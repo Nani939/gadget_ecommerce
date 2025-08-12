@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Gadget E-Commerce</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        header h1 {
+            margin: 0;
+        }
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+        }
+        main {
+            padding: 20px;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #f4f4f4;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gadget E-Commerce</h1>
+        <nav>
+            <a href="{% url 'product_list' %}">Home</a>
+            <a href="{% url 'cart' %}">Cart</a>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2025 Gadget E-Commerce</p>
+    </footer>
+</body>
+</html>
