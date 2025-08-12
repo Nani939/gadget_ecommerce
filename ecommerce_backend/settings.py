@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shop',  
+    'rest_framework',
+    'corsheaders',      # if using API + React
+    'shop',
 ]
 
 
