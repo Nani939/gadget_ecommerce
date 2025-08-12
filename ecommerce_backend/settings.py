@@ -146,5 +146,8 @@ STATICFILES_DIRS = [BASE_DIR / 'static']      # Dev
 STATIC_ROOT = BASE_DIR / 'staticfiles'        # Deployment
 
 # Media files
+import os
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

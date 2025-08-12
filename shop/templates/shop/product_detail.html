@@ -1,35 +1,17 @@
-{% extends "shop/base.html" %}
-{% load static %}
+{% extends 'shop/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <!-- Product Image -->
-        <div class="col-md-6">
-            {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid rounded shadow" alt="{{ product.name }}">
-            {% else %}
-                <img src="{% static 'shop/images/no-image.png' %}" class="img-fluid rounded shadow" alt="No image available">
-            {% endif %}
-        </div>
+<h1>{{ product.name }}</h1>
+{% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 400px; height: auto;">
+{% endif %}
+<p>{{ product.description }}</p>
+<p><strong>Price:</strong> ${{ product.price }}</p>
 
-        <!-- Product Details -->
-        <div class="col-md-6">
-            <h2>{{ product.name }}</h2>
-            <p class="text-muted">{{ product.description }}</p>
-            <h4 class="text-success">₹{{ product.price }}</h4>
-
-            <form method="post" action="{% url 'add_to_cart' product.id %}">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="quantity" class="form-label">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1">
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-cart-plus"></i> Add to Cart
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
+<p>
+    <a href="{% url 'add_to_cart' product.id %}">Add to Cart</a>
+</p>
+<p>
+    <a href="{% url 'product_list' %}">Back to Product List</a>
+</p>
 {% endblock %}
