@@ -1,3 +1,2 @@
 from django.contrib import admin
-
-# Register your models here.
+# (Nothing to register for now; we use built-in User)

@@ -1,61 +1,64 @@
-from django.shortcuts import render
-
-def product_list(request):
-    # You can fetch products from the database here if needed
-    return render(request, 'shop/product_list.html')
-
-from django.shortcuts import render, get_object_or_404
-from .models import Product  # make sure you have a Product model
-
-def product_detail(request, id):
-    product = get_object_or_404(Product, id=id)
-    return render(request, 'shop/product_detail.html', {'product': product})
-
-from django.shortcuts import render
-
-def cart(request):
-    return render(request, 'shop/cart.html')
-
-from django.shortcuts import render
-
-def checkout(request):
-    return render(request, 'shop/checkout.html')
-
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product
+from .models import Category, Product, Order
+from .cart import Cart
+from .forms import CartAddProductForm, OrderCreateForm
+from django.contrib.auth.decorators import login_required
 
-def add_to_cart(request, product_id):
-    cart = request.session.get('cart', {})
-    cart[str(product_id)] = cart.get(str(product_id), 0) + int(request.POST.get('quantity', 1))
-    request.session['cart'] = cart
-    return redirect('cart')
+def product_list(request, category_slug=None):
+    category = None
+    categories = Category.objects.all()
+    products = Product.objects.filter(available=True)
+    if category_slug:
+        category = get_object_or_404(Category, slug=category_slug)
+        products = products.filter(category=category)
+    return render(request, 'shop/product/list.html', {
+        'category': category,
+        'categories': categories,
+        'products': products
+    })
 
-def cart_view(request):
-    cart = request.session.get('cart', {})
-    products = Product.objects.filter(id__in=cart.keys())
-    cart_items = []
-    total = 0
-    for product in products:
-        quantity = cart[str(product.id)]
-        total += product.price * quantity
-        cart_items.append({'product': product, 'quantity': quantity, 'subtotal': product.price * quantity})
-    return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total': total})
+def product_detail(request, id, slug):
+    product = get_object_or_404(Product, id=id, slug=slug, available=True)
+    cart_product_form = CartAddProductForm()
+    return render(request, 'shop/product/detail.html', {
+        'product': product,
+        'cart_product_form': cart_product_form
+    })
 
-from django.shortcuts import render
-from .models import Product
+@login_required
+def cart_add(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    form = CartAddProductForm(request.POST)
+    if form.is_valid():
+        cd = form.cleaned_data
+        cart.add(product=product, quantity=cd['quantity'], override_quantity=cd['override'])
+    return redirect('shop:cart_detail')
 
-def product_list(request):
-    products = Product.objects.all()
-    return render(request, 'shop/product_list.html', {'products': products})
+@login_required
+def cart_remove(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    cart.remove(product)
+    return redirect('shop:cart_detail')
 
-from django.shortcuts import render, get_object_or_404
-from .models import Product
+@login_required
+def cart_detail(request):
+    cart = Cart(request)
+    return render(request, 'shop/cart/detail.html', {'cart': cart})
 
-def product_detail(request, product_id):
-    product = get_object_or_404(Product, pk=product_id)
-    return render(request, 'shop/product_detail.html', {'product': product})
-from django.shortcuts import render
+@login_required
+def order_create(request):
+    cart = Cart(request)
+    if request.method == 'POST':
+        form = OrderCreateForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user
+            order.save()
+            cart.clear()
+            return render(request, 'shop/order/created.html', {'order': order})
+    else:
+        form = OrderCreateForm()
+    return render(request, 'shop/order/create.html', {'cart': cart, 'form': form})
 
-def checkout_view(request):
-    # You can fetch cart data here if needed
-    return render(request, 'shop/checkout.html')
