@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Products - Gadget Shop{% endblock %}
+{% block content %}
+  <h1>All Gadgets</h1>
+  {% if products %}
+    <ul>
+    {% for product in products %}
+      <li>
+        <a href="{% url 'products:product_detail' product.id %}">{{ product.name }}</a> — ₹{{ product.price }}
+        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="qty" value="1">
+          <button type="submit">Add to Cart</button>
+        </form>
+        <form action="{% url 'shop:add_to_cart' product.id %}?next=checkout" method="post" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="qty" value="1">
+          <button type="submit">Buy</button>
+        </form>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p>No products found.</p>
+  {% endif %}
+{% endblock %}

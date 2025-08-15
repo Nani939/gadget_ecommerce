@@ -14,7 +14,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shop',  # your app
+    'products',
+    'shop',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -69,3 +71,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
+AUTH_USER_MODEL = 'users.CustomUser'
+LOGOUT_REDIRECT_URL = 'shop:home'

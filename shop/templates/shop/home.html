@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Gadget Store</title>
-</head>
-<body>
-    <h1>Welcome to Gadget Store</h1>
-    <a href="{% url 'cart' %}">Go to Cart</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Home - Gadget Shop{% endblock %}
+
+{% block content %}
+  <div class="container mt-5 text-center">
+    <h1 class="mb-4">Welcome to Gadget Shop</h1>
+
+    {% if not user.is_authenticated %}
+      <p>
+        <a href="{% url 'users:login' %}" class="btn btn-primary me-2">Login</a>
+        <a href="{% url 'users:signup' %}" class="btn btn-success">Signup</a>
+      </p>
+    {% else %}
+      <p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-warning">Shop Now</a>
+      </p>
+    {% endif %}
+  </div>
+{% endblock %}

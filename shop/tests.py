@@ -7,7 +7,6 @@ class ProductModelTest(TestCase):
         self.product = Product.objects.create(
             category=self.category,
             name="Laptop",
-            slug="laptop",
             price=1000,
             stock=10,
             available=True
