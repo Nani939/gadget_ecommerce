@@ -168,8 +168,8 @@ path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart')
 
 ## 👨‍💻 Author
 
-* **Your Name**
-* GitHub: [yourusername](https://github.com/yourusername)
+*    SWAMY MUDHIRAJ
+* GitHub: [](https://github.com/Nani939)
 
 ---
 
@@ -177,6 +177,4 @@ path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart')
 
 This project is open-source and free to use under the [MIT License](LICENSE).
 
-```
 
----`
