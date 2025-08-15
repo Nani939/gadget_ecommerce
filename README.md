@@ -169,7 +169,7 @@ path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart')
 ## 👨‍💻 Author
 
 *    SWAMY MUDHIRAJ
-* GitHub: [](https://github.com/Nani939)
+* GitHub: [https://github.com/Nani939](https://github.com/Nani939)
 
 ---
 
