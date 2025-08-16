@@ -76,3 +76,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 AUTH_USER_MODEL = 'users.CustomUser'
 LOGOUT_REDIRECT_URL = 'shop:home'
+LOGIN_REDIRECT_URL = 'shop:home'
+LOGIN_URL = 'users:login'

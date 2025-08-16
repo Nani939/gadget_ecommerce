@@ -1,17 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from .models import Category, Product
-from .forms import OrderCreateForm
+from django.contrib.auth.decorators import login_required
 
-
-# ---- Utility Functions ----
-
+# --- Utility to get or create cart in session ---
 def _get_cart(session):
     return session.setdefault('cart', {})  # {product_id: qty}
 
 
-# ---- Product Views ----
+# --- Product List and Detail Views ---
 
 def product_list(request, category_slug=None):
     category = None
@@ -32,7 +29,7 @@ def product_detail(request, id, slug):
     return render(request, 'shop/product/detail.html', {'product': product})
 
 
-# ---- Cart Views ----
+# --- Cart Views ---
 
 def add_to_cart(request, product_id):
     if request.method != 'POST':
@@ -45,8 +42,37 @@ def add_to_cart(request, product_id):
     request.session.modified = True
 
     messages.success(request, f'Added {product.name} to cart.')
-    nxt = request.POST.get('next') or request.GET.get('next')
-    return redirect('shop:checkout' if nxt == 'checkout' else 'shop:cart')
+    next_page = request.POST.get('next') or 'shop:cart'
+    return redirect(next_page)
+
+
+def buy_now(request, product_id):
+    product = get_object_or_404(Product, pk=product_id, available=True)
+    cart = _get_cart(request.session)
+    cart[str(product.id)] = 1  # Set quantity to 1
+    request.session.modified = True
+    return redirect('shop:checkout')
+
+
+def cart(request):
+    cart = _get_cart(request.session)
+    items = []
+    total = 0
+
+    for pid in list(cart.keys()):
+        try:
+            product = Product.objects.get(pk=int(pid))
+        except Product.DoesNotExist:
+            del cart[pid]
+            request.session.modified = True
+            continue
+
+        qty = cart[pid]
+        subtotal = product.price * qty
+        total += subtotal
+        items.append({'product': product, 'qty': qty, 'subtotal': subtotal})
+
+    return render(request, 'shop/cart.html', {'items': items, 'total': total})
 
 
 def remove_from_cart(request, product_id):
@@ -64,68 +90,37 @@ def clear_cart(request):
     return redirect('shop:cart')
 
 
-def cart(request):
-    cart = _get_cart(request.session)
-    items, total = [], 0
-    for pid, qty in cart.items():
-        product = get_object_or_404(Product, pk=int(pid))
-        subtotal = product.price * qty
-        total += subtotal
-        items.append({'product': product, 'qty': qty, 'subtotal': subtotal})
-    return render(request, 'shop/cart.html', {'items': items, 'total': total})
-
-
-# ---- Checkout & Order Views ----
+# --- Checkout View ---
 
 def checkout(request):
     cart = _get_cart(request.session)
-    items, total = [], 0
-    for pid, qty in cart.items():
-        product = get_object_or_404(Product, pk=int(pid))
+    items = []
+    total = 0
+
+    for pid in list(cart.keys()):
+        try:
+            product = Product.objects.get(pk=int(pid))
+        except Product.DoesNotExist:
+            del cart[pid]
+            request.session.modified = True
+            continue
+
+        qty = cart[pid]
         subtotal = product.price * qty
         total += subtotal
         items.append({'product': product, 'qty': qty, 'subtotal': subtotal})
 
     if request.method == 'POST':
-        # In real app: Save order, payment, email user, etc.
+        # In real app, process order/payment here
         request.session['cart'] = {}
         request.session.modified = True
-        messages.success(request, 'Order placed! (demo flow)')
+        messages.success(request, 'Order placed! (demo)')
         return render(request, 'shop/order_success.html', {'total': total})
 
     return render(request, 'shop/checkout.html', {'items': items, 'total': total})
 
 
-@login_required
-def order_create(request):
-    cart = _get_cart(request.session)
-    items, total = [], 0
-    for pid, qty in cart.items():
-        product = get_object_or_404(Product, pk=int(pid))
-        subtotal = product.price * qty
-        total += subtotal
-        items.append({'product': product, 'qty': qty, 'subtotal': subtotal})
-
-    if request.method == 'POST':
-        form = OrderCreateForm(request.POST)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.user = request.user
-            order.save()
-            request.session['cart'] = {}
-            request.session.modified = True
-            return render(request, 'shop/order/created.html', {'order': order})
-    else:
-        form = OrderCreateForm()
-
-    return render(request, 'shop/order/create.html', {
-        'cart_items': items,
-        'total': total,
-        'form': form
-    })
-
-
-# ---- Static Pages ----
+# --- Static Pages ---
 
 def home(request):
     latest_products = Product.objects.filter(available=True).order_by('-id')[:6]
@@ -134,12 +129,3 @@ def home(request):
 
 def about(request):
     return render(request, 'shop/about.html')
-from django.shortcuts import redirect, get_object_or_404
-from shop.models import Product
-
-def add_to_cart(request, product_id):
-    # Your logic to add the product to the cart here
-    product = get_object_or_404(Product, id=product_id)
-    # Add product to session or cart model
-    # ...
-    return redirect('shop:cart')  # or redirect wherever needed

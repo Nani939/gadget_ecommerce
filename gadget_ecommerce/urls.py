@@ -2,83 +2,24 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from shop.views import home  # Only if you're using a direct view for home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('shop.urls')),
-    path('users/', include('users.urls')),
+
+    # ✅ Root URL mapped to shop app, with namespace
+    path('', include(('shop.urls', 'shop'), namespace='shop')),
+
+    # ✅ Products app with namespace
+    path('products/', include(('products.urls', 'products'), namespace='products')),
+
+    # ✅ Users app (signup/profile views) with namespace
+    path('accounts/', include(('users.urls', 'users'), namespace='users')),
+
+    # ✅ Django's built-in auth system (login/logout/password management)
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
+# ✅ Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('shop.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),  # login/logout/password views
-    path('accounts/', include('users.urls')),                # signup + profile
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    
-
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('shop.urls')),
-    path('products/', include('products.urls')),
-    path('users/', include('users.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-
-    # public site
-    path('', include('shop.urls')),           # home, cart, checkout
-    path('products/', include('products.urls')),  # product list + detail
-    path('accounts/', include('users.urls')),  
-     
-]
-from django.shortcuts import redirect
-
-def profile_redirect(request):
-    # Redirect to home or user dashboard
-    return redirect('shop:home')  # or any other named url
-
-urlpatterns = [
-    # ... your other patterns
-    path('profile/', profile_redirect, name='profile'),
-]
-from django.urls import path, include
-from django.contrib import admin
-from shop import views as shop_views  # Assuming you have a home view here
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', shop_views.home, name='home'),  # Root path mapped to home view
-    path('accounts/', include('users.urls')),  # Your users app URLs
-    path('products/', include('products.urls')),  # Your products app URLs
-    # other paths...
-]
-from django.urls import path, include
-from django.contrib import admin
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('shop.urls', namespace='shop')),  # <-- Add namespace here
-    path('accounts/', include('users.urls')),
-    path('products/', include('products.urls')),
-    # other paths...
-]

@@ -27,3 +27,25 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'email')  # add your user fields here
+# users/views.py
+
+from django.shortcuts import render, redirect
+from .forms import CustomUserCreationForm
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')  # or wherever you want to redirect after signup
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'users/signup.html', {'form': form})
+from django.contrib.auth.forms import UserCreationForm
+from django import forms
+from .models import CustomUser  # your custom user model
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email')  # or any fields your CustomUser has
