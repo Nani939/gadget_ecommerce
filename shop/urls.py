@@ -24,4 +24,6 @@ urlpatterns = [
     # Checkout & Orders
     path("checkout/", views.checkout, name="checkout"),
     path("order/success/<int:order_id>/", views.order_success, name="order_success"),
+    path("track/<int:order_id>/", views.track_order, name="track_order"),
+
 ]

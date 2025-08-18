@@ -3,6 +3,10 @@
 {% block content %}
 <h1>Checkout</h1>
 
+{% if error %}
+  <p style="color: red;">{{ error }}</p>
+{% endif %}
+
 <ul>
   {% for item in cart_items %}
     <li>{{ item.product.name }} × {{ item.quantity }} — ₹{{ item.total }}</li>
@@ -10,11 +14,58 @@
 </ul>
 <p><strong>Total:</strong> ₹{{ total_price }}</p>
 
-<form method="post">
+<form method="post" id="checkout-form">
   {% csrf_token %}
-  <p><input type="text" name="address" placeholder="Address"></p>
-  <p><input type="text" name="city" placeholder="City"></p>
-  <p><input type="text" name="postal_code" placeholder="Postal Code"></p>
+  <p>
+    <input
+      type="text"
+      name="address"
+      placeholder="Address"
+      value="{{ address|default:'' }}"
+      required
+    >
+  </p>
+  <p>
+    <input
+      type="text"
+      name="city"
+      placeholder="City"
+      value="{{ city|default:'' }}"
+      required
+    >
+  </p>
+  <p>
+    <input
+      type="text"
+      name="postal_code"
+      placeholder="Postal Code"
+      value="{{ postal_code|default:'' }}"
+      required
+    >
+  </p>
+
+  <input type="hidden" id="id_latitude" name="latitude" value="{{ latitude|default:'' }}">
+  <input type="hidden" id="id_longitude" name="longitude" value="{{ longitude|default:'' }}">
+
   <button type="submit">Place Order</button>
 </form>
+
+<script>
+  function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        document.getElementById("id_latitude").value = position.coords.latitude;
+        document.getElementById("id_longitude").value = position.coords.longitude;
+      }, function(error) {
+        console.log("Geolocation error:", error.message);
+        // Optional: You can alert user or silently fail
+      });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+
+  window.onload = getLocation;
+</script>
+
 {% endblock %}

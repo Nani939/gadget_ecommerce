@@ -1,12 +1,59 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
+
 {% block title %}Profile{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <h2>Your Profile</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-success">Save changes</button>
-  </form>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Your Profile</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <h5 class="mb-3">User Details</h5>
+            <div class="mb-3">
+              <label for="id_username" class="form-label">Username</label>
+              {{ user_form.username|attr:"class=form-control,id=id_username" }}
+            </div>
+            <div class="mb-3">
+              <label for="id_email" class="form-label">Email</label>
+              {{ user_form.email|attr:"class=form-control,id=id_email,type=email" }}
+            </div>
+            <div class="mb-3">
+              <label for="id_first_name" class="form-label">First Name</label>
+              {{ user_form.first_name|attr:"class=form-control,id=id_first_name" }}
+            </div>
+            <div class="mb-3">
+              <label for="id_last_name" class="form-label">Last Name</label>
+              {{ user_form.last_name|attr:"class=form-control,id=id_last_name" }}
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Address Details</h5>
+            <div class="mb-3">
+              <label for="id_address" class="form-label">Address</label>
+              {{ profile_form.address|attr:"class=form-control,id=id_address" }}
+            </div>
+            <div class="mb-3">
+              <label for="id_city" class="form-label">City</label>
+              {{ profile_form.city|attr:"class=form-control,id=id_city" }}
+            </div>
+            <div class="mb-3">
+              <label for="id_postal_code" class="form-label">Postal Code</label>
+              {{ profile_form.postal_code|attr:"class=form-control,id=id_postal_code" }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

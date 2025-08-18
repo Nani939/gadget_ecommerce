@@ -6,25 +6,48 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
-    <!-- Optional: Bootstrap CSS for layout support -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
+    <!-- Location Bar -->
+    <div class="bg-dark text-white text-center py-1">
+        Deliver to: <strong id="user-location">Detecting...</strong>
+    </div>
+
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
         <a class="navbar-brand" href="{% url 'shop:home' %}">Gadget Shop</a>
-        
+
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'products:product_list' %}">Products</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'shop:view_cart' %}">Cart</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'shop:checkout' %}">Checkout</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'products:product_list' %}">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'shop:view_cart' %}">Cart</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'shop:checkout' %}">Checkout</a>
+                </li>
             </ul>
 
-            <!-- Right side: Login/Logout -->
-            <ul class="navbar-nav ms-auto">
+            <!-- Right side: Login/Logout/Profile -->
+            <ul class="navbar-nav ms-auto align-items-center">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <span class="navbar-text me-2">Hello, {{ user.username }}</span>
+                    </li>
+                    <!-- Profile Icon Button -->
+                    <li class="nav-item me-2">
+                        <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary rounded-circle"
+                           title="Profile"
+                           style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-person"></i>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <form method="post" action="{% url 'users:logout' %}">
@@ -44,8 +67,40 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="container mt-4">
         {% block content %}{% endblock %}
     </main>
+
+    <!-- JavaScript for Geolocation -->
+    <script>
+        function fetchLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+                        const data = await response.json();
+                        const city = data.address.city || data.address.town || data.address.village || data.address.state || "your area";
+                        document.getElementById("user-location").textContent = city;
+                    } catch (error) {
+                        document.getElementById("user-location").textContent = "Unknown";
+                        console.error("Geolocation error:", error);
+                    }
+                }, function(error) {
+                    document.getElementById("user-location").textContent = "Location unavailable";
+                });
+            } else {
+                document.getElementById("user-location").textContent = "Not supported";
+            }
+        }
+
+        window.onload = fetchLocation;
+    </script>
+
+    <!-- Optional: Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -49,3 +49,28 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'email')  # or any fields your CustomUser has
+
+# users/forms.py
+
+from django import forms
+from .models import Address
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['full_name', 'phone_number', 'address_line1', 'address_line2',
+                  'city', 'state', 'zip_code', 'country', 'is_default']
+# users/forms.py
+from django import forms
+from django.contrib.auth.models import User
+from users.models import UserProfile
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['address', 'city', 'postal_code']
