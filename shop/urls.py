@@ -1,25 +1,27 @@
 from django.urls import path
 from . import views
 
-app_name = 'shop'
+app_name = "shop"
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('about/', views.about, name='about'),
+    path("", views.home, name="home"),
+    path("about/", views.about, name="about"),
 
-    # Product URLs
-    path('category/<slug:category_slug>/', views.product_list, name='product_list_by_category'),
-    path('products/<int:id>/<slug:slug>/', views.product_detail, name='product_detail'),
+    # Products
+    path("products/", views.product_list, name="product_list"),
+    path("category/<slug:category_slug>/", views.product_list, name="product_list_by_category"),
+    path("product/<int:id>/<slug:slug>/", views.product_detail, name="product_detail"),
 
-    # Cart URLs
-    path('cart/', views.cart, name='cart'),
-    path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
-    path('cart/remove/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
-    path('cart/clear/', views.clear_cart, name='clear_cart'),
+    # Cart
+    path("cart/", views.view_cart, name="view_cart"),
+    path("cart/add/<int:product_id>/", views.add_to_cart, name="add_to_cart"),
+    path("cart/remove/<int:item_id>/", views.remove_from_cart, name="remove_from_cart"),
+    path("cart/update/<int:item_id>/", views.update_quantity, name="update_quantity"),
 
-    # Buy now shortcut
-    path('buy/<int:product_id>/', views.buy_now, name='buy_now'),
+    # Buy now
+    path("buy/<int:product_id>/", views.buy_now, name="buy_now"),
 
-    # Checkout
-    path('checkout/', views.checkout, name='checkout'),
+    # Checkout & Orders
+    path("checkout/", views.checkout, name="checkout"),
+    path("order/success/<int:order_id>/", views.order_success, name="order_success"),
 ]

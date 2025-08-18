@@ -1,22 +1,35 @@
 {% extends "base.html" %}
-{% block title %}Cart - Gadget Shop{% endblock %}
+{% block title %}Cart{% endblock %}
 {% block content %}
-  <h1>Your Cart</h1>
-  {% if items %}
-    <ul>
-    {% for row in items %}
-      <li>
-        {{ row.product.name }} — Qty: {{ row.qty }} — Subtotal: ₹{{ row.subtotal }}
-        <a href="{% url 'shop:remove_from_cart' row.product.id %}">Remove</a>
-      </li>
-    {% endfor %}
-    </ul>
-    <p><strong>Total: ₹{{ total }}</strong></p>
-    <p>
-      <a href="{% url 'shop:checkout' %}">Proceed to Checkout</a> |
-      <a href="{% url 'shop:clear_cart' %}">Clear Cart</a>
-    </p>
-  {% else %}
-    <p>Your cart is empty.</p>
-  {% endif %}
+<h1>Your Cart</h1>
+
+{% if cart_items %}
+<table>
+  <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Line Total</th><th></th></tr></thead>
+  <tbody>
+  {% for item in cart_items %}
+    <tr>
+      <td>{{ item.product.name }}</td>
+      <td>
+        <form method="post" action="{% url 'shop:update_quantity' item.product.id %}">
+          {% csrf_token %}
+          <input type="number" name="quantity" min="1" value="{{ item.quantity }}" style="width:70px">
+          <button type="submit">Update</button>
+        </form>
+      </td>
+      <td>₹{{ item.product.price }}</td>
+      <td>₹{{ item.total }}</td>
+      <td>
+        <a href="{% url 'shop:remove_from_cart' item.product.id %}">Remove</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<p><strong>Total:</strong> ₹{{ total_price }}</p>
+<p><a href="{% url 'shop:checkout' %}">Proceed to Checkout</a></p>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
 {% endblock %}

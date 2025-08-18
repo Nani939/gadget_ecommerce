@@ -1,20 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Checkout - Gadget Shop{% endblock %}
+{% block title %}Checkout{% endblock %}
 {% block content %}
-  <h1>Checkout</h1>
-  {% if items %}
-    <ul>
-      {% for row in items %}
-        <li>{{ row.product.name }} — Qty: {{ row.qty }} — ₹{{ row.subtotal }}</li>
-      {% endfor %}
-    </ul>
-    <p><strong>Total: ₹{{ total }}</strong></p>
+<h1>Checkout</h1>
 
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit">Place Order</button>
-    </form>
-  {% else %}
-    <p>Your cart is empty.</p>
-  {% endif %}
+<ul>
+  {% for item in cart_items %}
+    <li>{{ item.product.name }} × {{ item.quantity }} — ₹{{ item.total }}</li>
+  {% endfor %}
+</ul>
+<p><strong>Total:</strong> ₹{{ total_price }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  <p><input type="text" name="address" placeholder="Address"></p>
+  <p><input type="text" name="city" placeholder="City"></p>
+  <p><input type="text" name="postal_code" placeholder="Postal Code"></p>
+  <button type="submit">Place Order</button>
+</form>
 {% endblock %}
