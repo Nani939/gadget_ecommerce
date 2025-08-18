@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}All Gadgets{% endblock %}
 {% block content %}
-<h1>All Gadgets</h1>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>All Gadgets</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <h1>All Gadgets</h1>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;">
   {% for product in products %}
   <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;">

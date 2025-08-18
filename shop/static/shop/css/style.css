@@ -1,0 +1,31 @@
+.product-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.product-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.product-image {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.product-title {
+  margin-top: 10px;
+}
+
+.add-to-cart-form {
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.buy-now-form {
+  display: inline-block;
+}
