@@ -67,20 +67,11 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     {% if user.is_authenticated %}
                         <li class="nav-item me-3">
-                            <span class="navbar-text">
-                                <i class="bi bi-person-circle me-1"></i>
-                                Hello, <strong>{{ user.username }}</strong>
-                            </span>
-                        </li>
-                        <!-- Profile Icon Button -->
-                        <li class="nav-item me-2">
-                            <a href="{% url 'users:profile' %}" 
-                               class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
-                               title="View Profile"
-                               style="width: 40px; height: 40px;">
-                                <i class="bi bi-person"></i>
-                            </a>
-                        </li>
+    <a href="{% url 'users:profile' %}" class="nav-link">
+        Hello, <strong>{{ user.username }}</strong>
+    </a>
+</li>
+
                         <li class="nav-item">
                             <form method="post" action="{% url 'users:logout' %}" class="d-inline">
                                 {% csrf_token %}
