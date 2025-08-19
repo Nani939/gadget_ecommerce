@@ -1,45 +1,89 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Cart{% endblock %}
+{% block title %}Shopping Cart{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-<h1>Your Cart</h1>
+<div class="cart-container">
+  <div class="cart-header">
+    <h1 class="cart-title">🛒 Your Shopping Cart</h1>
+    <p class="cart-subtitle">Review your items before checkout</p>
+  </div>
 
-{% if cart_items %}
-<table>
-  <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Line Total</th><th></th></tr></thead>
-  <tbody>
-  {% for item in cart_items %}
-    <tr>
-      <td>{{ item.product.name }}</td>
-      <td>
-        <form method="post" action="{% url 'shop:update_quantity' item.product.id %}">
-          {% csrf_token %}
-          <input type="number" name="quantity" min="1" value="{{ item.quantity }}" style="width:70px">
-          <button type="submit">Update</button>
-        </form>
-      </td>
-      <td>₹{{ item.product.price }}</td>
-      <td>₹{{ item.total }}</td>
-      <td>
-        <a href="{% url 'shop:remove_from_cart' item.product.id %}">Remove</a>
-      </td>
-    </tr>
-  {% endfor %}
-  </tbody>
-</table>
+  {% if cart_items %}
+    <div class="cart-table">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+            <tr>
+              <td>
+                <div class="product-info">
+                  <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}" 
+                       alt="{{ item.product.name }}" 
+                       class="product-image"
+                       onerror="this.src='{% static 'images/placeholder.jpg' %}'">
+                  <div class="product-details">
+                    <h3>{{ item.product.name }}</h3>
+                    <p>SKU: #{{ item.product.id|stringformat:"04d" }}</p>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <form method="post" action="{% url 'shop:update_quantity' item.product.id %}" class="quantity-form">
+                  {% csrf_token %}
+                  <input type="number" 
+                         name="quantity" 
+                         min="1" 
+                         value="{{ item.quantity }}" 
+                         class="quantity-input">
+                  <button type="submit" class="update-btn">Update</button>
+                </form>
+              </td>
+              <td class="price-cell">₹{{ item.product.price }}</td>
+              <td class="total-cell">₹{{ item.total }}</td>
+              <td>
+                <a href="{% url 'shop:remove_from_cart' item.product.id %}" 
+                   class="remove-btn"
+                   onclick="return confirm('Are you sure you want to remove this item?')">
+                  🗑️ Remove
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
-<p><strong>Total:</strong> ₹{{ total_price }}</p>
-<p><a href="{% url 'shop:checkout' %}">Proceed to Checkout</a></p>
-{% else %}
-<p>Your cart is empty.</p>
-{% endif %}
+    <div class="cart-summary">
+      <div class="cart-total">
+        <strong>Grand Total: ₹{{ total_price }}</strong>
+      </div>
+      <a href="{% url 'shop:checkout' %}" class="checkout-btn">
+        🚀 Proceed to Checkout
+      </a>
+    </div>
+
+  {% else %}
+    <div class="empty-cart">
+      <div class="empty-cart-icon">🛒</div>
+      <h2>Your cart is empty</h2>
+      <p>Looks like you haven't added any items to your cart yet.</p>
+      <a href="{% url 'shop:product_list' %}" class="continue-shopping">
+        Continue Shopping
+      </a>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}
