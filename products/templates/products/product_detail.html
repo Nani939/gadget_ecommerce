@@ -1,24 +1,300 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{{ product.name }}{% endblock %}
+
+{% block title %}{{ product.name }} - Gadget Shop{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
+{% endblock %}
+
 {% block content %}
-  <h1>{{ product.name }}</h1>
-  {% if product.image %}
-    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:300px;height:300px;object-fit:contain;">
-  {% else %}
-    <img src="{% static 'img/no-image.png' %}" alt="No Image Available" style="width:300px;height:300px;object-fit:contain;">
-  {% endif %}
-  <p>₹{{ product.price }}</p>
-  <p>{{ product.description }}</p>
+<div class="amazon-container">
+  <!-- Breadcrumb -->
+  <div class="amazon-breadcrumb">
+    <a href="{% url 'shop:home' %}">Home</a> › 
+    <a href="{% url 'products:product_list' %}">All Products</a> › 
+    <span>{{ product.name }}</span>
+  </div>
 
-  <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="display:inline-block;margin-right:8px;">
-    {% csrf_token %}
-    <input type="number" name="quantity" min="1" value="1">
-    <button type="submit">Add to Cart</button>
-  </form>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 300px; gap: 40px; margin-top: 20px;">
+    <!-- Product Images -->
+    <div>
+      <div style="text-align: center; background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 20px;">
+        <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/400x400?text=No+Image{% endif %}" 
+             alt="{{ product.name }}"
+             style="max-width: 100%; max-height: 400px; object-fit: contain;"
+             onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+      </div>
+      
+      <!-- Thumbnail Images (Mock) -->
+      <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: center;">
+        {% for i in "12345" %}
+          <div style="width: 60px; height: 60px; border: 1px solid var(--amazon-border); border-radius: 4px; background: var(--amazon-gray); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999;">
+            IMG
+          </div>
+        {% endfor %}
+      </div>
+    </div>
 
-  <form method="post" action="{% url 'shop:buy_now' product.id %}" style="display:inline-block;">
-    {% csrf_token %}
-    <button type="submit">Buy</button>
-  </form>
+    <!-- Product Info -->
+    <div>
+      <h1 style="font-size: 24px; font-weight: 400; color: var(--amazon-text); line-height: 1.3; margin-bottom: 8px;">
+        {{ product.name }}
+      </h1>
+
+      <!-- Rating and Reviews -->
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div class="amazon-stars" style="font-size: 16px;">
+          ★★★★☆
+        </div>
+        <a href="#reviews" class="amazon-rating-count">{{ product.id|add:47 }} ratings</a>
+        <span style="color: #e7e7e7;">|</span>
+        <a href="#qa" class="amazon-action-link">{{ product.id|add:12 }} answered questions</a>
+      </div>
+
+      <!-- Prime Badge -->
+      <div style="margin-bottom: 16px;">
+        <span style="background: var(--amazon-link); color: white; font-size: 12px; padding: 3px 8px; border-radius: 2px; font-weight: 700;">
+          prime
+        </span>
+        <span style="font-size: 14px; color: var(--amazon-text); margin-left: 8px;">
+          FREE delivery
+        </span>
+      </div>
+
+      <!-- Price -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px;">
+          <span style="font-size: 14px; color: #565959;">Price:</span>
+          <div class="amazon-price" style="font-size: 28px;">
+            <span class="amazon-price-symbol" style="font-size: 20px;">₹</span>{{ product.price|floatformat:2 }}
+          </div>
+        </div>
+        {% if product.id|divisibleby:3 %}
+          <div style="font-size: 14px; color: #565959;">
+            List Price: <span style="text-decoration: line-through;">₹{{ product.price|add:500|floatformat:2 }}</span>
+            <span style="color: var(--amazon-warning); margin-left: 8px;">
+              Save ₹500 ({{ 500|div:product.price|mul:100|floatformat:0 }}%)
+            </span>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Product Details -->
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">About this item</h3>
+        <ul style="margin: 0; padding-left: 20px; color: var(--amazon-text);">
+          <li style="margin-bottom: 4px;">{{ product.description|default:"High-quality product with excellent features and performance." }}</li>
+          <li style="margin-bottom: 4px;">Premium build quality and materials</li>
+          <li style="margin-bottom: 4px;">1-year manufacturer warranty included</li>
+          <li style="margin-bottom: 4px;">Fast and reliable shipping</li>
+          <li style="margin-bottom: 4px;">Customer satisfaction guaranteed</li>
+        </ul>
+      </div>
+
+      <!-- Product Specifications -->
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Product details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr style="border-bottom: 1px solid #e7e7e7;">
+            <td style="padding: 8px 0; font-weight: 700; width: 30%;">Brand</td>
+            <td style="padding: 8px 0;">Gadget Shop</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e7e7e7;">
+            <td style="padding: 8px 0; font-weight: 700;">Model</td>
+            <td style="padding: 8px 0;">GS-{{ product.id|stringformat:"04d" }}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e7e7e7;">
+            <td style="padding: 8px 0; font-weight: 700;">Item Weight</td>
+            <td style="padding: 8px 0;">{{ product.id|add:100 }}g</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e7e7e7;">
+            <td style="padding: 8px 0; font-weight: 700;">Dimensions</td>
+            <td style="padding: 8px 0;">15 x 10 x 5 cm</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Purchase Options -->
+    <div>
+      <div style="background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 20px; position: sticky; top: 100px;">
+        <!-- Price -->
+        <div class="amazon-price" style="font-size: 28px; margin-bottom: 8px;">
+          <span class="amazon-price-symbol" style="font-size: 20px;">₹</span>{{ product.price|floatformat:2 }}
+        </div>
+
+        <!-- Delivery Info -->
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 14px; color: var(--amazon-success); font-weight: 500;">
+            FREE delivery: <strong>Tomorrow</strong>
+          </div>
+          <div style="font-size: 12px; color: #565959;">
+            Order within 4 hrs 23 mins
+          </div>
+          <div style="font-size: 14px; margin-top: 4px;">
+            <i class="bi bi-geo-alt" style="color: var(--amazon-link);"></i>
+            Deliver to <a href="#" class="amazon-action-link">Your Location</a>
+          </div>
+        </div>
+
+        <!-- Stock Status -->
+        <div style="font-size: 18px; color: var(--amazon-success); font-weight: 500; margin-bottom: 16px;">
+          {% if product.available %}
+            In Stock
+          {% else %}
+            Currently unavailable
+          {% endif %}
+        </div>
+
+        <!-- Quantity Selector -->
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">Quantity:</label>
+          <div class="amazon-quantity-selector">
+            <select class="amazon-quantity-dropdown" id="quantity-select">
+              {% for i in "123456789" %}
+                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+              {% endfor %}
+              <option value="10">10+</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+          <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1" id="cart-quantity">
+            <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%; padding: 12px;">
+              Add to Cart
+            </button>
+          </form>
+          
+          <form method="post" action="{% url 'shop:buy_now' product.id %}" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="quantity" value="1" id="buy-quantity">
+            <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; padding: 12px; background-color: var(--amazon-orange); color: var(--amazon-blue); border-color: var(--amazon-orange-dark);">
+              Buy Now
+            </button>
+          </form>
+        </div>
+
+        <!-- Additional Options -->
+        <div style="font-size: 14px; margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 8px;">
+            <input type="checkbox" style="margin-right: 8px;">
+            Add gift options
+          </label>
+          <a href="#" class="amazon-action-link">Add to Wish List</a>
+        </div>
+
+        <!-- Security Features -->
+        <div style="border-top: 1px solid #e7e7e7; padding-top: 16px; font-size: 12px; color: #565959;">
+          <div style="margin-bottom: 8px;">
+            <i class="bi bi-shield-check" style="color: var(--amazon-success);"></i>
+            Secure transaction
+          </div>
+          <div style="margin-bottom: 8px;">
+            Ships from: <strong>Gadget Shop</strong>
+          </div>
+          <div>
+            Sold by: <strong>Gadget Shop</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sponsored Products -->
+      <div style="margin-top: 20px; background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 16px;">
+        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #565959;">
+          Sponsored products related to this item
+        </h3>
+        <div style="font-size: 12px; color: #565959; text-align: center; padding: 20px;">
+          <a href="{% url 'products:product_list' %}" class="amazon-action-link">
+            View more products →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Reviews Section -->
+  <div style="margin-top: 60px; padding-top: 24px; border-top: 1px solid #e7e7e7;" id="reviews">
+    <h2 style="font-size: 21px; font-weight: 400; margin-bottom: 16px;">
+      Customer reviews
+    </h2>
+    
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px;">
+      <!-- Review Summary -->
+      <div>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <div class="amazon-stars" style="font-size: 20px;">★★★★☆</div>
+          <span style="font-size: 16px; color: var(--amazon-text);">4.2 out of 5</span>
+        </div>
+        <div style="font-size: 14px; color: #565959; margin-bottom: 16px;">
+          {{ product.id|add:47 }} global ratings
+        </div>
+        
+        <!-- Rating Breakdown -->
+        <div style="font-size: 14px;">
+          {% for rating in "54321" %}
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span>{{ rating }} star</span>
+              <div style="flex: 1; height: 16px; background: #e7e7e7; border-radius: 2px; overflow: hidden;">
+                <div style="height: 100%; background: var(--amazon-orange); width: {% cycle '60' '25' '10' '3' '2' %}%;"></div>
+              </div>
+              <span style="color: var(--amazon-link);">{% cycle '60' '25' '10' '3' '2' %}%</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Individual Reviews -->
+      <div>
+        <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e7e7e7;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <div class="amazon-stars">★★★★★</div>
+            <strong>Excellent product!</strong>
+          </div>
+          <div style="font-size: 14px; color: #565959; margin-bottom: 8px;">
+            By <strong>John D.</strong> on {{ product.created|date:"F j, Y" }}
+          </div>
+          <div style="font-size: 14px; color: var(--amazon-text);">
+            Great quality and fast delivery. Exactly as described. Would definitely recommend to others.
+          </div>
+        </div>
+
+        <div style="text-align: center; padding: 20px;">
+          <a href="#" class="amazon-action-link">See all reviews</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Update quantity in hidden inputs when dropdown changes
+document.addEventListener('DOMContentLoaded', function() {
+  const quantitySelect = document.getElementById('quantity-select');
+  const cartQuantity = document.getElementById('cart-quantity');
+  const buyQuantity = document.getElementById('buy-quantity');
+  
+  quantitySelect.addEventListener('change', function() {
+    const selectedQuantity = this.value;
+    cartQuantity.value = selectedQuantity;
+    buyQuantity.value = selectedQuantity;
+  });
+
+  // Add loading states to buttons
+  const buttons = document.querySelectorAll('.amazon-btn');
+  buttons.forEach(button => {
+    if (button.type === 'submit') {
+      button.addEventListener('click', function() {
+        const originalText = this.textContent;
+        this.innerHTML = '<span class="amazon-loading"></span> ' + originalText;
+        this.disabled = true;
+      });
+    }
+  });
+});
+</script>
 {% endblock %}
