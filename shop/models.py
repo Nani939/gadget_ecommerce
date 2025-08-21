@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 # -------------------------
 # Category Model
@@ -32,6 +34,7 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     available = models.BooleanField(default=True)
+    stock = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -43,7 +46,7 @@ class Product(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("shop:product_detail", args=[self.id, self.slug])
+        return reverse("products:product_detail", args=[self.id])
 
 
 # -------------------------
@@ -62,14 +65,18 @@ ORDER_STATUS = [
 # Order Model
 # -------------------------
 class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     customer_name = models.CharField(max_length=200)
     customer_email = models.EmailField()
+    phone_number = models.CharField(max_length=15, blank=True)
     paid = models.BooleanField(default=False)
 
     # Optional address fields
     address = models.TextField(blank=True)
     city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
     postal_code = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, default='India')
 
     # Tracking fields
     status = models.CharField(
@@ -81,6 +88,9 @@ class Order(models.Model):
     delivery_latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     delivery_longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     delivery_status = models.CharField(max_length=20, default='Pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_method = models.CharField(max_length=50, default='COD')
+    notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -88,7 +98,10 @@ class Order(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Order {self.id}"
+        return f"Order #{self.id} - {self.customer_name}"
+    
+    def get_total_cost(self):
+        return sum(item.get_cost() for item in self.items.all())
 
 
 # -------------------------
@@ -102,3 +115,6 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} of {self.product.name}"
+    
+    def get_cost(self):
+        return self.price * self.quantity

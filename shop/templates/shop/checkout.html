@@ -71,6 +71,19 @@
               </div>
 
               <div class="amazon-form-group">
+                <label class="amazon-form-label" for="id_state">State *</label>
+                <input type="text" 
+                       name="state" 
+                       id="id_state"
+                       class="amazon-form-input" 
+                       placeholder="Enter your state"
+                       value="{{ state|default:'' }}" 
+                       required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="amazon-form-group">
                 <label class="amazon-form-label" for="id_postal_code">Postal Code *</label>
                 <input type="text" 
                        name="postal_code" 
@@ -78,6 +91,17 @@
                        class="amazon-form-input" 
                        placeholder="Enter postal code"
                        value="{{ postal_code|default:'' }}" 
+                       required>
+              </div>
+
+              <div class="amazon-form-group">
+                <label class="amazon-form-label" for="id_phone_number">Phone Number *</label>
+                <input type="tel" 
+                       name="phone_number" 
+                       id="id_phone_number"
+                       class="amazon-form-input" 
+                       placeholder="Enter your phone number"
+                       value="{{ phone_number|default:'' }}" 
                        required>
               </div>
             </div>
@@ -270,6 +294,11 @@ function getLocation() {
             
             if (!cityField.value) {
               cityField.value = address.city || address.town || address.village || "";
+            }
+            
+            const stateField = document.getElementById("id_state");
+            if (!stateField.value && address.state) {
+              stateField.value = address.state;
             }
             
             if (!postalField.value && address.postcode) {

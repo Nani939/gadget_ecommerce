@@ -1,6 +1,9 @@
 import requests
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from .models import Category, Product, Order, OrderItem
 from users.models import UserProfile  # Make sure this import matches your app structure
 
@@ -35,6 +38,9 @@ def product_detail(request, id, slug):
     product = get_object_or_404(Product, id=id, slug=slug, available=True)
     return render(request, "products/product_detail.html", {"product": product})
 
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk, available=True)
+    return render(request, "products/product_detail.html", {"product": product})
 # -------------------------------
 # Cart (session-based)
 # -------------------------------
@@ -68,12 +74,27 @@ def _parse_qty(request, default=1):
         return default
 
 def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id, available=True)
     qty = _parse_qty(request, default=1)
-    get_object_or_404(Product, id=product_id)
+    
+    # Check stock availability
+    if product.stock < qty:
+        messages.error(request, f"Sorry, only {product.stock} items available in stock.")
+        return redirect("products:product_detail", pk=product_id)
+    
     cart = request.session.get("cart", {})
     current = int(cart.get(str(product_id), {}).get("quantity", 0))
-    cart[str(product_id)] = {"quantity": current + qty}
+    new_quantity = current + qty
+    
+    # Check if total quantity exceeds stock
+    if new_quantity > product.stock:
+        messages.error(request, f"Cannot add {qty} items. Only {product.stock - current} more items available.")
+        return redirect("products:product_detail", pk=product_id)
+    
+    cart[str(product_id)] = {"quantity": new_quantity}
     request.session["cart"] = cart
+    messages.success(request, f"Added {qty} {product.name}(s) to your cart.")
+    
     if request.GET.get("next") == "checkout":
         return redirect("shop:checkout")
     return redirect("shop:view_cart")
@@ -83,22 +104,39 @@ def remove_from_cart(request, item_id):
     if str(item_id) in cart:
         del cart[str(item_id)]
         request.session["cart"] = cart
+        messages.success(request, "Item removed from cart.")
     return redirect("shop:view_cart")
 
 def update_quantity(request, item_id):
     if request.method != "POST":
         return redirect("shop:view_cart")
+    
+    product = get_object_or_404(Product, id=item_id)
+    new_qty = _parse_qty(request, default=1)
+    
+    # Check stock availability
+    if new_qty > product.stock:
+        messages.error(request, f"Sorry, only {product.stock} items available in stock.")
+        return redirect("shop:view_cart")
+    
     cart = request.session.get("cart", {})
     if str(item_id) in cart:
-        cart[str(item_id)]["quantity"] = _parse_qty(request, default=1)
+        cart[str(item_id)]["quantity"] = new_qty
         request.session["cart"] = cart
+        messages.success(request, "Cart updated successfully.")
     return redirect("shop:view_cart")
 
 def buy_now(request, product_id):
-    get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, id=product_id, available=True)
+    qty = _parse_qty(request, default=1)
+    
+    # Check stock availability
+    if product.stock < qty:
+        messages.error(request, f"Sorry, only {product.stock} items available in stock.")
+        return redirect("products:product_detail", pk=product_id)
+    
     cart = request.session.get("cart", {})
-    current = int(cart.get(str(product_id), {}).get("quantity", 0))
-    cart[str(product_id)] = {"quantity": current + 1}
+    cart[str(product_id)] = {"quantity": qty}  # Replace existing quantity for buy now
     request.session["cart"] = cart
     return redirect("shop:checkout")
 
@@ -144,6 +182,8 @@ def checkout(request):
         address = request.POST.get("address", (profile.address if profile else "")).strip()
         city = request.POST.get("city", (profile.city if profile else "")).strip()
         postal_code = request.POST.get("postal_code", (profile.postal_code if profile else "")).strip()
+        phone_number = request.POST.get("phone_number", "").strip()
+        state = request.POST.get("state", "").strip()
 
         if latitude and longitude:
             try:
@@ -165,8 +205,8 @@ def checkout(request):
             except Exception:
                 error = "Reverse geocoding failed."
 
-        if not address or not city or not postal_code:
-            error = error or "Complete valid address is required."
+        if not address or not city or not postal_code or not phone_number:
+            error = error or "Complete address including phone number is required."
 
         if error:
             return render(request, "shop/checkout.html", {
@@ -175,21 +215,32 @@ def checkout(request):
                 "error": error,
                 "address": address,
                 "city": city,
+                "state": state,
                 "postal_code": postal_code,
+                "phone_number": phone_number,
                 "latitude": latitude,
                 "longitude": longitude,
             })
 
+        # Calculate total amount
+        total_amount = sum(item["total"] for item in cart_items)
+
         order = Order.objects.create(
+            user=request.user,
             customer_name=request.user.username,
             customer_email=request.user.email,
+            phone_number=phone_number,
             paid=True,
             address=address,
             city=city,
+            state=state,
             postal_code=postal_code,
+            total_amount=total_amount,
+            payment_method="COD",
             delivery_latitude=latitude,
             delivery_longitude=longitude,
         )
+        
         for ci in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -197,6 +248,10 @@ def checkout(request):
                 price=ci["product"].price,
                 quantity=ci["quantity"],
             )
+            # Reduce stock
+            product = ci["product"]
+            product.stock -= ci["quantity"]
+            product.save()
 
         # Optionally update user's profile address
         if profile:
@@ -214,6 +269,8 @@ def checkout(request):
         "address": profile.address if profile else "",
         "city": profile.city if profile else "",
         "postal_code": profile.postal_code if profile else "",
+        "phone_number": "",
+        "state": "",
     })
 
 @login_required

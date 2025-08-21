@@ -141,26 +141,40 @@
         <!-- Stock Status -->
         <div style="font-size: 18px; color: var(--amazon-success); font-weight: 500; margin-bottom: 16px;">
           {% if product.available %}
-            In Stock
+            {% if product.stock > 0 %}
+              In Stock ({{ product.stock }} available)
+            {% else %}
+              Out of Stock
+            {% endif %}
+              In Stock ({{ product.stock }} available)
+            {% else %}
+              Out of Stock
+            {% endif %}
           {% else %}
             Currently unavailable
           {% endif %}
         </div>
 
         <!-- Quantity Selector -->
+        {% if product.available and product.stock > 0 %}
         <div style="margin-bottom: 16px;">
           <label style="display: block; font-weight: 700; margin-bottom: 4px;">Quantity:</label>
           <div class="amazon-quantity-selector">
             <select class="amazon-quantity-dropdown" id="quantity-select">
-              {% for i in "123456789" %}
-                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+              {% for i in "123456789"|slice:":"|slice:product.stock %}
+                {% if forloop.counter <= product.stock %}
+                  <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                {% endif %}
               {% endfor %}
-              <option value="10">10+</option>
+              {% if product.stock >= 10 %}
+                <option value="10">10+</option>
+              {% endif %}
             </select>
           </div>
         </div>
 
         <!-- Action Buttons -->
+        {% if product.available and product.stock > 0 %}
         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
           <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
             {% csrf_token %}
@@ -178,6 +192,20 @@
             </button>
           </form>
         </div>
+        {% else %}
+        <div class="amazon-product-actions">
+          <button class="amazon-btn" style="width: 100%; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
+            Currently Unavailable
+          </button>
+        </div>
+        {% endif %}
+        {% else %}
+        <div style="margin-bottom: 16px;">
+          <button class="amazon-btn" style="width: 100%; padding: 12px; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
+            Currently Unavailable
+          </button>
+        </div>
+        {% endif %}
 
         <!-- Additional Options -->
         <div style="font-size: 14px; margin-bottom: 16px;">
@@ -238,7 +266,7 @@
         <div style="font-size: 14px;">
           {% for rating in "54321" %}
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span>{{ rating }} star</span>
+                <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/400x400?text=No+Image{% endif %}" 
               <div style="flex: 1; height: 16px; background: #e7e7e7; border-radius: 2px; overflow: hidden;">
                 <div style="height: 100%; background: var(--amazon-orange); width: {% cycle '60' '25' '10' '3' '2' %}%;"></div>
               </div>
