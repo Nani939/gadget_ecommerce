@@ -51,8 +51,7 @@
             </span>
           </div>
           <div style="margin-bottom: 12px;">
-            <strong>Estimated Delivery:</strong> 
-            {{ order.created_at|date:"F j, Y"|add_days:3 }}
+            <strong>Estimated Delivery:</strong> {{ estimated_delivery|date:"F j, Y" }}
           </div>
           {% if order.tracking_number %}
           <div style="margin-bottom: 12px;">

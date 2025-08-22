@@ -17,6 +17,15 @@ def about(request):
     return render(request, "shop/about.html")
 
 # -------------------------------
+# Cart Count API
+# -------------------------------
+def cart_count(request):
+    """Return cart item count as JSON"""
+    cart = request.session.get("cart", {})
+    total_qty = sum(int(item.get("quantity", 0)) for item in cart.values())
+    return JsonResponse({"count": total_qty})
+
+# -------------------------------
 # Product Views
 # -------------------------------
 def product_list(request, category_slug=None):
@@ -38,9 +47,6 @@ def product_detail(request, id, slug):
     product = get_object_or_404(Product, id=id, slug=slug, available=True)
     return render(request, "products/product_detail.html", {"product": product})
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk, available=True)
-    return render(request, "products/product_detail.html", {"product": product})
 # -------------------------------
 # Cart (session-based)
 # -------------------------------
@@ -80,7 +86,7 @@ def add_to_cart(request, product_id):
     # Check stock availability
     if product.stock < qty:
         messages.error(request, f"Sorry, only {product.stock} items available in stock.")
-        return redirect("products:product_detail", pk=product_id)
+        return redirect("products:product_detail", pk=product.id)
     
     cart = request.session.get("cart", {})
     current = int(cart.get(str(product_id), {}).get("quantity", 0))
@@ -89,7 +95,7 @@ def add_to_cart(request, product_id):
     # Check if total quantity exceeds stock
     if new_quantity > product.stock:
         messages.error(request, f"Cannot add {qty} items. Only {product.stock - current} more items available.")
-        return redirect("products:product_detail", pk=product_id)
+        return redirect("products:product_detail", pk=product.id)
     
     cart[str(product_id)] = {"quantity": new_quantity}
     request.session["cart"] = cart
@@ -99,19 +105,19 @@ def add_to_cart(request, product_id):
         return redirect("shop:checkout")
     return redirect("shop:view_cart")
 
-def remove_from_cart(request, item_id):
+def remove_from_cart(request, product_id):
     cart = request.session.get("cart", {})
-    if str(item_id) in cart:
-        del cart[str(item_id)]
+    if str(product_id) in cart:
+        del cart[str(product_id)]
         request.session["cart"] = cart
         messages.success(request, "Item removed from cart.")
     return redirect("shop:view_cart")
 
-def update_quantity(request, item_id):
+def update_quantity(request, product_id):
     if request.method != "POST":
         return redirect("shop:view_cart")
     
-    product = get_object_or_404(Product, id=item_id)
+    product = get_object_or_404(Product, id=product_id)
     new_qty = _parse_qty(request, default=1)
     
     # Check stock availability
@@ -120,8 +126,8 @@ def update_quantity(request, item_id):
         return redirect("shop:view_cart")
     
     cart = request.session.get("cart", {})
-    if str(item_id) in cart:
-        cart[str(item_id)]["quantity"] = new_qty
+    if str(product_id) in cart:
+        cart[str(product_id)]["quantity"] = new_qty
         request.session["cart"] = cart
         messages.success(request, "Cart updated successfully.")
     return redirect("shop:view_cart")
@@ -133,7 +139,7 @@ def buy_now(request, product_id):
     # Check stock availability
     if product.stock < qty:
         messages.error(request, f"Sorry, only {product.stock} items available in stock.")
-        return redirect("products:product_detail", pk=product_id)
+        return redirect("products:product_detail", pk=product.id)
     
     cart = request.session.get("cart", {})
     cart[str(product_id)] = {"quantity": qty}  # Replace existing quantity for buy now
@@ -273,12 +279,33 @@ def checkout(request):
         "state": "",
     })
 
-@login_required
-def order_success(request, order_id):
-    order = get_object_or_404(Order, id=order_id, customer_email=request.user.email)
-    return render(request, "shop/order_success.html", {"order": order})
+from datetime import timedelta
 
 @login_required
-def track_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id, customer_email=request.user.email)
-    return render(request, "shop/track_order.html", {"order": order})
+def order_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    estimated_delivery = order.created_at + timedelta(days=3)
+
+    return render(request, "shop/order_success.html", {
+        "order": order,
+        "estimated_delivery": estimated_delivery,
+    })
+
+
+@login_required
+def track_order(request, pk):
+    order = get_object_or_404(Order, id=pk)
+
+    status_list = ["PLACED", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"]
+
+    # compute the index of the current status
+    try:
+        current_status_index = status_list.index(order.status)
+    except ValueError:
+        current_status_index = -1  # fallback if status not in list
+
+    return render(request, "shop/track_order.html", {
+        "order": order,
+        "status_list": status_list,
+        "current_status_index": current_status_index,
+    })

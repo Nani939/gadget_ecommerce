@@ -244,13 +244,29 @@
 
         // Update cart count
         function updateCartCount() {
-            // This would typically be done via AJAX or server-side rendering
-            // For now, we'll use a placeholder
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) {
-                // You can implement actual cart count logic here
-                cartCount.textContent = '{{ cart_items|length|default:0 }}';
-            }
+            fetch('/cart/count/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    cartCount.textContent = data.count || 0;
+                }
+            })
+            .catch(error => {
+                console.log('Cart count update failed:', error);
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    // Fallback to session-based count
+                    const cart = JSON.parse(sessionStorage.getItem('cart') || '{}');
+                    const count = Object.values(cart).reduce((sum, item) => sum + (item.quantity || 0), 0);
+                    cartCount.textContent = count;
+                }
+            });
         }
 
         // Initialize on page load

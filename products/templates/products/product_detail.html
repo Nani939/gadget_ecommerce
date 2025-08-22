@@ -74,7 +74,7 @@
           <div style="font-size: 14px; color: #565959;">
             List Price: <span style="text-decoration: line-through;">₹{{ product.price|add:500|floatformat:2 }}</span>
             <span style="color: var(--amazon-warning); margin-left: 8px;">
-              Save ₹500 ({{ 500|div:product.price|mul:100|floatformat:0 }}%)
+              Save ₹{{ discount }} ( {{ discount_percent }}% )
             </span>
           </div>
         {% endif %}
@@ -141,18 +141,14 @@
         <!-- Stock Status -->
         <div style="font-size: 18px; color: var(--amazon-success); font-weight: 500; margin-bottom: 16px;">
           {% if product.available %}
-            {% if product.stock > 0 %}
-              In Stock ({{ product.stock }} available)
-            {% else %}
-              Out of Stock
-            {% endif %}
-              In Stock ({{ product.stock }} available)
-            {% else %}
-              Out of Stock
-            {% endif %}
-          {% else %}
-            Currently unavailable
-          {% endif %}
+  {% if product.stock > 0 %}
+    In Stock ({{ product.stock }} available)
+  {% else %}
+    Out of Stock
+  {% endif %}
+{% else %}
+  Currently unavailable
+{% endif %}
         </div>
 
         <!-- Quantity Selector -->
