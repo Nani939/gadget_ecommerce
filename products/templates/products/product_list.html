@@ -139,20 +139,6 @@
                 </button>
               {% endif %}
             </div>
-                {% csrf_token %}
-                <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%;">
-                  Add to Cart
-                </button>
-              </form>
-              
-              <form method="post" action="{% url 'shop:buy_now' product.id %}" style="margin: 0;">
-                {% csrf_token %}
-                <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%;">
-                  Buy Now
-                </button>
-              </form>
-            </div>
 
             <!-- Additional Info -->
             <div style="margin-top: 8px; font-size: 12px; color: #565959;">

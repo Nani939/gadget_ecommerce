@@ -47,9 +47,6 @@ def product_detail(request, id, slug):
     product = get_object_or_404(Product, id=id, slug=slug, available=True)
     return render(request, "products/product_detail.html", {"product": product})
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk, available=True)
-    return render(request, "products/product_detail.html", {"product": product})
 # -------------------------------
 # Cart (session-based)
 # -------------------------------
@@ -89,7 +86,7 @@ def add_to_cart(request, product_id):
     # Check stock availability
     if product.stock < qty:
         messages.error(request, f"Sorry, only {product.stock} items available in stock.")
-        return redirect("products:product_detail", pk=product_id)
+        return redirect("products:product_detail", pk=product.id)
     
     cart = request.session.get("cart", {})
     current = int(cart.get(str(product_id), {}).get("quantity", 0))
@@ -98,7 +95,7 @@ def add_to_cart(request, product_id):
     # Check if total quantity exceeds stock
     if new_quantity > product.stock:
         messages.error(request, f"Cannot add {qty} items. Only {product.stock - current} more items available.")
-        return redirect("products:product_detail", pk=product_id)
+        return redirect("products:product_detail", pk=product.id)
     
     cart[str(product_id)] = {"quantity": new_quantity}
     request.session["cart"] = cart
@@ -108,19 +105,19 @@ def add_to_cart(request, product_id):
         return redirect("shop:checkout")
     return redirect("shop:view_cart")
 
-def remove_from_cart(request, item_id):
+def remove_from_cart(request, product_id):
     cart = request.session.get("cart", {})
-    if str(item_id) in cart:
-        del cart[str(item_id)]
+    if str(product_id) in cart:
+        del cart[str(product_id)]
         request.session["cart"] = cart
         messages.success(request, "Item removed from cart.")
     return redirect("shop:view_cart")
 
-def update_quantity(request, item_id):
+def update_quantity(request, product_id):
     if request.method != "POST":
         return redirect("shop:view_cart")
     
-    product = get_object_or_404(Product, id=item_id)
+    product = get_object_or_404(Product, id=product_id)
     new_qty = _parse_qty(request, default=1)
     
     # Check stock availability
@@ -129,8 +126,8 @@ def update_quantity(request, item_id):
         return redirect("shop:view_cart")
     
     cart = request.session.get("cart", {})
-    if str(item_id) in cart:
-        cart[str(item_id)]["quantity"] = new_qty
+    if str(product_id) in cart:
+        cart[str(product_id)]["quantity"] = new_qty
         request.session["cart"] = cart
         messages.success(request, "Cart updated successfully.")
     return redirect("shop:view_cart")
@@ -142,7 +139,7 @@ def buy_now(request, product_id):
     # Check stock availability
     if product.stock < qty:
         messages.error(request, f"Sorry, only {product.stock} items available in stock.")
-        return redirect("products:product_detail", pk=product_id)
+        return redirect("products:product_detail", pk=product.id)
     
     cart = request.session.get("cart", {})
     cart[str(product_id)] = {"quantity": qty}  # Replace existing quantity for buy now
