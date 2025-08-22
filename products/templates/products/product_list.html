@@ -117,7 +117,28 @@
 
             <!-- Action Buttons -->
             <div class="amazon-product-actions">
-              <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
+              {% if product.available and product.stock > 0 %}
+                <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%;">
+                    Add to Cart
+                  </button>
+                </form>
+                
+                <form method="post" action="{% url 'shop:buy_now' product.id %}" style="margin: 0;">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%;">
+                    Buy Now
+                  </button>
+                </form>
+              {% else %}
+                <button class="amazon-btn" style="width: 100%; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
+                  {% if product.stock <= 0 %}Out of Stock{% else %}Unavailable{% endif %}
+                </button>
+              {% endif %}
+            </div>
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%;">

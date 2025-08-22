@@ -17,6 +17,15 @@ def about(request):
     return render(request, "shop/about.html")
 
 # -------------------------------
+# Cart Count API
+# -------------------------------
+def cart_count(request):
+    """Return cart item count as JSON"""
+    cart = request.session.get("cart", {})
+    total_qty = sum(int(item.get("quantity", 0)) for item in cart.values())
+    return JsonResponse({"count": total_qty})
+
+# -------------------------------
 # Product Views
 # -------------------------------
 def product_list(request, category_slug=None):

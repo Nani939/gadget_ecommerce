@@ -63,6 +63,33 @@ class Command(BaseCommand):
                 'description': 'Fast wireless charging pad compatible with all Qi devices.',
                 'available': True,
             },
+            {
+                'name': 'MacBook Pro M3',
+                'slug': 'macbook-pro-m3',
+                'category': electronics,
+                'price': 199999.00,
+                'stock': 15,
+                'description': 'Powerful laptop with M3 chip for professional work.',
+                'available': True,
+            },
+            {
+                'name': 'iPad Air',
+                'slug': 'ipad-air',
+                'category': electronics,
+                'price': 59999.00,
+                'stock': 40,
+                'description': 'Versatile tablet perfect for work and entertainment.',
+                'available': True,
+            },
+            {
+                'name': 'Apple Watch Series 9',
+                'slug': 'apple-watch-series-9',
+                'category': accessories,
+                'price': 39999.00,
+                'stock': 60,
+                'description': 'Advanced smartwatch with health monitoring features.',
+                'available': True,
+            },
         ]
 
         for product_data in products_data:
