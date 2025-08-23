@@ -79,3 +79,4 @@ AUTH_USER_MODEL = 'users.CustomUser'
 LOGOUT_REDIRECT_URL = 'shop:home'
 LOGIN_REDIRECT_URL = 'shop:home'
 LOGIN_URL = 'users:login'
+STATIC_ROOT = BASE_DIR / "staticfiles"

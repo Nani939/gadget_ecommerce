@@ -115,20 +115,6 @@
 
             <!-- Action Buttons -->
             <div class="amazon-product-actions">
-<<<<<<< HEAD
-              {% if product.available %}
-                <a href="{% url 'shop:add_to_cart' product.id %}?quantity=1" 
-                   class="amazon-btn amazon-btn-primary" style="width: 100%;">
-                  Add to Cart
-                </a>
-                <a href="{% url 'shop:buy_now' product.id %}?quantity=1" 
-                   class="amazon-btn amazon-btn-secondary" style="width: 100%; margin-top: 6px;">
-                  Buy Now
-                </a>
-              {% else %}
-                <button class="amazon-btn amazon-btn-secondary" style="width: 100%;" disabled>
-                  Out of Stock
-=======
               {% if product.available and product.stock > 0 %}
                 <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
                   {% csrf_token %}
@@ -148,7 +134,6 @@
               {% else %}
                 <button class="amazon-btn" style="width: 100%; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
                   {% if product.stock <= 0 %}Out of Stock{% else %}Unavailable{% endif %}
->>>>>>> 4019711b90c533f521c51557ee413952c13dc9a4
                 </button>
               {% endif %}
             </div>

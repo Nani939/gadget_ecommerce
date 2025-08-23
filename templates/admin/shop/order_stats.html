@@ -1,0 +1,59 @@
+<div class="order-stats-widget">
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">₹{{ stats.total_revenue|floatformat:0 }}</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.pending_orders }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.shipped_orders }}</div>
+            <div class="stat-label">Shipped</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.delivered_orders }}</div>
+            <div class="stat-label">Delivered</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.order-stats-widget {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+</style>
