@@ -1,0 +1,176 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .download-addresses-btn {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .download-addresses-btn:hover {
+        background: linear-gradient(135deg, #218838, #1ea085);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .admin-tools {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #007cba;
+    }
+    
+    .admin-tools h3 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .tool-item {
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .tool-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tool-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .tool-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+    
+    .tool-desc {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content_title %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ cl.result_count }}</div>
+        <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+        <div class="stat-number">{{ pending_orders_count|default:0 }}</div>
+        <div class="stat-label">Pending Orders</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
+        <div class="stat-number">{{ shipped_orders_count|default:0 }}</div>
+        <div class="stat-label">Shipped Orders</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8, #6f42c1);">
+        <div class="stat-number">₹{{ total_revenue|default:0|floatformat:0 }}</div>
+        <div class="stat-label">Total Revenue</div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}
+
+{% block result_list %}
+<div class="admin-tools">
+    <h3>🛠️ Admin Tools</h3>
+    <div class="tools-grid">
+        <div class="tool-item">
+            <span class="tool-icon">📥</span>
+            <div class="tool-title">Download All Addresses</div>
+            <div class="tool-desc">Export all customer delivery addresses</div>
+            <a href="{% url 'admin:shop_download_addresses' %}" class="download-addresses-btn">
+                📥 Download CSV
+            </a>
+        </div>
+        <div class="tool-item">
+            <span class="tool-icon">📊</span>
+            <div class="tool-title">Order Analytics</div>
+            <div class="tool-desc">View detailed order statistics</div>
+            <a href="#" class="download-addresses-btn" style="background: linear-gradient(135deg, #007cba, #6f42c1);">
+                📊 View Stats
+            </a>
+        </div>
+        <div class="tool-item">
+            <span class="tool-icon">🚚</span>
+            <div class="tool-title">Delivery Management</div>
+            <div class="tool-desc">Manage delivery routes and tracking</div>
+            <a href="#" class="download-addresses-btn" style="background: linear-gradient(135deg, #fd7e14, #e83e8c);">
+                🚚 Manage
+            </a>
+        </div>
+        <div class="tool-item">
+            <span class="tool-icon">📧</span>
+            <div class="tool-title">Customer Communication</div>
+            <div class="tool-desc">Send bulk emails to customers</div>
+            <a href="#" class="download-addresses-btn" style="background: linear-gradient(135deg, #6c757d, #495057);">
+                📧 Send Emails
+            </a>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}
