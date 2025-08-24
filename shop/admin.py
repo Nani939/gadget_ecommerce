@@ -80,7 +80,7 @@ class OrderAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Order Information', {
-            'fields': ('id', 'status', 'tracking_number', 'created_at', 'updated_at')
+            'fields': ( 'status', 'tracking_number', 'created_at', 'updated_at')
         }),
         ('Customer Details', {
             'fields': ('get_customer_info', 'user')

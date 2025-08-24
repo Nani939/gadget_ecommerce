@@ -504,3 +504,26 @@ def bulk_order(request):
                 messages.error(request, "Error processing file. Please check the format.")
     
     return render(request, 'shop/bulk_order.html')
+
+from datetime import timedelta
+from django.shortcuts import render, get_object_or_404
+from .models import Order
+
+def order_details_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    estimated_delivery = order.created_at + timedelta(days=3)
+
+    context = {
+        "order": order,
+        "estimated_delivery": estimated_delivery,
+    }
+    return render(request, "admin/shop/order_details.html", context)
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .models import Order
+
+@login_required(login_url="users:login")  # redirect to login if not authenticated
+def orders_list(request):
+    orders = Order.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "shop/orders.html", {"orders": orders})

@@ -28,6 +28,7 @@ urlpatterns = [
     path("track/<int:order_id>/", views.track_order, name="track_order"),
     
     # Print and delivery management
+    path("orders/", views.orders_list, name="orders"),
     path("order/print/<int:order_id>/", views.print_order_details, name="print_order_details"),
     path("order/delivery-slip/<int:order_id>/", views.delivery_slip, name="delivery_slip"),
     

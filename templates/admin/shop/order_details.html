@@ -286,7 +286,9 @@
             </div>
             <div class="meta-item">
                 <div class="meta-label">Estimated Delivery</div>
-                <div class="meta-value">{{ order.created_at|date:"F j, Y"|add_days:3 }}</div>
+                <div class="meta-value">
+  {{ estimated_delivery|date:"F j, Y" }}
+</div>-
             </div>
         </div>
     </div>
