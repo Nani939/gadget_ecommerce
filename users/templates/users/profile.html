@@ -4,6 +4,7 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
@@ -52,26 +53,27 @@
             <button type="submit" class="btn btn-primary w-100">Save Changes</button>
           </form>
           
-          <!-- Order History Section -->
-          <hr style="margin: 30px 0;">
+          <hr class="orders-divider">
           <h5 class="mb-3">📦 Recent Orders</h5>
-          <div style="max-height: 300px; overflow-y: auto;">
+          <div class="orders-list">
             {% for order in user.order_set.all|slice:":5" %}
-              <div style="border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin-bottom: 10px; background: #f8f9fa;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="order-card">
+                <div class="order-card-header">
                   <div>
                     <strong>Order #{{ order.id }}</strong>
-                    <div style="font-size: 14px; color: #666;">{{ order.created_at|date:"M j, Y" }}</div>
+                    <div class="order-date">{{ order.created_at|date:"M j, Y" }}</div>
                   </div>
-                  
-                  {# ✅ Print button only for staff/admins #}
-                  {% if request.user.is_staff %}
-                    <div style="font-size: 12px;">
-                      <a href="{% url 'shop:print_order_details' order.id %}" target="_blank" style="color: #007cba;">
-                        🖨️ Print Details
-                      </a>
-                    </div>
-                  {% endif %}
+                  </div>
+<<<<<<< HEAD
+  <div class="order-card-actions">
+    <div class="order-total">₹{{ order.total_amount|floatformat:2 }}</div>
+    <div class="order-print-link">
+      <a href="{% url 'shop:print_order_details' order.id %}" target="_blank" class="order-print-anchor">
+        🖨️ Print Details
+      </a>
+    </div>
+  </div>
+</div>
                 </div>
               </div>
             {% empty %}
@@ -81,6 +83,6 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
-{% endblock %}
+            {% empty %}
+              <p class="orders-empty">No orders yet</p>
+            {% endfor %}

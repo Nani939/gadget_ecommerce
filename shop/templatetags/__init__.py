@@ -1,1 +1,1 @@
-# Template tags package
+# shop/templatetags/__init__.py
