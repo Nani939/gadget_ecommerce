@@ -86,6 +86,18 @@
                         </div>
                     </div>
                 </a>
+                
+                <!-- Wishlist -->
+                {% if user.is_authenticated %}
+                <a href="{% url 'shop:wishlist' %}" class="amazon-nav-item">
+                    <div style="display: flex; align-items: end; gap: 4px;">
+                        <i class="bi bi-heart" style="font-size: 20px;"></i>
+                        <div>
+                            <small>Wishlist</small>
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
             </div>
         </div>
 
@@ -101,6 +113,11 @@
             <a href="#">Best Sellers</a>
             <a href="#">New Releases</a>
             <a href="#">Customer Service</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'shop:quick_order' %}">⚡ Quick Order</a>
+                <a href="{% url 'shop:bulk_order' %}">📊 Bulk Order</a>
+                <a href="{% url 'shop:compare_products' %}">📊 Compare</a>
+            {% endif %}
             {% if user.is_authenticated %}
                 <a href="{% url 'users:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     Sign Out

@@ -1,9 +1,12 @@
 import requests
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.template.loader import render_to_string
 from .models import Category, Product, Order, OrderItem
 from users.models import UserProfile  # Make sure this import matches your app structure
 
@@ -309,3 +312,195 @@ def track_order(request, pk):
         "status_list": status_list,
         "current_status_index": current_status_index,
     })
+
+# -------------------------------
+# Print and Delivery Management
+# -------------------------------
+@login_required
+def print_order_details(request, order_id):
+    """Print-friendly order details page"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Check if user has permission to view this order
+    if not request.user.is_staff and order.user != request.user:
+        messages.error(request, "You don't have permission to view this order.")
+        return redirect('shop:home')
+    
+    context = {
+        'order': order,
+        'print_date': timezone.now(),
+        'company_info': {
+            'name': 'Gadget Shop',
+            'address': '123 Tech Street, Digital City, 560001',
+            'phone': '+91 98765 43210',
+            'email': 'orders@gadgetshop.com',
+            'website': 'www.gadgetshop.com',
+            'gst': 'GST123456789'
+        }
+    }
+    
+    return render(request, 'shop/print_order_details.html', context)
+
+@login_required
+def delivery_slip(request, order_id):
+    """Generate delivery slip for courier"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Check if user has permission
+    if not request.user.is_staff and order.user != request.user:
+        messages.error(request, "You don't have permission to view this order.")
+        return redirect('shop:home')
+    
+    context = {
+        'order': order,
+        'delivery_date': timezone.now(),
+        'courier_instructions': [
+            'Handle with care - Electronic items',
+            'Verify customer identity before delivery',
+            'Collect payment if COD',
+            'Get delivery confirmation signature',
+            'Take photo proof of delivery'
+        ]
+    }
+    
+    return render(request, 'shop/delivery_slip.html', context)
+
+# -------------------------------
+# Unique Features
+# -------------------------------
+@login_required
+def wishlist(request):
+    """User's wishlist page"""
+    wishlist_items = request.session.get('wishlist', [])
+    products = Product.objects.filter(id__in=wishlist_items, available=True)
+    
+    return render(request, 'shop/wishlist.html', {
+        'products': products,
+        'wishlist_count': len(wishlist_items)
+    })
+
+@login_required
+def add_to_wishlist(request, product_id):
+    """Add product to wishlist"""
+    product = get_object_or_404(Product, id=product_id, available=True)
+    wishlist = request.session.get('wishlist', [])
+    
+    if product_id not in wishlist:
+        wishlist.append(product_id)
+        request.session['wishlist'] = wishlist
+        messages.success(request, f"{product.name} added to your wishlist!")
+    else:
+        messages.info(request, f"{product.name} is already in your wishlist.")
+    
+    return redirect('products:product_detail', pk=product.id)
+
+def compare_products(request):
+    """Product comparison page"""
+    compare_list = request.session.get('compare', [])
+    products = Product.objects.filter(id__in=compare_list, available=True)
+    
+    return render(request, 'shop/compare_products.html', {
+        'products': products,
+        'compare_count': len(compare_list)
+    })
+
+def add_to_compare(request, product_id):
+    """Add product to comparison"""
+    product = get_object_or_404(Product, id=product_id, available=True)
+    compare_list = request.session.get('compare', [])
+    
+    if len(compare_list) >= 4:
+        messages.warning(request, "You can compare maximum 4 products at a time.")
+        return redirect('shop:compare_products')
+    
+    if product_id not in compare_list:
+        compare_list.append(product_id)
+        request.session['compare'] = compare_list
+        messages.success(request, f"{product.name} added to comparison!")
+    else:
+        messages.info(request, f"{product.name} is already in comparison.")
+    
+    return redirect('products:product_detail', pk=product.id)
+
+@login_required
+def quick_order(request):
+    """Quick order by product code"""
+    if request.method == 'POST':
+        product_codes = request.POST.get('product_codes', '').strip()
+        if not product_codes:
+            messages.error(request, "Please enter product codes.")
+            return render(request, 'shop/quick_order.html')
+        
+        # Parse product codes (format: CODE:QTY,CODE:QTY)
+        cart = request.session.get("cart", {})
+        added_count = 0
+        
+        for line in product_codes.split('\n'):
+            line = line.strip()
+            if ':' in line:
+                try:
+                    code, qty = line.split(':')
+                    product_id = int(code.strip())
+                    quantity = int(qty.strip())
+                    
+                    product = Product.objects.get(id=product_id, available=True)
+                    if product.stock >= quantity:
+                        cart[str(product_id)] = {"quantity": quantity}
+                        added_count += 1
+                    else:
+                        messages.warning(request, f"Product {product.name} has insufficient stock.")
+                        
+                except (ValueError, Product.DoesNotExist):
+                    messages.warning(request, f"Invalid product code: {line}")
+        
+        if added_count > 0:
+            request.session["cart"] = cart
+            messages.success(request, f"{added_count} products added to cart.")
+            return redirect('shop:view_cart')
+        else:
+            messages.error(request, "No valid products were added.")
+    
+    return render(request, 'shop/quick_order.html')
+
+@login_required
+def bulk_order(request):
+    """Bulk order for businesses"""
+    if request.method == 'POST':
+        # Handle bulk order CSV upload
+        csv_file = request.FILES.get('bulk_file')
+        if csv_file:
+            try:
+                import csv
+                import io
+                
+                file_data = csv_file.read().decode('utf-8')
+                csv_data = csv.reader(io.StringIO(file_data))
+                
+                cart = request.session.get("cart", {})
+                added_count = 0
+                
+                for row in csv_data:
+                    if len(row) >= 2:
+                        try:
+                            product_id = int(row[0])
+                            quantity = int(row[1])
+                            
+                            product = Product.objects.get(id=product_id, available=True)
+                            if product.stock >= quantity:
+                                cart[str(product_id)] = {"quantity": quantity}
+                                added_count += 1
+                            
+                        except (ValueError, Product.DoesNotExist):
+                            continue
+                
+                if added_count > 0:
+                    request.session["cart"] = cart
+                    messages.success(request, f"{added_count} products added from bulk order.")
+                    return redirect('shop:view_cart')
+                else:
+                    messages.error(request, "No valid products found in the file.")
+                    
+            except Exception as e:
+                messages.error(request, "Error processing file. Please check the format.")
+    
+    return render(request, 'shop/bulk_order.html')

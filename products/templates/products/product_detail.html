@@ -187,6 +187,31 @@
               Buy Now
             </button>
           </form>
+          
+          <!-- Unique Features -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+            <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" style="margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; padding: 8px; font-size: 12px;">
+                ❤️ Wishlist
+              </button>
+            </form>
+            
+            <form method="post" action="{% url 'shop:add_to_compare' product.id %}" style="margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; padding: 8px; font-size: 12px;">
+                📊 Compare
+              </button>
+            </form>
+          </div>
+          
+          <!-- Quick Order Code -->
+          <div style="background: #f0f8ff; padding: 10px; border-radius: 4px; margin-top: 8px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Quick Order Code:</div>
+            <div style="font-family: 'Courier New', monospace; font-weight: bold; color: #2980b9;">
+              {{ product.id }}:1
+            </div>
+          </div>
         </div>
         {% else %}
         <div class="amazon-product-actions">
