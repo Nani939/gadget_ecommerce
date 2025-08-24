@@ -103,73 +103,107 @@ class OrderAdmin(admin.ModelAdmin):
     
     def get_urls(self):
         urls = super().get_urls()
-    custom_urls = [
-        path('order-details/<int:order_id>/', 
-             self.admin_site.admin_view(self.order_details_view), 
-             name='shop_order_details'),
-        path('print-order/<int:order_id>/', 
-             self.admin_site.admin_view(self.print_order_view),  # admin_view protects staff-only
-             name='shop_print_order'),
-        path('download-addresses/', 
-             self.admin_site.admin_view(self.download_addresses_view), 
-             name='shop_download_addresses'),
-        path('download-single-address/<int:order_id>/', 
-             self.admin_site.admin_view(self.download_single_address_view), 
-             name='shop_download_single_address'),
-    ]
-    return custom_urls + urls
-
-def view_order_details(self, obj):
-    url = reverse('admin:shop_order_details', args=[obj.id])
-    return format_html(
-        '<a href="{}" class="button" style="background: #417690; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📋 View Details</a>',
-        url
-    )
-view_order_details.short_description = "Order Details"
-
-def print_order_details(self, obj):
-    url = reverse('admin:shop_print_order', args=[obj.id])
-    return format_html(
-        '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">🖨️ Print</a>',
-        url
-    )
-print_order_details.short_description = "Print Order"
-
-def download_address(self, obj):
-    url = reverse('admin:shop_download_single_address', args=[obj.id])
-    return format_html(
-        '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📥 Address</a>',
-        url
-    )
-download_address.short_description = "Download Address"
-
-def order_details_view(self, request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    context = {
-        'title': f'Order Details - #{order.id}',
-        'order': order,
-        'opts': self.model._meta,
-        'has_change_permission': self.has_change_permission(request),
-    }
-    return render(request, 'admin/shop/order_details.html', context)
-
-def print_order_view(self, request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    context = {
-        'order': order,
-        'print_date': __import__('datetime').datetime.now(),
-        'company_info': {
-            'name': 'Gadget Shop',
-            'address': '123 Tech Street, Digital City, 560001',
-            'phone': '+91 98765 43210',
-            'email': 'orders@gadgetshop.com',
-            'website': 'www.gadgetshop.com',
-            'gst': 'GST123456789'
+        custom_urls = [
+            path('order-details/<int:order_id>/', 
+                 self.admin_site.admin_view(self.order_details_view), 
+                 name='shop_order_details'),
+            path('print-order/<int:order_id>/', 
+                 self.admin_site.admin_view(self.print_order_view),  # ✅ admin_view protects staff-only
+                 name='shop_print_order'),
+            path('download-addresses/', 
+                 self.admin_site.admin_view(self.download_addresses_view), 
+                 name='shop_download_addresses'),
+            path('download-single-address/<int:order_id>/', 
+                 self.admin_site.admin_view(self.download_single_address_view), 
+                 name='shop_download_single_address'),
+        ]
+        return custom_urls + urls
+    
+    def view_order_details(self, obj):
+        url = reverse('admin:shop_order_details', args=[obj.id])
+        return format_html(
+            '<a href="{}" class="button" style="background: #417690; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📋 View Details</a>',
+            url
+        )
+    view_order_details.short_description = "Order Details"
+    
+    def print_order_details(self, obj):
+        url = reverse('admin:shop_print_order', args=[obj.id])
+        return format_html(
+            '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">🖨️ Print</a>',
+            url
+        )
+    print_order_details.short_description = "Print Order"
+    
+    def download_address(self, obj):
+        url = reverse('admin:shop_download_single_address', args=[obj.id])
+        return format_html(
+            '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📥 Address</a>',
+            url
+        )
+    download_address.short_description = "Download Address"
+    
+    def order_details_view(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        context = {
+            'title': f'Order Details - #{order.id}',
+            'order': order,
+            'opts': self.model._meta,
+            'has_change_permission': self.has_change_permission(request),
         }
-    }
-    return render(request, 'shop/print_order_details.html', context)
-
-def download_addresses_view(self, request):
+        return render(request, 'admin/shop/order_details.html', context)
+    
+    def print_order_view(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        context = {
+            'order': order,
+            'print_date': __import__('datetime').datetime.now(),
+            'company_info': {
+                'name': 'Gadget Shop',
+                'address': '123 Tech Street, Digital City, 560001',
+                'phone': '+91 98765 43210',
+                'email': 'orders@gadgetshop.com',
+                'website': 'www.gadgetshop.com',
+                'gst': 'GST123456789'
+            }
+        }
+        return render(request, 'shop/print_order_details.html', context)
+    
+    def download_address(self, obj):
+        url = reverse('admin:shop_download_single_address', args=[obj.id])
+        return format_html(
+            '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📥 Address</a>',
+            url
+        )
+    download_address.short_description = "Download Address"
+    
+    def order_details_view(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        context = {
+            'title': f'Order Details - #{order.id}',
+            'order': order,
+            'opts': self.model._meta,
+            'has_change_permission': self.has_change_permission(request),
+        }
+        return render(request, 'admin/shop/order_details.html', context)
+    
+    def print_order_view(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        context = {
+            'order': order,
+            'print_date': __import__('datetime').datetime.now(),
+            'company_info': {
+                'name': 'Gadget Shop',
+                'address': '123 Tech Street, Digital City, 560001',
+                'phone': '+91 98765 43210',
+                'email': 'orders@gadgetshop.com',
+                'website': 'www.gadgetshop.com',
+                'gst': 'GST123456789'
+            }
+        }
+        return render(request, 'shop/print_order_details.html', context)
+    
+    def download_addresses_view(self, request):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="delivery_addresses.csv"'
         
@@ -448,7 +482,9 @@ def download_addresses_view(self, request):
         return response
     export_addresses.short_description = "Export selected addresses to CSV"
 
-# Add custom admin site configuration
+
+
+# Custom Admin site branding
 admin.site.site_header = "Gadget Shop Admin Dashboard"
 admin.site.site_title = "Gadget Shop Admin"
 admin.site.index_title = "Welcome to Gadget Shop Administration"

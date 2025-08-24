@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% load widget_tweaks %}
 
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'users/css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
@@ -63,26 +64,16 @@
                     <strong>Order #{{ order.id }}</strong>
                     <div class="order-date">{{ order.created_at|date:"M j, Y" }}</div>
                   </div>
-                  </div>
-<<<<<<< HEAD
-  <div class="order-card-actions">
-    <div class="order-total">₹{{ order.total_amount|floatformat:2 }}</div>
-    <div class="order-print-link">
-      <a href="{% url 'shop:print_order_details' order.id %}" target="_blank" class="order-print-anchor">
-        🖨️ Print Details
-      </a>
-    </div>
-  </div>
-</div>
                 </div>
+               
               </div>
             {% empty %}
-              <p style="color: #666; text-align: center; padding: 20px;">No orders yet</p>
+              <p class="orders-empty">No orders yet</p>
             {% endfor %}
           </div>
         </div>
       </div>
     </div>
-            {% empty %}
-              <p class="orders-empty">No orders yet</p>
-            {% endfor %}
+  </div>
+</div>
+{% endblock %}
