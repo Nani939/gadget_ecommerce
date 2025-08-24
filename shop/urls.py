@@ -26,5 +26,17 @@ urlpatterns = [
     path("checkout/", views.checkout, name="checkout"),
     path("order/success/<int:order_id>/", views.order_success, name="order_success"),
     path("track/<int:order_id>/", views.track_order, name="track_order"),
+    
+    # Print and delivery management
+    path("order/print/<int:order_id>/", views.print_order_details, name="print_order_details"),
+    path("order/delivery-slip/<int:order_id>/", views.delivery_slip, name="delivery_slip"),
+    
+    # Unique features
+    path("wishlist/", views.wishlist, name="wishlist"),
+    path("wishlist/add/<int:product_id>/", views.add_to_wishlist, name="add_to_wishlist"),
+    path("compare/", views.compare_products, name="compare_products"),
+    path("compare/add/<int:product_id>/", views.add_to_compare, name="add_to_compare"),
+    path("quick-order/", views.quick_order, name="quick_order"),
+    path("bulk-order/", views.bulk_order, name="bulk_order"),
 
 ]

@@ -5,15 +5,15 @@ from django.urls import reverse, path
 from django.utils.safestring import mark_safe
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.decorators import method_decorator
 from .models import Category, Product, Order, OrderItem
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ['name']
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -40,6 +40,7 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     raw_id_fields = ["product"]
@@ -61,12 +62,13 @@ class OrderItemInline(admin.TabularInline):
         return "No Image"
     product_image.short_description = "Image"
 
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         "id", "customer_name", "customer_email", "phone_number", 
         "status", "total_amount", "payment_method", "created_at", "paid",
-        "view_order_details", "download_address"
+        "view_order_details", "print_order_details", "download_address"
     ]
     list_filter = ["paid", "status", "payment_method", "created_at", "country", "state"]
     search_fields = ["customer_name", "customer_email", "tracking_number", "phone_number"]
@@ -105,6 +107,9 @@ class OrderAdmin(admin.ModelAdmin):
             path('order-details/<int:order_id>/', 
                  self.admin_site.admin_view(self.order_details_view), 
                  name='shop_order_details'),
+            path('print-order/<int:order_id>/', 
+                 self.admin_site.admin_view(self.print_order_view),  # ✅ admin_view protects staff-only
+                 name='shop_print_order'),
             path('download-addresses/', 
                  self.admin_site.admin_view(self.download_addresses_view), 
                  name='shop_download_addresses'),
@@ -121,6 +126,14 @@ class OrderAdmin(admin.ModelAdmin):
             url
         )
     view_order_details.short_description = "Order Details"
+    
+    def print_order_details(self, obj):
+        url = reverse('admin:shop_print_order', args=[obj.id])
+        return format_html(
+            '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">🖨️ Print</a>',
+            url
+        )
+    print_order_details.short_description = "Print Order"
     
     def download_address(self, obj):
         url = reverse('admin:shop_download_single_address', args=[obj.id])
@@ -139,6 +152,23 @@ class OrderAdmin(admin.ModelAdmin):
             'has_change_permission': self.has_change_permission(request),
         }
         return render(request, 'admin/shop/order_details.html', context)
+    
+    def print_order_view(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        context = {
+            'order': order,
+            'print_date': __import__('datetime').datetime.now(),
+            'company_info': {
+                'name': 'Gadget Shop',
+                'address': '123 Tech Street, Digital City, 560001',
+                'phone': '+91 98765 43210',
+                'email': 'orders@gadgetshop.com',
+                'website': 'www.gadgetshop.com',
+                'gst': 'GST123456789'
+            }
+        }
+        return render(request, 'shop/print_order_details.html', context)
+    
     
     def download_addresses_view(self, request):
         response = HttpResponse(content_type='text/csv')
