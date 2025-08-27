@@ -102,14 +102,14 @@
                     
                     <div style="font-size: 24px; font-weight: bold; color: #B12704; margin-bottom: 10px;">
                         ₹{{ product.price|floatformat:2 }}
-                    </div>
-                    
+        <h1 class="wishlist-title">❤️ My Wishlist</h1>
+        <p class="wishlist-count">{{ wishlist_count }} item{{ wishlist_count|pluralize }} saved for later</p>
                     <div style="color: #067d62; font-weight: 500; margin-bottom: 10px;">
                         {% if product.stock > 0 %}
                             ✅ In Stock ({{ product.stock }} available)
                         {% else %}
                             ❌ Out of Stock
-                        {% endif %}
+                         {% endif %} 
                     </div>
                     
                     <div style="font-size: 14px; color: #666;">
@@ -117,53 +117,53 @@
                     </div>
                     
                     <!-- Price Alert Feature -->
-                    <div class="price-alert">
-                        💡 <strong>Smart Alert:</strong> We'll notify you when price drops below ₹{{ product.price|add:-500|floatformat:2 }}
-                    </div>
-                </div>
-                
+                    <h3 class="wishlist-product-title">
+                        <a href="{{ product.get_absolute_url }}" class="wishlist-product-link">
+                            {{ product.name }}
+                        </a>
+                    </h3>
                 <div class="wishlist-actions">
-                    {% if product.stock > 0 %}
-                        <form method="post" action="{% url 'shop:add_to_cart' product.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%;">
+                    <div class="wishlist-rating-row">
+                        <div class="amazon-stars">★★★★☆</div>
+                        <span class="wishlist-review-count">({{ product.id|add:47 }} reviews)</span>
+                    </div>
                                 🛒 Add to Cart
-                            </button>
+                    <div class="wishlist-product-price">
                         </form>
-                        
+                    <div class="wishlist-stock-status">
                         <form method="post" action="{% url 'shop:buy_now' product.id %}">
-                            {% csrf_token %}
+                    <div class="wishlist-added-date">
                             <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; background: #ff9900;">
-                                ⚡ Buy Now
+                            <button type="submit" class="amazon-btn amazon-btn-primary wishlist-btn-fullwidth" title="Add to Cart">
                             </button>
-                        </form>
-                    {% else %}
-                        <button class="amazon-btn" style="width: 100%; background: #ccc; cursor: not-allowed;" disabled>
+                            <button type="submit" class="amazon-btn amazon-btn-secondary wishlist-btn-fullwidth wishlist-btn-buynow" title="Buy Now">
+                    {% empty %}
+                        <button class="amazon-btn wishlist-btn-fullwidth wishlist-btn-disabled" type="button" title="Out of Stock" disabled>
                             Out of Stock
-                        </button>
-                    {% endif %}
+                    <a href="{% url 'shop:add_to_compare' product.id %}" class="amazon-btn amazon-btn-secondary wishlist-btn-fullwidth" title="Compare Product">
                     
+                    <button type="button" onclick="removeFromWishlist({{ product.id }})" class="amazon-btn wishlist-btn-fullwidth wishlist-btn-remove" title="Remove from Wishlist">
                     <a href="{% url 'shop:add_to_compare' product.id %}" class="amazon-btn amazon-btn-secondary" style="width: 100%;">
-                        📊 Compare
+                    <button type="button" onclick="shareProduct({{ product.id }})" class="amazon-btn amazon-btn-secondary wishlist-btn-fullwidth" title="Share Product">
                     </a>
-                    
-                    <button onclick="removeFromWishlist({{ product.id }})" class="amazon-btn" style="width: 100%; background: #dc3545; color: white;">
-                        🗑️ Remove
-                    </button>
-                    
-                    <button onclick="shareProduct({{ product.id }})" class="amazon-btn amazon-btn-secondary" style="width: 100%;">
-                        📤 Share
-                    </button>
-                </div>
-            </div>
-        {% endfor %}
-        
-        <!-- Wishlist Actions -->
-        <div style="text-align: center; margin: 40px 0;">
-            <button onclick="addAllToCart()" class="amazon-btn amazon-btn-primary" style="padding: 15px 30px; font-size: 16px;">
+        <div class="wishlist-actions-row">
+            <button type="button" onclick="addAllToCart()" class="amazon-btn amazon-btn-primary wishlist-btn-large" title="Add All to Cart">
                 🛒 Add All to Cart
             </button>
-            <button onclick="clearWishlist()" class="amazon-btn" style="padding: 15px 30px; font-size: 16px; background: #dc3545; color: white; margin-left: 15px;">
+            <button type="button" onclick="clearWishlist()" class="amazon-btn wishlist-btn-large wishlist-btn-removeall" title="Clear Wishlist">
+                �️ Clear Wishlist
+            </button>
+        </div>
+                </div>
+            <div class="wishlist-empty-icon">💔</div>
+        {% endfor %}
+            <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary wishlist-btn-large" title="Start Shopping">
+        <!-- Wishlist Actions -->
+        <div class="wishlist-actions-row">
+            <button onclick="addAllToCart()" class="amazon-btn amazon-btn-primary wishlist-btn-large" title="Add All to Cart">
+                🛒 Add All to Cart
+            </button>
+            <button onclick="clearWishlist()" class="amazon-btn wishlist-btn-large wishlist-btn-removeall" title="Clear Wishlist">
                 🗑️ Clear Wishlist
             </button>
         </div>
@@ -174,7 +174,7 @@
             <div style="font-size: 80px; margin-bottom: 20px;">💔</div>
             <h2>Your wishlist is empty</h2>
             <p>Save items you love for later by clicking the heart icon ❤️</p>
-            <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary" style="padding: 15px 30px; font-size: 16px;">
+            <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary wishlist-btn-large" title="Start Shopping">
                 🛍️ Start Shopping
             </a>
         </div>

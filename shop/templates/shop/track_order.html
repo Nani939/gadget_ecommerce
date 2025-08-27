@@ -16,94 +16,24 @@
     <span>Track Order</span>
   </div>
 
-  <!-- Order Tracking Header -->
-  <div style="text-align: center; margin: 40px 0;">
-    <h1 style="font-size: 32px; font-weight: 400; color: var(--amazon-text); margin-bottom: 16px;">
-      Track Your Order
-    </h1>
-    <p style="font-size: 18px; color: #565959; margin-bottom: 32px;">
-      Order #{{ order.id }} • Placed on {{ order.created_at|date:"F j, Y" }}
-    </p>
-  </div>
-
-  <!-- Order Status Timeline -->
-  <div style="max-width: 800px; margin: 0 auto;">
-    <div style="background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-      <h2 style="font-size: 21px; font-weight: 400; margin-bottom: 24px; color: var(--amazon-text);">
-        Order Status
-      </h2>
-      
-      <!-- Status Timeline -->
-      <div style="position: relative; padding-left: 40px;">
-        <!-- Timeline Line -->
-        <div style="position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: #e7e7e7;"></div>
-        
-        <!-- Status Steps -->
-<<<<<<< HEAD
-        {% for status_item in status_list %}
-          <div style="position: relative; margin-bottom: 24px; {% if forloop.last %}margin-bottom: 0;{% endif %}">
-            
-            <!-- Status Dot -->
-            <div style="position: absolute; left: -32px; top: 4px; width: 24px; height: 24px; border-radius: 50%; 
-                        {% if order.status == status_item or forloop.counter <= status_list.index(order.status) + 1 %}
-                          background: var(--amazon-success); border: 3px solid white; box-shadow: 0 0 0 2px var(--amazon-success);
-                        {% else %}
-                          background: #e7e7e7; border: 3px solid white; box-shadow: 0 0 0 2px #e7e7e7;
-                        {% endif %}">
-            </div>
-            
-            <!-- Status Content -->
-            <div>
-              <div style="font-weight: 700; margin-bottom: 4px; 
-                          {% if order.status == status_item %}color: var(--amazon-success);{% else %}color: #565959;{% endif %}">
-                {% if status_item == 'PLACED' %}Order Placed
-                {% elif status_item == 'PACKED' %}Order Packed
-                {% elif status_item == 'SHIPPED' %}Order Shipped
-                {% elif status_item == 'OUT_FOR_DELIVERY' %}Out for Delivery
-                {% elif status_item == 'DELIVERED' %}Delivered
-                {% endif %}
-              </div>
-              <div style="font-size: 14px; color: #565959;">
-                {% if status_item == 'PLACED' %}
-                  {{ order.created_at|date:"M j, Y g:i A" }}
-                {% elif status_item == 'PACKED' and order.status != 'PLACED' %}
-                  {% if order.status == 'PACKED' %}{{ order.updated_at|date:"M j, Y g:i A" }}{% else %}Expected within 1-2 business days{% endif %}
-                {% elif status_item == 'SHIPPED' and order.status in 'SHIPPED,OUT_FOR_DELIVERY,DELIVERED' %}
-                  {% if order.status == 'SHIPPED' %}{{ order.updated_at|date:"M j, Y g:i A" }}{% else %}Expected within 2-3 business days{% endif %}
-                {% elif status_item == 'OUT_FOR_DELIVERY' and order.status in 'OUT_FOR_DELIVERY,DELIVERED' %}
-                  {% if order.status == 'OUT_FOR_DELIVERY' %}{{ order.updated_at|date:"M j, Y g:i A" }}{% else %}Expected today{% endif %}
-                {% elif status_item == 'DELIVERED' and order.status == 'DELIVERED' %}
-                  {{ order.updated_at|date:"M j, Y g:i A" }}
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-=======
+  <!-- Removed duplicate/erroneous status block above. Only the correct status timeline loop below remains. -->
         {% with status_list="PLACED,PACKED,SHIPPED,OUT_FOR_DELIVERY,DELIVERED" %}
           {% for status_item in status_list|split:"," %}
-            <div style="position: relative; margin-bottom: 24px; {% if forloop.last %}margin-bottom: 0;{% endif %}">
+            <div class="order-status-row{% if forloop.last %} order-status-row-last{% endif %}">
               <!-- Status Dot -->
-              <div style="position: absolute; left: -32px; top: 4px; width: 24px; height: 24px; border-radius: 50%; 
-                          {% if order.status == status_item or forloop.counter <= 'PLACED,PACKED,SHIPPED,OUT_FOR_DELIVERY,DELIVERED'|split:','|length and order.status in 'PLACED,PACKED,SHIPPED,OUT_FOR_DELIVERY,DELIVERED'|split:','|slice:forloop.counter0: %}
-                            background: var(--amazon-success); border: 3px solid white; box-shadow: 0 0 0 2px var(--amazon-success);
-                          {% else %}
-                            background: #e7e7e7; border: 3px solid white; box-shadow: 0 0 0 2px #e7e7e7;
-                          {% endif %}">
+              <div class="order-status-dot {% if order.status == status_item or forloop.counter <= 'PLACED,PACKED,SHIPPED,OUT_FOR_DELIVERY,DELIVERED'|split:','|length and order.status in 'PLACED,PACKED,SHIPPED,OUT_FOR_DELIVERY,DELIVERED'|split:','|slice:forloop.counter0: %}order-status-dot-active{% endif %}">
               </div>
               
               <!-- Status Content -->
               <div>
-                <div style="font-weight: 700; margin-bottom: 4px; 
-                            {% if order.status == status_item %}color: var(--amazon-success);{% else %}color: #565959;{% endif %}">
+                <div class="order-status-label {% if order.status == status_item %}order-status-label-active{% endif %}">
                   {% if status_item == 'PLACED' %}Order Placed
-                  {% elif status_item == 'PACKED' %}Order Packed
                   {% elif status_item == 'SHIPPED' %}Order Shipped
                   {% elif status_item == 'OUT_FOR_DELIVERY' %}Out for Delivery
                   {% elif status_item == 'DELIVERED' %}Delivered
                   {% endif %}
                 </div>
-                <div style="font-size: 14px; color: #565959;">
+                <div class="order-status-date">
                   {% if status_item == 'PLACED' %}
                     {{ order.created_at|date:"M j, Y g:i A" }}
                   {% elif status_item == 'PACKED' and order.status != 'PLACED' %}
@@ -120,20 +50,19 @@
             </div>
           {% endfor %}
         {% endwith %}
->>>>>>> 4019711b90c533f521c51557ee413952c13dc9a4
       </div>
 
       <!-- Current Status Info -->
-      <div style="background: var(--amazon-gray); padding: 16px; border-radius: 4px; margin-top: 24px;">
-        <div style="font-weight: 700; margin-bottom: 8px; color: var(--amazon-text);">
+      <div class="order-status-info">
+        <div class="order-status-info-title">
           Current Status: {{ order.get_status_display }}
         </div>
         {% if order.tracking_number %}
-          <div style="font-size: 14px; color: #565959; margin-bottom: 8px;">
+          <div class="order-status-info-tracking">
             Tracking Number: <strong>{{ order.tracking_number }}</strong>
           </div>
         {% endif %}
-        <div style="font-size: 14px; color: #565959;">
+  <div class="order-status-info-desc">
           {% if order.status == 'PLACED' %}
             Your order has been received and is being processed.
           {% elif order.status == 'PACKED' %}
@@ -150,9 +79,9 @@
     </div>
 
     <!-- Delivery Address -->
-    <div style="background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-      <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Delivery Address</h3>
-      <div style="color: var(--amazon-text);">
+    <div class="order-address-box">
+      <h3 class="order-address-title">Delivery Address</h3>
+      <div class="order-address-content">
         <strong>{{ order.customer_name }}</strong><br>
         {{ order.address }}<br>
         {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br>
@@ -164,87 +93,58 @@
     </div>
 
     <!-- Order Items -->
-    <div style="background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-      <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Items in this Order</h3>
+    <div class="order-items-box">
+      <h3 class="order-items-title">Items in this Order</h3>
       {% for item in order.items.all %}
-        <div style="display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e7e7e7; {% if forloop.last %}border-bottom: none;{% endif %}">
+        <div class="order-item-row{% if forloop.last %} order-item-row-last{% endif %}">
           <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}https://via.placeholder.com/80x80?text=No+Image{% endif %}" 
                alt="{{ item.product.name }}"
-               style="width: 80px; height: 80px; object-fit: contain; border-radius: 4px;"
+               class="order-item-img"
                onerror="this.src='https://via.placeholder.com/80x80?text=No+Image'">
-          
-          <div style="flex: 1;">
-            <div style="font-weight: 500; margin-bottom: 4px;">{{ item.product.name }}</div>
-            <div style="font-size: 14px; color: #565959; margin-bottom: 4px;">
-              Quantity: {{ item.quantity }}
-            </div>
-            <div style="font-size: 14px; color: #565959;">
-              Price: ₹{{ item.price|floatformat:2 }} each
-            </div>
+          <div class="order-item-details">
+            <div class="order-item-name">{{ item.product.name }}</div>
+            <div class="order-item-qty">Quantity: {{ item.quantity }}</div>
+            <div class="order-item-price">Price: ₹{{ item.price|floatformat:2 }} each</div>
           </div>
-          
-          <div style="text-align: right;">
-            <div style="font-weight: 700;">₹{{ item.get_cost|floatformat:2 }}</div>
-          </div>
+          <div class="order-item-cost">₹{{ item.get_cost|floatformat:2 }}</div>
         </div>
       {% endfor %}
       
-      <div style="text-align: right; margin-top: 16px; font-size: 18px; font-weight: 700;">
+  <div class="order-total">
         Total: ₹{{ order.get_total_cost|floatformat:2 }}
       </div>
     </div>
 
     <!-- Action Buttons -->
-    <div style="text-align: center; margin: 32px 0;">
-      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <a href="{% url 'users:profile' %}" class="amazon-btn amazon-btn-secondary" style="padding: 12px 24px;">
-          View All Orders
-        </a>
-<<<<<<< HEAD
-        <a href="{% url 'shop:product_list' %}" class="amazon-btn amazon-btn-secondary" style="padding: 12px 24px;">
-=======
-        <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-secondary" style="padding: 12px 24px;">
->>>>>>> 4019711b90c533f521c51557ee413952c13dc9a4
-          Continue Shopping
-        </a>
-        <a href="{% url 'shop:home' %}" class="amazon-btn amazon-btn-primary" style="padding: 12px 24px;">
-          Back to Home
-        </a>
-      </div>
+    <div class="order-action-btns">
+      <a href="{% url 'users:profile' %}" class="amazon-btn amazon-btn-secondary order-btn">View All Orders</a>
+      <a href="{% url 'shop:product_list' %}" class="amazon-btn amazon-btn-secondary order-btn">Continue Shopping</a>
+      <a href="{% url 'shop:home' %}" class="amazon-btn amazon-btn-primary order-btn">Back to Home</a>
     </div>
-<<<<<<< HEAD
-=======
 
     <!-- Help Section -->
-    <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 20px; margin: 24px 0;">
-      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #004085;">
-        Need Help?
-      </h3>
-      <ul style="margin: 0; padding-left: 20px; color: #004085;">
-        <li style="margin-bottom: 8px;">Contact customer service for any delivery issues</li>
-        <li style="margin-bottom: 8px;">Report missing or damaged items within 7 days</li>
-        <li style="margin-bottom: 8px;">Track your package using the tracking number above</li>
-        <li style="margin-bottom: 8px;">Check delivery instructions and address details</li>
+    <div class="order-help-box">
+      <h3 class="order-help-title">Need Help?</h3>
+      <ul class="order-help-list">
+        <li>Contact customer service for any delivery issues</li>
+        <li>Report missing or damaged items within 7 days</li>
+        <li>Track your package using the tracking number above</li>
+        <li>Check delivery instructions and address details</li>
       </ul>
     </div>
->>>>>>> 4019711b90c533f521c51557ee413952c13dc9a4
   </div>
 </div>
 
 <script>
-<<<<<<< HEAD
-=======
-// Auto-refresh page every 5 minutes for status updates
->>>>>>> 4019711b90c533f521c51557ee413952c13dc9a4
+
 setTimeout(function() {
   if (document.visibilityState === 'visible') {
     location.reload();
   }
-<<<<<<< HEAD
+
 }, 300000);
 </script>
 {% endblock %}
-=======
 }, 300000); // 5 minutes
 
 // Add visual feedback for status updates
@@ -267,4 +167,3 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 {% endblock %}
->>>>>>> 4019711b90c533f521c51557ee413952c13dc9a4

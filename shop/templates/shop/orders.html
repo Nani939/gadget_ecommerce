@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>My Orders</h2>
+  <h2 class="amazon-orders-title">My Orders</h2>
   {% if orders %}
-    <ul>
+    <ul class="amazon-orders-list">
       {% for order in orders %}
-        <li>
-          Order #{{ order.id }} - {{ order.status }} - {{ order.total_amount }}
-          (Placed on {{ order.created_at|date:"F j, Y" }})
+        <li class="amazon-orders-item">
+          <span class="amazon-orders-id">Order #{{ order.id }}</span><br>
+          <strong>Status:</strong> <span class="amazon-orders-status">{{ order.get_status_display }}</span><br>
+          <strong>Total:</strong> ₹{{ order.total_amount }}<br>
+          <span class="amazon-orders-date">Placed on {{ order.created_at|date:"F j, Y" }}</span>
         </li>
       {% endfor %}
     </ul>

@@ -16,20 +16,20 @@
     <span>{{ product.name }}</span>
   </div>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr 300px; gap: 40px; margin-top: 20px;">
+  <div class="product-detail-main-grid">
     <!-- Product Images -->
     <div>
-      <div style="text-align: center; background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 20px;">
-        <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/400x400?text=No+Image{% endif %}" 
-             alt="{{ product.name }}"
-             style="max-width: 100%; max-height: 400px; object-fit: contain;"
-             onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+  <div class="product-detail-image-box">
+  <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/400x400?text=No+Image{% endif %}" 
+       alt="{{ product.name }}"
+       class="product-detail-main-img"
+       onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
       </div>
       
       <!-- Thumbnail Images (Mock) -->
-      <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: center;">
+  <div class="product-detail-thumbnails-row">
         {% for i in "12345" %}
-          <div style="width: 60px; height: 60px; border: 1px solid var(--amazon-border); border-radius: 4px; background: var(--amazon-gray); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999;">
+          <div class="product-detail-thumbnail">
             IMG
           </div>
         {% endfor %}
@@ -38,79 +38,73 @@
 
     <!-- Product Info -->
     <div>
-      <h1 style="font-size: 24px; font-weight: 400; color: var(--amazon-text); line-height: 1.3; margin-bottom: 8px;">
+  <h1 class="product-detail-title">
         {{ product.name }}
       </h1>
 
       <!-- Rating and Reviews -->
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-        <div class="amazon-stars" style="font-size: 16px;">
+  <div class="product-detail-rating-row">
+  <div class="amazon-stars product-detail-stars">
           ★★★★☆
         </div>
         <a href="#reviews" class="amazon-rating-count">{{ product.id|add:47 }} ratings</a>
-        <span style="color: #e7e7e7;">|</span>
+  <span class="product-detail-rating-sep">|</span>
         <a href="#qa" class="amazon-action-link">{{ product.id|add:12 }} answered questions</a>
       </div>
 
       <!-- Prime Badge -->
-      <div style="margin-bottom: 16px;">
-        <span style="background: var(--amazon-link); color: white; font-size: 12px; padding: 3px 8px; border-radius: 2px; font-weight: 700;">
-          prime
-        </span>
-        <span style="font-size: 14px; color: var(--amazon-text); margin-left: 8px;">
-          FREE delivery
-        </span>
+      <div class="product-detail-prime-row">
+        <span class="product-detail-prime-badge">prime</span>
+        <span class="product-detail-prime-delivery">FREE delivery</span>
       </div>
 
       <!-- Price -->
-      <div style="margin-bottom: 20px;">
-        <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px;">
-          <span style="font-size: 14px; color: #565959;">Price:</span>
-          <div class="amazon-price" style="font-size: 28px;">
-            <span class="amazon-price-symbol" style="font-size: 20px;">₹</span>{{ product.price|floatformat:2 }}
+      <div class="product-detail-price-box">
+        <div class="product-detail-price-row">
+          <span class="product-detail-price-label">Price:</span>
+          <div class="amazon-price product-detail-price-main">
+            <span class="amazon-price-symbol product-detail-price-symbol">₹</span>{{ product.price|floatformat:2 }}
           </div>
         </div>
         {% if product.id|divisibleby:3 %}
-          <div style="font-size: 14px; color: #565959;">
-            List Price: <span style="text-decoration: line-through;">₹{{ product.price|add:500|floatformat:2 }}</span>
-            <span style="color: var(--amazon-warning); margin-left: 8px;">
-              Save ₹{{ discount }} ( {{ discount_percent }}% )
-            </span>
+          <div class="product-detail-old-price-row">
+            List Price: <span class="product-detail-old-price">₹{{ product.price|add:500|floatformat:2 }}</span>
+            <span class="product-detail-discount">Save ₹{{ discount }} ( {{ discount_percent }}% )</span>
           </div>
         {% endif %}
       </div>
 
       <!-- Product Details -->
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">About this item</h3>
-        <ul style="margin: 0; padding-left: 20px; color: var(--amazon-text);">
-          <li style="margin-bottom: 4px;">{{ product.description|default:"High-quality product with excellent features and performance." }}</li>
-          <li style="margin-bottom: 4px;">Premium build quality and materials</li>
-          <li style="margin-bottom: 4px;">1-year manufacturer warranty included</li>
-          <li style="margin-bottom: 4px;">Fast and reliable shipping</li>
-          <li style="margin-bottom: 4px;">Customer satisfaction guaranteed</li>
+      <div class="product-detail-about-box">
+        <h3 class="product-detail-about-title">About this item</h3>
+        <ul class="product-detail-about-list">
+          <li class="product-detail-about-listitem">{{ product.description|default:"High-quality product with excellent features and performance." }}</li>
+          <li class="product-detail-about-listitem">Premium build quality and materials</li>
+          <li class="product-detail-about-listitem">1-year manufacturer warranty included</li>
+          <li class="product-detail-about-listitem">Fast and reliable shipping</li>
+          <li class="product-detail-about-listitem">Customer satisfaction guaranteed</li>
         </ul>
       </div>
 
       <!-- Product Specifications -->
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Product details</h3>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr style="border-bottom: 1px solid #e7e7e7;">
-            <td style="padding: 8px 0; font-weight: 700; width: 30%;">Brand</td>
-            <td style="padding: 8px 0;">Gadget Shop</td>
+      <div class="product-detail-specs-box">
+        <h3 class="product-detail-specs-title">Product details</h3>
+        <table class="product-detail-specs-table">
+          <tr class="product-detail-specs-row">
+            <td class="product-detail-specs-label">Brand</td>
+            <td class="product-detail-specs-value">Gadget Shop</td>
           </tr>
-          <tr style="border-bottom: 1px solid #e7e7e7;">
-            <td style="padding: 8px 0; font-weight: 700;">Model</td>
-            <td style="padding: 8px 0;">GS-{{ product.id|stringformat:"04d" }}</td>
+          <tr class="product-detail-specs-row">
+            <td class="product-detail-specs-label">Model</td>
+            <td class="product-detail-specs-value">GS-{{ product.id|stringformat:"04d" }}</td>
           </tr>
-          <tr style="border-bottom: 1px solid #e7e7e7;">
-            <td style="padding: 8px 0; font-weight: 700;">Item Weight</td>
-            <td style="padding: 8px 0;">{{ product.id|add:100 }}g</td>
+          <tr class="product-detail-specs-row">
+            <td class="product-detail-specs-label">Item Weight</td>
+            <td class="product-detail-specs-value">{{ product.id|add:100 }}g</td>
           </tr>
-          <tr style="border-bottom: 1px solid #e7e7e7;">
-            <td style="padding: 8px 0; font-weight: 700;">Dimensions</td>
-            <td style="padding: 8px 0;">15 x 10 x 5 cm</td>
+          <tr class="product-detail-specs-row">
+            <td class="product-detail-specs-label">Dimensions</td>
+            <td class="product-detail-specs-value">15 x 10 x 5 cm</td>
           </tr>
         </table>
       </div>
@@ -118,28 +112,24 @@
 
     <!-- Purchase Options -->
     <div>
-      <div style="background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 20px; position: sticky; top: 100px;">
+  <div class="product-detail-purchase-box">
         <!-- Price -->
-        <div class="amazon-price" style="font-size: 28px; margin-bottom: 8px;">
-          <span class="amazon-price-symbol" style="font-size: 20px;">₹</span>{{ product.price|floatformat:2 }}
+        <div class="amazon-price product-detail-purchase-price">
+          <span class="amazon-price-symbol product-detail-purchase-price-symbol">₹</span>{{ product.price|floatformat:2 }}
         </div>
 
         <!-- Delivery Info -->
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 14px; color: var(--amazon-success); font-weight: 500;">
-            FREE delivery: <strong>Tomorrow</strong>
-          </div>
-          <div style="font-size: 12px; color: #565959;">
-            Order within 4 hrs 23 mins
-          </div>
-          <div style="font-size: 14px; margin-top: 4px;">
-            <i class="bi bi-geo-alt" style="color: var(--amazon-link);"></i>
+        <div class="product-detail-delivery-box">
+          <div class="product-detail-delivery-free">FREE delivery: <strong>Tomorrow</strong></div>
+          <div class="product-detail-delivery-time">Order within 4 hrs 23 mins</div>
+          <div class="product-detail-delivery-location">
+            <i class="bi bi-geo-alt product-detail-delivery-location-icon"></i>
             Deliver to <a href="#" class="amazon-action-link">Your Location</a>
           </div>
         </div>
 
         <!-- Stock Status -->
-        <div style="font-size: 18px; color: var(--amazon-success); font-weight: 500; margin-bottom: 16px;">
+  <div class="product-detail-stock-status">
           {% if product.available %}
   {% if product.stock > 0 %}
     In Stock ({{ product.stock }} available)
@@ -153,8 +143,8 @@
 
         <!-- Quantity Selector -->
         {% if product.available and product.stock > 0 %}
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; font-weight: 700; margin-bottom: 4px;">Quantity:</label>
+        <div class="product-detail-qty-box">
+          <label class="product-detail-qty-label">Quantity:</label>
           <div class="amazon-quantity-selector">
             <select class="amazon-quantity-dropdown" id="quantity-select">
               {% for i in "123456789"|slice:":"|slice:product.stock %}
@@ -171,148 +161,127 @@
 
         <!-- Action Buttons -->
         {% if product.available and product.stock > 0 %}
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-          <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
+        <div class="product-detail-action-btns">
+          <form method="post" action="{% url 'shop:add_to_cart' product.id %}" class="product-detail-action-form">
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1" id="cart-quantity">
-            <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%; padding: 12px;">
+            <button type="submit" class="amazon-btn amazon-btn-primary product-detail-btn-fullwidth">
               Add to Cart
             </button>
           </form>
           
-          <form method="post" action="{% url 'shop:buy_now' product.id %}" style="margin: 0;">
+          <form method="post" action="{% url 'shop:buy_now' product.id %}" class="product-detail-action-form">
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1" id="buy-quantity">
-            <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; padding: 12px; background-color: var(--amazon-orange); color: var(--amazon-blue); border-color: var(--amazon-orange-dark);">
+            <button type="submit" class="amazon-btn amazon-btn-secondary product-detail-btn-fullwidth product-detail-btn-buynow">
               Buy Now
             </button>
           </form>
           
           <!-- Unique Features -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-            <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" style="margin: 0;">
+          <div class="product-detail-feature-btns">
+            <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" class="product-detail-feature-form">
               {% csrf_token %}
-              <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; padding: 8px; font-size: 12px;">
+              <button type="submit" class="amazon-btn amazon-btn-secondary product-detail-btn-feature">❤️ Wishlist</button>
                 ❤️ Wishlist
               </button>
             </form>
             
-            <form method="post" action="{% url 'shop:add_to_compare' product.id %}" style="margin: 0;">
+            <form method="post" action="{% url 'shop:add_to_compare' product.id %}" class="product-detail-feature-form">
               {% csrf_token %}
-              <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%; padding: 8px; font-size: 12px;">
+              <button type="submit" class="amazon-btn amazon-btn-secondary product-detail-btn-feature">📊 Compare</button>
                 📊 Compare
               </button>
             </form>
           </div>
           
           <!-- Quick Order Code -->
-          <div style="background: #f0f8ff; padding: 10px; border-radius: 4px; margin-top: 8px;">
-            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Quick Order Code:</div>
-            <div style="font-family: 'Courier New', monospace; font-weight: bold; color: #2980b9;">
-              {{ product.id }}:1
-            </div>
+          <div class="product-detail-quickorder-box">
+            <div class="product-detail-quickorder-label">Quick Order Code:</div>
+            <div class="product-detail-quickorder-code">{{ product.id }}:1</div>
           </div>
         </div>
         {% else %}
         <div class="amazon-product-actions">
-          <button class="amazon-btn" style="width: 100%; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
+          <button class="amazon-btn product-detail-btn-disabled" type="button" disabled>
             Currently Unavailable
           </button>
         </div>
         {% endif %}
         {% else %}
-        <div style="margin-bottom: 16px;">
-          <button class="amazon-btn" style="width: 100%; padding: 12px; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
+        <div class="product-detail-unavailable-box">
+          <button class="amazon-btn product-detail-btn-disabled product-detail-btn-fullwidth" type="button" disabled>
             Currently Unavailable
           </button>
         </div>
         {% endif %}
 
         <!-- Additional Options -->
-        <div style="font-size: 14px; margin-bottom: 16px;">
-          <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 8px;">
-            <input type="checkbox" style="margin-right: 8px;">
+        <div class="product-detail-options-box">
+          <label class="product-detail-options-label">
+            <input type="checkbox" class="product-detail-options-checkbox">
             Add gift options
           </label>
-          <a href="#" class="amazon-action-link">Add to Wish List</a>
+          <a href="#" class="amazon-action-link product-detail-options-link">Add to Wish List</a>
         </div>
 
         <!-- Security Features -->
-        <div style="border-top: 1px solid #e7e7e7; padding-top: 16px; font-size: 12px; color: #565959;">
-          <div style="margin-bottom: 8px;">
-            <i class="bi bi-shield-check" style="color: var(--amazon-success);"></i>
+        <div class="product-detail-security-box">
+          <div class="product-detail-security-row">
+            <i class="bi bi-shield-check product-detail-security-icon"></i>
             Secure transaction
           </div>
-          <div style="margin-bottom: 8px;">
-            Ships from: <strong>Gadget Shop</strong>
-          </div>
-          <div>
-            Sold by: <strong>Gadget Shop</strong>
-          </div>
+          <div class="product-detail-security-row">Ships from: <strong>Gadget Shop</strong></div>
+          <div class="product-detail-security-row">Sold by: <strong>Gadget Shop</strong></div>
         </div>
       </div>
 
       <!-- Sponsored Products -->
-      <div style="margin-top: 20px; background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 16px;">
-        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #565959;">
-          Sponsored products related to this item
-        </h3>
-        <div style="font-size: 12px; color: #565959; text-align: center; padding: 20px;">
-          <a href="{% url 'products:product_list' %}" class="amazon-action-link">
-            View more products →
-          </a>
+      <div class="product-detail-sponsored-box">
+        <h3 class="product-detail-sponsored-title">Sponsored products related to this item</h3>
+        <div class="product-detail-sponsored-link-row">
+          <a href="{% url 'products:product_list' %}" class="amazon-action-link product-detail-sponsored-link">View more products →</a>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Product Reviews Section -->
-  <div style="margin-top: 60px; padding-top: 24px; border-top: 1px solid #e7e7e7;" id="reviews">
-    <h2 style="font-size: 21px; font-weight: 400; margin-bottom: 16px;">
-      Customer reviews
-    </h2>
-    
-    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px;">
+  <div class="product-detail-reviews-section" id="reviews">
+    <h2 class="product-detail-reviews-title">Customer reviews</h2>
+    <div class="product-detail-reviews-grid">
       <!-- Review Summary -->
-      <div>
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-          <div class="amazon-stars" style="font-size: 20px;">★★★★☆</div>
-          <span style="font-size: 16px; color: var(--amazon-text);">4.2 out of 5</span>
+      <div class="product-detail-reviews-summary">
+        <div class="product-detail-reviews-summary-row">
+          <div class="amazon-stars product-detail-reviews-stars">★★★★☆</div>
+          <span class="product-detail-reviews-score">4.2 out of 5</span>
         </div>
-        <div style="font-size: 14px; color: #565959; margin-bottom: 16px;">
-          {{ product.id|add:47 }} global ratings
-        </div>
-        
+        <div class="product-detail-reviews-count">{{ product.id|add:47 }} global ratings</div>
         <!-- Rating Breakdown -->
-        <div style="font-size: 14px;">
+        <div class="product-detail-reviews-breakdown">
           {% for rating in "54321" %}
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/400x400?text=No+Image{% endif %}" 
-              <div style="flex: 1; height: 16px; background: #e7e7e7; border-radius: 2px; overflow: hidden;">
-                <div style="height: 100%; background: var(--amazon-orange); width: {% cycle '60' '25' '10' '3' '2' %}%;"></div>
+            <div class="product-detail-reviews-breakdown-row">
+              <div class="product-detail-reviews-breakdown-bar-bg">
+                <div class="product-detail-reviews-breakdown-bar" style="width: {% cycle '60' '25' '10' '3' '2' %}%;"></div>
               </div>
-              <span style="color: var(--amazon-link);">{% cycle '60' '25' '10' '3' '2' %}%</span>
+              <span class="product-detail-reviews-breakdown-label">{% cycle '60' '25' '10' '3' '2' %}%</span>
             </div>
           {% endfor %}
         </div>
       </div>
-
-      <!-- Individual Reviews -->
-      <div>
-        <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e7e7e7;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+      <div class="product-detail-reviews-list">
+        <div class="product-detail-review">
+          <div class="product-detail-review-header">
             <div class="amazon-stars">★★★★★</div>
             <strong>Excellent product!</strong>
           </div>
-          <div style="font-size: 14px; color: #565959; margin-bottom: 8px;">
-            By <strong>John D.</strong> on {{ product.created|date:"F j, Y" }}
-          </div>
-          <div style="font-size: 14px; color: var(--amazon-text);">
-            Great quality and fast delivery. Exactly as described. Would definitely recommend to others.
-          </div>
+          <div class="product-detail-review-meta">By <strong>John D.</strong> on {{ product.created|date:"F j, Y" }}</div>
+          <div class="product-detail-review-body">Great quality and fast delivery. Exactly as described. Would definitely recommend to others.</div>
         </div>
-
-        <div style="text-align: center; padding: 20px;">
+        <div class="product-detail-reviews-footer">
+          <a href="#" class="amazon-action-link product-detail-reviews-link">See all reviews</a>
+        </div>
+      </div>
           <a href="#" class="amazon-action-link">See all reviews</a>
         </div>
       </div>

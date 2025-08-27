@@ -33,11 +33,27 @@ class Product(models.Model):
     image = models.ImageField(upload_to="products/%Y/%m/%d", blank=True, null=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    model = models.CharField(max_length=100, blank=True, help_text="Product model/variant")
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Discount amount in rupees")
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Discount percentage (0-100)")
     available = models.BooleanField(default=True)
     stock = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     updated = models.DateTimeField(auto_now=True)
 
+    # Extra details (like Amazon page)
+    brand = models.CharField(max_length=100, blank=True, null=True)
+    model_number = models.CharField(max_length=100, blank=True, null=True)
+    weight = models.CharField(max_length=50, blank=True, null=True)
+    dimensions = models.CharField(max_length=100, blank=True, null=True)
+    warranty = models.CharField(max_length=100, blank=True, null=True)
+    shipping = models.CharField(max_length=100, blank=True, null=True)
+
+    # Image
+    image = models.ImageField(upload_to="products/", blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         ordering = ["name"]
         indexes = [models.Index(fields=["id", "slug"])]
@@ -47,7 +63,23 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse("products:product_detail", args=[self.id])
+    
+    def get_discounted_price(self):
+        if self.discount:
+            return self.price - (self.price * (self.discount / 100))
+        return self.price
+    get_discounted_price.short_description = "Discounted Price"
 
+    def get_savings(self):
+        if self.discount:
+            return self.price * (self.discount / 100)
+        return 0
+    get_savings.short_description = "You Save"
+
+
+def has_discount(self):
+    """Check if product has any discount."""
+    return self.discount_amount > 0 or self.discount_percentage > 0
 
 # -------------------------
 # Order Status Choices
@@ -58,6 +90,9 @@ ORDER_STATUS = [
     ('SHIPPED', 'Shipped'),
     ('OUT_FOR_DELIVERY', 'Out for Delivery'),
     ('DELIVERED', 'Delivered'),
+    ('PAYMENT_FAILED', 'Payment Failed'),
+    ('CANCELLED', 'Cancelled'),
+    ('RETURNED', 'Returned'),
 ]
 
 
@@ -118,3 +153,9 @@ class OrderItem(models.Model):
     
     def get_cost(self):
         return self.price * self.quantity
+
+PAYMENT_METHODS = (
+    ('RZP', 'Razorpay'),
+)
+
+payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default='RZP')

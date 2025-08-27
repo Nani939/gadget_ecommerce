@@ -1,14 +1,18 @@
 import requests
+from datetime import timedelta
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.http import HttpResponse
-from django.views.decorators.http import require_POST
-from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.core.mail import send_mail
+
 from .models import Category, Product, Order, OrderItem
-from users.models import UserProfile  # Make sure this import matches your app structure
+from users.models import UserProfile
+
+import razorpay
 
 # -------------------------------
 # Home & About
@@ -49,6 +53,100 @@ def product_list(request, category_slug=None):
 def product_detail(request, id, slug):
     product = get_object_or_404(Product, id=id, slug=slug, available=True)
     return render(request, "products/product_detail.html", {"product": product})
+# -------------------------------
+# Payment Success (Razorpay callback)
+# -------------------------------
+@csrf_exempt
+def payment_success(request):
+    if request.method == "POST":
+        import json, hmac, hashlib
+        from django.contrib.auth import get_user_model
+        data = json.loads(request.body)
+        # Extract payment and address info
+        razorpay_payment_id = data.get("razorpay_payment_id")
+        razorpay_order_id = data.get("razorpay_order_id")
+        razorpay_signature = data.get("razorpay_signature")
+        name = data.get("name", "").strip()
+        address = data.get("address", "").strip()
+        phone_number = data.get("phone", "").strip()
+        user = request.user if request.user.is_authenticated else None
+        # Razorpay signature verification
+        key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', None)
+        if not (razorpay_payment_id and razorpay_order_id and razorpay_signature and key_secret):
+            return JsonResponse({"status": "error", "error": "Missing payment data."}, status=400)
+        msg = f"{razorpay_order_id}|{razorpay_payment_id}"
+        generated_signature = hmac.new(
+            key_secret.encode(),
+            msg.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        if generated_signature != razorpay_signature:
+            return JsonResponse({"status": "error", "error": "Payment signature verification failed."}, status=400)
+        # Get cart from session
+        cart = request.session.get("cart", {})
+        if not cart or not name or not address or not phone_number:
+            return JsonResponse({"status": "error", "error": "Missing data or cart empty."}, status=400)
+        # Calculate total and create order
+        cart_items, total_price = [], 0
+        from .models import Product, Order, OrderItem
+        for product_id, item in cart.items():
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                continue
+            qty = int(item.get("quantity", 1))
+            line_total = product.get_discounted_price() * qty
+            cart_items.append({"product": product, "quantity": qty, "total": line_total})
+            total_price += line_total
+        order = Order.objects.create(
+            user=user,
+            customer_name=name,
+            customer_email=user.email if user else "",
+            phone_number=phone_number,
+            paid=True,
+            address=address,
+            city="",
+            state="",
+            postal_code="",
+            total_amount=total_price,
+            payment_method="razorpay",
+            payment_id=razorpay_payment_id,
+            payment_signature=razorpay_signature,
+            payment_order_id=razorpay_order_id,
+        )
+        # Send order confirmation email (plain text)
+        if order.customer_email:
+            subject = f"Order Confirmation - Gadget Shop (Order #{order.id})"
+            message = (
+                f"Dear {order.customer_name},\n\n"
+                f"Thank you for your order! Your payment was successful.\n\n"
+                f"Order Number: {order.id}\n"
+                f"Total Amount: ₹{order.total_amount}\n"
+                f"Status: {order.get_status_display()}\n\n"
+                f"We'll notify you when your order is shipped.\n\n"
+                f"Thank you for shopping with us!\nGadget Shop Team"
+            )
+            send_mail(subject, message, None, [order.customer_email], fail_silently=True)
+        for ci in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=ci["product"],
+                price=ci["product"].get_discounted_price(),
+                quantity=ci["quantity"],
+            )
+            ci["product"].stock -= ci["quantity"]
+            ci["product"].save()
+        # Optionally update user's profile address
+        if user:
+            try:
+                profile = user.userprofile
+                profile.address = address
+                profile.save()
+            except Exception:
+                pass
+        request.session["cart"] = {}
+        return JsonResponse({"status": "success", "order_id": order.id})
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 # -------------------------------
 # Cart (session-based)
@@ -66,7 +164,7 @@ def view_cart(request):
             continue
 
         qty = int(item.get("quantity", 1))
-        line_total = product.price * qty
+        line_total = product.get_discounted_price() * qty
         cart_items.append({"product": product, "quantity": qty, "total": line_total})
         total_price += line_total
         total_qty += qty
@@ -150,7 +248,7 @@ def buy_now(request, product_id):
     return redirect("shop:checkout")
 
 # -------------------------------
-# Checkout & Order Success with Profile Integration
+# Checkout & Order Success with Razorpay Integration
 # -------------------------------
 @login_required
 def checkout(request):
@@ -165,11 +263,9 @@ def checkout(request):
         except Product.DoesNotExist:
             continue
         qty = int(item.get("quantity", 1))
-        line_total = product.price * qty
+        line_total = product.get_discounted_price() * qty
         cart_items.append({"product": product, "quantity": qty, "total": line_total})
         total_price += line_total
-
-    error = None
 
     # Try to load user's saved profile if available
     try:
@@ -177,100 +273,38 @@ def checkout(request):
     except UserProfile.DoesNotExist:
         profile = None
 
+
     if request.method == "POST":
-        latitude = request.POST.get("latitude")
-        longitude = request.POST.get("longitude")
-        try:
-            latitude = float(latitude) if latitude else None
-            longitude = float(longitude) if longitude else None
-        except ValueError:
-            latitude = None
-            longitude = None
-
-        # Grab submitted or profile-backed values
-        address = request.POST.get("address", (profile.address if profile else "")).strip()
-        city = request.POST.get("city", (profile.city if profile else "")).strip()
-        postal_code = request.POST.get("postal_code", (profile.postal_code if profile else "")).strip()
-        phone_number = request.POST.get("phone_number", "").strip()
-        state = request.POST.get("state", "").strip()
-
-        if latitude and longitude:
-            try:
-                response = requests.get(
-                    "https://nominatim.openstreetmap.org/reverse",
-                    params={"format":"json", "lat":latitude, "lon":longitude, "zoom":18, "addressdetails":1},
-                    headers={'User-Agent':'gadget-shop'}
-                )
-                if response.status_code == 200:
-                    data = response.json().get("address", {})
-                    if not address:
-                        address = ", ".join(filter(None, [data.get("road"), data.get("suburb")]))
-                    if not city:
-                        city = data.get("city") or data.get("town") or data.get("village") or ""
-                    if not postal_code:
-                        postal_code = data.get("postcode", "")
-                else:
-                    error = "Could not validate location."
-            except Exception:
-                error = "Reverse geocoding failed."
-
-        if not address or not city or not postal_code or not phone_number:
-            error = error or "Complete address including phone number is required."
-
-        if error:
-            return render(request, "shop/checkout.html", {
-                "cart_items": cart_items,
-                "total_price": total_price,
-                "error": error,
-                "address": address,
-                "city": city,
-                "state": state,
-                "postal_code": postal_code,
-                "phone_number": phone_number,
-                "latitude": latitude,
-                "longitude": longitude,
+        import json
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            payment_method = data.get("payment_method", "COD").lower()
+            address = data.get("address", "").strip()
+            phone_number = data.get("phone", "").strip()
+            name = data.get("name", "").strip()
+            # For demo, city/state/postal_code are left blank, you can parse from address if needed
+            city = ""
+            state = ""
+            postal_code = ""
+            latitude = data.get("latitude")
+            longitude = data.get("longitude")
+            error = None
+            if not address or not phone_number or not name:
+                return JsonResponse({"status": "error", "error": "All address fields required."}, status=400)
+            # Only allow Razorpay/online payments
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            razorpay_order = client.order.create({
+                "amount": int(total_price * 100),  # in paise
+                "currency": "INR",
+                "payment_capture": "1"
             })
-
-        # Calculate total amount
-        total_amount = sum(item["total"] for item in cart_items)
-
-        order = Order.objects.create(
-            user=request.user,
-            customer_name=request.user.username,
-            customer_email=request.user.email,
-            phone_number=phone_number,
-            paid=True,
-            address=address,
-            city=city,
-            state=state,
-            postal_code=postal_code,
-            total_amount=total_amount,
-            payment_method="COD",
-            delivery_latitude=latitude,
-            delivery_longitude=longitude,
-        )
-        
-        for ci in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=ci["product"],
-                price=ci["product"].price,
-                quantity=ci["quantity"],
-            )
-            # Reduce stock
-            product = ci["product"]
-            product.stock -= ci["quantity"]
-            product.save()
-
-        # Optionally update user's profile address
-        if profile:
-            profile.address = address
-            profile.city = city
-            profile.postal_code = postal_code
-            profile.save()
-
-        request.session["cart"] = {}
-        return redirect("shop:order_success", order_id=order.id)
+            return JsonResponse({
+                "razorpay_order_id": razorpay_order["id"],
+                "razorpay_key": settings.RAZORPAY_KEY_ID,
+                "razorpay_amount": int(total_price * 100)
+            })
+        # fallback for non-JSON POST (form submit)
+        # ...existing code for form POST...
 
     return render(request, "shop/checkout.html", {
         "cart_items": cart_items,
@@ -282,31 +316,27 @@ def checkout(request):
         "state": "",
     })
 
-from datetime import timedelta
 
+# -------------------------------
+# Order Success
+# -------------------------------
 @login_required
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     estimated_delivery = order.created_at + timedelta(days=3)
-
     return render(request, "shop/order_success.html", {
         "order": order,
         "estimated_delivery": estimated_delivery,
     })
 
-
 @login_required
 def track_order(request, pk):
     order = get_object_or_404(Order, id=pk)
-
     status_list = ["PLACED", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"]
-
-    # compute the index of the current status
     try:
         current_status_index = status_list.index(order.status)
     except ValueError:
-        current_status_index = -1  # fallback if status not in list
-
+        current_status_index = -1
     return render(request, "shop/track_order.html", {
         "order": order,
         "status_list": status_list,
@@ -318,14 +348,10 @@ def track_order(request, pk):
 # -------------------------------
 @login_required
 def print_order_details(request, order_id):
-    """Print-friendly order details page"""
     order = get_object_or_404(Order, id=order_id)
-    
-    # Check if user has permission to view this order
     if not request.user.is_staff and order.user != request.user:
         messages.error(request, "You don't have permission to view this order.")
         return redirect('shop:home')
-    
     context = {
         'order': order,
         'print_date': timezone.now(),
@@ -338,19 +364,14 @@ def print_order_details(request, order_id):
             'gst': 'GST123456789'
         }
     }
-    
     return render(request, 'shop/print_order_details.html', context)
 
 @login_required
 def delivery_slip(request, order_id):
-    """Generate delivery slip for courier"""
     order = get_object_or_404(Order, id=order_id)
-    
-    # Check if user has permission
     if not request.user.is_staff and order.user != request.user:
         messages.error(request, "You don't have permission to view this order.")
         return redirect('shop:home')
-    
     context = {
         'order': order,
         'delivery_date': timezone.now(),
@@ -362,7 +383,6 @@ def delivery_slip(request, order_id):
             'Take photo proof of delivery'
         ]
     }
-    
     return render(request, 'shop/delivery_slip.html', context)
 
 # -------------------------------
@@ -370,10 +390,8 @@ def delivery_slip(request, order_id):
 # -------------------------------
 @login_required
 def wishlist(request):
-    """User's wishlist page"""
     wishlist_items = request.session.get('wishlist', [])
     products = Product.objects.filter(id__in=wishlist_items, available=True)
-    
     return render(request, 'shop/wishlist.html', {
         'products': products,
         'wishlist_count': len(wishlist_items)
@@ -381,60 +399,47 @@ def wishlist(request):
 
 @login_required
 def add_to_wishlist(request, product_id):
-    """Add product to wishlist"""
     product = get_object_or_404(Product, id=product_id, available=True)
     wishlist = request.session.get('wishlist', [])
-    
     if product_id not in wishlist:
         wishlist.append(product_id)
         request.session['wishlist'] = wishlist
         messages.success(request, f"{product.name} added to your wishlist!")
     else:
         messages.info(request, f"{product.name} is already in your wishlist.")
-    
     return redirect('products:product_detail', pk=product.id)
 
 def compare_products(request):
-    """Product comparison page"""
     compare_list = request.session.get('compare', [])
     products = Product.objects.filter(id__in=compare_list, available=True)
-    
     return render(request, 'shop/compare_products.html', {
         'products': products,
         'compare_count': len(compare_list)
     })
 
 def add_to_compare(request, product_id):
-    """Add product to comparison"""
     product = get_object_or_404(Product, id=product_id, available=True)
     compare_list = request.session.get('compare', [])
-    
     if len(compare_list) >= 4:
         messages.warning(request, "You can compare maximum 4 products at a time.")
         return redirect('shop:compare_products')
-    
     if product_id not in compare_list:
         compare_list.append(product_id)
         request.session['compare'] = compare_list
         messages.success(request, f"{product.name} added to comparison!")
     else:
         messages.info(request, f"{product.name} is already in comparison.")
-    
     return redirect('products:product_detail', pk=product.id)
 
 @login_required
 def quick_order(request):
-    """Quick order by product code"""
     if request.method == 'POST':
         product_codes = request.POST.get('product_codes', '').strip()
         if not product_codes:
             messages.error(request, "Please enter product codes.")
             return render(request, 'shop/quick_order.html')
-        
-        # Parse product codes (format: CODE:QTY,CODE:QTY)
         cart = request.session.get("cart", {})
         added_count = 0
-        
         for line in product_codes.split('\n'):
             line = line.strip()
             if ':' in line:
@@ -442,88 +447,65 @@ def quick_order(request):
                     code, qty = line.split(':')
                     product_id = int(code.strip())
                     quantity = int(qty.strip())
-                    
                     product = Product.objects.get(id=product_id, available=True)
                     if product.stock >= quantity:
                         cart[str(product_id)] = {"quantity": quantity}
                         added_count += 1
                     else:
                         messages.warning(request, f"Product {product.name} has insufficient stock.")
-                        
                 except (ValueError, Product.DoesNotExist):
                     messages.warning(request, f"Invalid product code: {line}")
-        
         if added_count > 0:
             request.session["cart"] = cart
             messages.success(request, f"{added_count} products added to cart.")
             return redirect('shop:view_cart')
         else:
             messages.error(request, "No valid products were added.")
-    
     return render(request, 'shop/quick_order.html')
 
 @login_required
 def bulk_order(request):
-    """Bulk order for businesses"""
     if request.method == 'POST':
-        # Handle bulk order CSV upload
         csv_file = request.FILES.get('bulk_file')
         if csv_file:
             try:
                 import csv
                 import io
-                
                 file_data = csv_file.read().decode('utf-8')
                 csv_data = csv.reader(io.StringIO(file_data))
-                
                 cart = request.session.get("cart", {})
                 added_count = 0
-                
                 for row in csv_data:
                     if len(row) >= 2:
                         try:
                             product_id = int(row[0])
                             quantity = int(row[1])
-                            
                             product = Product.objects.get(id=product_id, available=True)
                             if product.stock >= quantity:
                                 cart[str(product_id)] = {"quantity": quantity}
                                 added_count += 1
-                            
                         except (ValueError, Product.DoesNotExist):
                             continue
-                
                 if added_count > 0:
                     request.session["cart"] = cart
                     messages.success(request, f"{added_count} products added from bulk order.")
                     return redirect('shop:view_cart')
                 else:
                     messages.error(request, "No valid products found in the file.")
-                    
-            except Exception as e:
+            except Exception:
                 messages.error(request, "Error processing file. Please check the format.")
-    
     return render(request, 'shop/bulk_order.html')
 
-from datetime import timedelta
-from django.shortcuts import render, get_object_or_404
-from .models import Order
+@login_required(login_url="users:login")
+def orders_list(request):
+    orders = Order.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "shop/orders.html", {"orders": orders})
 
 def order_details_view(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     estimated_delivery = order.created_at + timedelta(days=3)
-
     context = {
         "order": order,
         "estimated_delivery": estimated_delivery,
     }
     return render(request, "admin/shop/order_details.html", context)
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from .models import Order
-
-@login_required(login_url="users:login")  # redirect to login if not authenticated
-def orders_list(request):
-    orders = Order.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "shop/orders.html", {"orders": orders})

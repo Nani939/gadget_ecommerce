@@ -5,272 +5,376 @@ from django.urls import reverse, path
 from django.utils.safestring import mark_safe
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
+
 from .models import Category, Product, Order, OrderItem
 
 
+# -----------------------------
+# Category Admin
+# -----------------------------
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
-    search_fields = ['name']
+    search_fields = ["name"]
 
 
+# -----------------------------
+# Product Admin (single source of truth)
+# -----------------------------
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "price", "stock", "available", "created", "updated"]
-    list_filter = ["available", "created", "updated", "category"]
+    list_display = [
+        "name",
+        "brand",
+        "model",
+        "model_number",
+        "price",
+        "get_discounted_price",
+        "stock",
+        "available",
+        "created",
+        "updated",
+    ]
+    list_filter = ["available", "created", "updated", "category", "brand"]
     list_editable = ["price", "stock", "available"]
     prepopulated_fields = {"slug": ("name",)}
-    search_fields = ['name', 'description']
-    readonly_fields = ['created', 'updated']
-    
+    search_fields = ["name", "description", "model", "brand", "model_number"]
+    readonly_fields = ["created", "updated", "get_discounted_price", "get_savings"]
+
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'slug', 'category', 'description')
-        }),
-        ('Pricing & Stock', {
-            'fields': ('price', 'stock', 'available')
-        }),
-        ('Media', {
-            'fields': ('image',)
-        }),
-        ('Timestamps', {
-            'fields': ('created', 'updated'),
-            'classes': ('collapse',)
-        }),
+        (
+            "Basic Information",
+            {
+                "fields": (
+                    "name",
+                    "slug",
+                    "model",
+                    "model_number",
+                    "brand",
+                    "category",
+                    "description",
+                    "image",
+                )
+            },
+        ),
+        (
+            "Pricing & Stock",
+            {
+                "fields": (
+                    "price",
+                    "discount_amount",
+                    "discount_percentage",
+                    "get_discounted_price",
+                    "get_savings",
+                    "stock",
+                    "available",
+                )
+            },
+        ),
+        (
+            "Specifications",
+            {
+                "fields": (
+                    "weight",
+                    "dimensions",
+                    "warranty",
+                    "shipping",
+                )
+            },
+        ),
+        (
+            "Timestamps",
+            {
+                "fields": ("created", "updated"),
+                "classes": ("collapse",),
+            },
+        ),
     )
 
+    # Display helpers (kept as methods so they work in list_display & readonly_fields)
+    @admin.display(description="Discounted Price")
+    def get_discounted_price(self, obj):
+        """
+        Uses the model's get_discounted_price() if present.
+        Falls back gracefully if it returns None.
+        """
+        try:
+            price = obj.get_discounted_price()
+        except AttributeError:
+            price = None
+        if price is None:
+            return "—"
+        return f"₹{price:.2f}"
 
+    @admin.display(description="Savings")
+    def get_savings(self, obj):
+        """
+        Uses the model's get_savings() if present.
+        """
+        try:
+            savings = obj.get_savings()
+        except AttributeError:
+            savings = None
+        if savings is None:
+            return "—"
+        if savings > 0:
+            return f"₹{savings:.2f}"
+        return "No discount"
+
+
+# -----------------------------
+# Inline for Order Items
+# -----------------------------
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     raw_id_fields = ["product"]
-    readonly_fields = ['get_cost', 'product_image']
+    readonly_fields = ["get_cost", "product_image"]
     extra = 0
-    
+
     def get_cost(self, obj):
         if obj.id:
             return f"₹{obj.get_cost():.2f}"
         return "₹0.00"
+
     get_cost.short_description = "Total Cost"
-    
+
     def product_image(self, obj):
         if obj.product and obj.product.image:
             return format_html(
                 '<img src="{}" width="50" height="50" style="object-fit: contain;" />',
-                obj.product.image.url
+                obj.product.image.url,
             )
         return "No Image"
+
     product_image.short_description = "Image"
 
 
+# -----------------------------
+# Order Admin
+# -----------------------------
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-        "id", "customer_name", "customer_email", "phone_number", 
-        "status", "total_amount", "payment_method", "created_at", "paid",
-        "view_order_details", "print_order_details", "download_address"
+        "id",
+        "customer_name",
+        "customer_email",
+        "phone_number",
+        "status",
+        "total_amount",
+        "payment_method",
+        "created_at",
+        "paid",
+        "view_order_details",
+        "print_order_details",
+        "download_address",
     ]
     list_filter = ["paid", "status", "payment_method", "created_at", "country", "state"]
     search_fields = ["customer_name", "customer_email", "tracking_number", "phone_number"]
     readonly_fields = [
-        'created_at', 'updated_at', 'get_total_cost', 'get_customer_info',
-        'get_delivery_address', 'get_order_items', 'get_order_summary'
+        "created_at",
+        "updated_at",
+        "get_total_cost",
+        "get_customer_info",
+        "get_delivery_address",
+        "get_order_items",
+        "get_order_summary",
     ]
     inlines = [OrderItemInline]
-    
+
     fieldsets = (
-        ('Order Information', {
-            'fields': ( 'status', 'tracking_number', 'created_at', 'updated_at')
-        }),
-        ('Customer Details', {
-            'fields': ('get_customer_info', 'user')
-        }),
-        ('Delivery Address', {
-            'fields': ('get_delivery_address', 'delivery_latitude', 'delivery_longitude')
-        }),
-        ('Payment Information', {
-            'fields': ('payment_method', 'total_amount', 'get_total_cost', 'paid')
-        }),
-        ('Order Summary', {
-            'fields': ('get_order_summary',),
-            'classes': ('wide',)
-        }),
-        ('Additional Information', {
-            'fields': ('notes', 'delivery_status'),
-            'classes': ('collapse',)
-        }),
+        ("Order Information", {"fields": ("status", "tracking_number", "created_at", "updated_at")}),
+        ("Customer Details", {"fields": ("get_customer_info", "user")}),
+        ("Delivery Address", {"fields": ("get_delivery_address", "delivery_latitude", "delivery_longitude")}),
+        ("Payment Information", {"fields": ("payment_method", "total_amount", "get_total_cost", "paid")}),
+        ("Order Summary", {"fields": ("get_order_summary",), "classes": ("wide",)}),
+        ("Additional Information", {"fields": ("notes", "delivery_status"), "classes": ("collapse",)}),
     )
-    
+
+    # ---- Custom URLs (single definitions) ----
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('order-details/<int:order_id>/', 
-                 self.admin_site.admin_view(self.order_details_view), 
-                 name='shop_order_details'),
-            path('print-order/<int:order_id>/', 
-                 self.admin_site.admin_view(self.print_order_view),  # ✅ admin_view protects staff-only
-                 name='shop_print_order'),
-            path('download-addresses/', 
-                 self.admin_site.admin_view(self.download_addresses_view), 
-                 name='shop_download_addresses'),
-            path('download-single-address/<int:order_id>/', 
-                 self.admin_site.admin_view(self.download_single_address_view), 
-                 name='shop_download_single_address'),
+            path(
+                "order-details/<int:order_id>/",
+                self.admin_site.admin_view(self.order_details_view),
+                name="shop_order_details",
+            ),
+            path(
+                "print-order/<int:order_id>/",
+                self.admin_site.admin_view(self.print_order_view),
+                name="shop_print_order",
+            ),
+            path(
+                "download-addresses/",
+                self.admin_site.admin_view(self.download_addresses_view),
+                name="shop_download_addresses",
+            ),
+            path(
+                "download-single-address/<int:order_id>/",
+                self.admin_site.admin_view(self.download_single_address_view),
+                name="shop_download_single_address",
+            ),
         ]
         return custom_urls + urls
-    
+
+    # ---- List display helpers ----
     def view_order_details(self, obj):
-        url = reverse('admin:shop_order_details', args=[obj.id])
+        url = reverse("admin:shop_order_details", args=[obj.id])
         return format_html(
             '<a href="{}" class="button" style="background: #417690; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📋 View Details</a>',
-            url
+            url,
         )
+
     view_order_details.short_description = "Order Details"
-    
+
     def print_order_details(self, obj):
-        url = reverse('admin:shop_print_order', args=[obj.id])
+        url = reverse("admin:shop_print_order", args=[obj.id])
         return format_html(
             '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">🖨️ Print</a>',
-            url
+            url,
         )
+
     print_order_details.short_description = "Print Order"
-    
+
     def download_address(self, obj):
-        url = reverse('admin:shop_download_single_address', args=[obj.id])
+        url = reverse("admin:shop_download_single_address", args=[obj.id])
         return format_html(
             '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📥 Address</a>',
-            url
+            url,
         )
+
     download_address.short_description = "Download Address"
-    
+
+    # ---- Views (single definitions) ----
     def order_details_view(self, request, order_id):
         order = get_object_or_404(Order, id=order_id)
         context = {
-            'title': f'Order Details - #{order.id}',
-            'order': order,
-            'opts': self.model._meta,
-            'has_change_permission': self.has_change_permission(request),
+            "title": f"Order Details - #{order.id}",
+            "order": order,
+            "opts": self.model._meta,
+            "has_change_permission": self.has_change_permission(request),
         }
-        return render(request, 'admin/shop/order_details.html', context)
-    
+        return render(request, "admin/shop/order_details.html", context)
+
     def print_order_view(self, request, order_id):
         order = get_object_or_404(Order, id=order_id)
         context = {
-            'order': order,
-            'print_date': __import__('datetime').datetime.now(),
-            'company_info': {
-                'name': 'Gadget Shop',
-                'address': '123 Tech Street, Digital City, 560001',
-                'phone': '+91 98765 43210',
-                'email': 'orders@gadgetshop.com',
-                'website': 'www.gadgetshop.com',
-                'gst': 'GST123456789'
-            }
+            "order": order,
+            "print_date": __import__("datetime").datetime.now(),
+            "company_info": {
+                "name": "Gadget Shop",
+                "address": "123 Tech Street, Digital City, 560001",
+                "phone": "+91 98765 43210",
+                "email": "orders@gadgetshop.com",
+                "website": "www.gadgetshop.com",
+                "gst": "GST123456789",
+            },
         }
-        return render(request, 'shop/print_order_details.html', context)
-    
-    def download_address(self, obj):
-        url = reverse('admin:shop_download_single_address', args=[obj.id])
-        return format_html(
-            '<a href="{}" class="button" style="background: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">📥 Address</a>',
-            url
-        )
-    download_address.short_description = "Download Address"
-    
-    def order_details_view(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id)
-        context = {
-            'title': f'Order Details - #{order.id}',
-            'order': order,
-            'opts': self.model._meta,
-            'has_change_permission': self.has_change_permission(request),
-        }
-        return render(request, 'admin/shop/order_details.html', context)
-    
-    def print_order_view(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id)
-        context = {
-            'order': order,
-            'print_date': __import__('datetime').datetime.now(),
-            'company_info': {
-                'name': 'Gadget Shop',
-                'address': '123 Tech Street, Digital City, 560001',
-                'phone': '+91 98765 43210',
-                'email': 'orders@gadgetshop.com',
-                'website': 'www.gadgetshop.com',
-                'gst': 'GST123456789'
-            }
-        }
-        return render(request, 'shop/print_order_details.html', context)
-    
+        return render(request, "shop/print_order_details.html", context)
+
     def download_addresses_view(self, request):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="delivery_addresses.csv"'
-        
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="delivery_addresses.csv"'
+
         writer = csv.writer(response)
-        writer.writerow([
-            'Order ID', 'Customer Name', 'Phone', 'Email', 'Address', 
-            'City', 'State', 'Postal Code', 'Country', 'Order Date', 
-            'Status', 'Total Amount', 'Payment Method', 'Latitude', 'Longitude'
-        ])
-        
-        orders = Order.objects.all().order_by('-created_at')
+        writer.writerow(
+            [
+                "Order ID",
+                "Customer Name",
+                "Phone",
+                "Email",
+                "Address",
+                "City",
+                "State",
+                "Postal Code",
+                "Country",
+                "Order Date",
+                "Status",
+                "Total Amount",
+                "Payment Method",
+                "Latitude",
+                "Longitude",
+            ]
+        )
+
+        orders = Order.objects.all().order_by("-created_at")
         for order in orders:
-            writer.writerow([
-                order.id,
-                order.customer_name,
-                order.phone_number or 'N/A',
-                order.customer_email,
-                order.address or 'N/A',
-                order.city or 'N/A',
-                order.state or 'N/A',
-                order.postal_code or 'N/A',
-                order.country,
-                order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                order.get_status_display(),
-                f'₹{order.total_amount}',
-                order.payment_method,
-                order.delivery_latitude or 'N/A',
-                order.delivery_longitude or 'N/A',
-            ])
-        
+            writer.writerow(
+                [
+                    order.id,
+                    order.customer_name,
+                    order.phone_number or "N/A",
+                    order.customer_email,
+                    order.address or "N/A",
+                    order.city or "N/A",
+                    order.state or "N/A",
+                    order.postal_code or "N/A",
+                    order.country,
+                    order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    order.get_status_display(),
+                    f"₹{order.total_amount}",
+                    order.payment_method,
+                    order.delivery_latitude or "N/A",
+                    order.delivery_longitude or "N/A",
+                ]
+            )
+
         return response
-    
+
     def download_single_address_view(self, request, order_id):
         order = get_object_or_404(Order, id=order_id)
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="order_{order.id}_address.csv"'
-        
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="order_{order.id}_address.csv"'
+
         writer = csv.writer(response)
-        writer.writerow([
-            'Order ID', 'Customer Name', 'Phone', 'Email', 'Address', 
-            'City', 'State', 'Postal Code', 'Country', 'Order Date', 
-            'Status', 'Total Amount', 'Payment Method', 'Items', 'Latitude', 'Longitude'
-        ])
-        
-        items_list = ', '.join([f"{item.product.name} (Qty: {item.quantity})" for item in order.items.all()])
-        
-        writer.writerow([
-            order.id,
-            order.customer_name,
-            order.phone_number or 'N/A',
-            order.customer_email,
-            order.address or 'N/A',
-            order.city or 'N/A',
-            order.state or 'N/A',
-            order.postal_code or 'N/A',
-            order.country,
-            order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            order.get_status_display(),
-            f'₹{order.total_amount}',
-            order.payment_method,
-            items_list,
-            order.delivery_latitude or 'N/A',
-            order.delivery_longitude or 'N/A',
-        ])
-        
+        writer.writerow(
+            [
+                "Order ID",
+                "Customer Name",
+                "Phone",
+                "Email",
+                "Address",
+                "City",
+                "State",
+                "Postal Code",
+                "Country",
+                "Order Date",
+                "Status",
+                "Total Amount",
+                "Payment Method",
+                "Items",
+                "Latitude",
+                "Longitude",
+            ]
+        )
+
+        items_list = ", ".join([f"{item.product.name} (Qty: {item.quantity})" for item in order.items.all()])
+
+        writer.writerow(
+            [
+                order.id,
+                order.customer_name,
+                order.phone_number or "N/A",
+                order.customer_email,
+                order.address or "N/A",
+                order.city or "N/A",
+                order.state or "N/A",
+                order.postal_code or "N/A",
+                order.country,
+                order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                order.get_status_display(),
+                f"₹{order.total_amount}",
+                order.payment_method,
+                items_list,
+                order.delivery_latitude or "N/A",
+                order.delivery_longitude or "N/A",
+            ]
+        )
+
         return response
-    
+
+    # ---- Readonly render helpers ----
     def get_customer_info(self, obj):
         info = f"""
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 5px 0; border-left: 4px solid #007cba;">
@@ -290,8 +394,9 @@ class OrderAdmin(admin.ModelAdmin):
         </div>
         """
         return mark_safe(info)
+
     get_customer_info.short_description = "Customer Information"
-    
+
     def get_delivery_address(self, obj):
         address_parts = []
         if obj.address:
@@ -304,15 +409,14 @@ class OrderAdmin(admin.ModelAdmin):
             address_parts.append(obj.postal_code)
         if obj.country:
             address_parts.append(obj.country)
-        
+
         full_address = ", ".join(address_parts) if address_parts else "No address provided"
-        
-        # Google Maps link if coordinates are available
+
         maps_link = ""
         if obj.delivery_latitude and obj.delivery_longitude:
             maps_url = f"https://www.google.com/maps?q={obj.delivery_latitude},{obj.delivery_longitude}"
             maps_link = f'<div style="margin-top: 10px;"><a href="{maps_url}" target="_blank" style="background: #4285f4; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 12px;">🗺️ View on Google Maps</a></div>'
-        
+
         address_html = f"""
         <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 5px 0; border-left: 4px solid #28a745;">
             <div style="display: flex; align-items: center; margin-bottom: 10px;">
@@ -326,13 +430,14 @@ class OrderAdmin(admin.ModelAdmin):
         </div>
         """
         return mark_safe(address_html)
+
     get_delivery_address.short_description = "Delivery Address"
-    
+
     def get_order_items(self, obj):
         items = obj.items.all()
         if not items:
             return "No items"
-        
+
         items_html = """
         <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 5px 0; border-left: 4px solid #ffc107;">
             <div style="display: flex; align-items: center; margin-bottom: 15px;">
@@ -351,14 +456,13 @@ class OrderAdmin(admin.ModelAdmin):
                 </thead>
                 <tbody>
         """
-        
+
         for item in items:
-            image_html = ""
             if item.product.image:
                 image_html = f'<img src="{item.product.image.url}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;" />'
             else:
                 image_html = '<div style="width: 40px; height: 40px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6c757d;">No Image</div>'
-            
+
             items_html += f"""
                 <tr style="border-bottom: 1px solid #dee2e6;">
                     <td style="padding: 10px;">{image_html}</td>
@@ -370,7 +474,7 @@ class OrderAdmin(admin.ModelAdmin):
                     <td style="padding: 10px; text-align: right; font-weight: 600; color: #28a745;">₹{item.get_cost():.2f}</td>
                 </tr>
             """
-        
+
         items_html += f"""
                 </tbody>
             </table>
@@ -382,11 +486,12 @@ class OrderAdmin(admin.ModelAdmin):
         </div>
         """
         return mark_safe(items_html)
+
     get_order_items.short_description = "Order Items"
-    
+
     def get_order_summary(self, obj):
-        estimated_delivery = obj.created_at + __import__('datetime').timedelta(days=3)
-        
+        estimated_delivery = obj.created_at + __import__("datetime").timedelta(days=3)
+
         summary_html = f"""
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin: 10px 0;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
@@ -424,67 +529,92 @@ class OrderAdmin(admin.ModelAdmin):
         </div>
         """
         return mark_safe(summary_html)
+
     get_order_summary.short_description = "Order Summary"
-    
+
     def get_total_cost(self, obj):
         return f"₹{obj.get_total_cost():.2f}"
+
     get_total_cost.short_description = "Calculated Total"
-    
-    actions = ['mark_as_packed', 'mark_as_shipped', 'mark_as_delivered', 'export_addresses']
-    
+
+    # ---- Actions ----
+    actions = ["mark_as_packed", "mark_as_shipped", "mark_as_delivered", "export_addresses"]
+
     def mark_as_packed(self, request, queryset):
-        updated = queryset.update(status='PACKED')
-        self.message_user(request, f'{updated} orders marked as packed.')
+        updated = queryset.update(status="PACKED")
+        self.message_user(request, f"{updated} orders marked as packed.")
+
     mark_as_packed.short_description = "Mark selected orders as packed"
-    
+
     def mark_as_shipped(self, request, queryset):
-        updated = queryset.update(status='SHIPPED')
-        self.message_user(request, f'{updated} orders marked as shipped.')
+        updated = queryset.update(status="SHIPPED")
+        self.message_user(request, f"{updated} orders marked as shipped.")
+
     mark_as_shipped.short_description = "Mark selected orders as shipped"
-    
+
     def mark_as_delivered(self, request, queryset):
-        updated = queryset.update(status='DELIVERED')
-        self.message_user(request, f'{updated} orders marked as delivered.')
+        updated = queryset.update(status="DELIVERED")
+        self.message_user(request, f"{updated} orders marked as delivered.")
+
     mark_as_delivered.short_description = "Mark selected orders as delivered"
-    
+
     def export_addresses(self, request, queryset):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="selected_orders_addresses.csv"'
-        
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="selected_orders_addresses.csv"'
+
         writer = csv.writer(response)
-        writer.writerow([
-            'Order ID', 'Customer Name', 'Phone', 'Email', 'Address', 
-            'City', 'State', 'Postal Code', 'Country', 'Order Date', 
-            'Status', 'Total Amount', 'Payment Method', 'Items', 'Latitude', 'Longitude'
-        ])
-        
+        writer.writerow(
+            [
+                "Order ID",
+                "Customer Name",
+                "Phone",
+                "Email",
+                "Address",
+                "City",
+                "State",
+                "Postal Code",
+                "Country",
+                "Order Date",
+                "Status",
+                "Total Amount",
+                "Payment Method",
+                "Items",
+                "Latitude",
+                "Longitude",
+            ]
+        )
+
         for order in queryset:
-            items_list = ', '.join([f"{item.product.name} (Qty: {item.quantity})" for item in order.items.all()])
-            writer.writerow([
-                order.id,
-                order.customer_name,
-                order.phone_number or 'N/A',
-                order.customer_email,
-                order.address or 'N/A',
-                order.city or 'N/A',
-                order.state or 'N/A',
-                order.postal_code or 'N/A',
-                order.country,
-                order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                order.get_status_display(),
-                f'₹{order.total_amount}',
-                order.payment_method,
-                items_list,
-                order.delivery_latitude or 'N/A',
-                order.delivery_longitude or 'N/A',
-            ])
-        
+            items_list = ", ".join([f"{item.product.name} (Qty: {item.quantity})" for item in order.items.all()])
+            writer.writerow(
+                [
+                    order.id,
+                    order.customer_name,
+                    order.phone_number or "N/A",
+                    order.customer_email,
+                    order.address or "N/A",
+                    order.city or "N/A",
+                    order.state or "N/A",
+                    order.postal_code or "N/A",
+                    order.country,
+                    order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    order.get_status_display(),
+                    f"₹{order.total_amount}",
+                    order.payment_method,
+                    items_list,
+                    order.delivery_latitude or "N/A",
+                    order.delivery_longitude or "N/A",
+                ]
+            )
+
         return response
+
     export_addresses.short_description = "Export selected addresses to CSV"
 
 
-
-# Custom Admin site branding
+# -----------------------------
+# Custom Admin Site Branding
+# -----------------------------
 admin.site.site_header = "Gadget Shop Admin Dashboard"
 admin.site.site_title = "Gadget Shop Admin"
 admin.site.index_title = "Welcome to Gadget Shop Administration"

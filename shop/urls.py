@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib import admin
 
 app_name = "shop"
 
@@ -40,4 +41,8 @@ urlpatterns = [
     path("quick-order/", views.quick_order, name="quick_order"),
     path("bulk-order/", views.bulk_order, name="bulk_order"),
 
+    # FIXED section
+    path("payment-success/", views.payment_success, name="payment_success"),  # ✅ Keep only this
+    # ❌ REMOVE: path("order-success/", views.order_success, name="order_success"),
+    # ❌ REMOVE duplicate: path("product/<int:pk>/", views.product_detail, name="product_detail"),
 ]

@@ -18,6 +18,7 @@ urlpatterns = [
 
     # ✅ Django's built-in auth system (login/logout/password management)
     path('accounts/', include('django.contrib.auth.urls')),
+    path("", include("shop.urls")), 
 ]
 
 # ✅ Serve media files in development

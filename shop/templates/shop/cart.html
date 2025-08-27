@@ -21,7 +21,7 @@
       <div class="amazon-cart-main">
         <div class="amazon-cart-header">
           <h1 class="amazon-cart-title">Shopping Cart</h1>
-          <p style="margin: 8px 0 0 0; color: #565959;">
+          <p class="amazon-cart-continue">
             <a href="{% url 'products:product_list' %}" class="amazon-action-link">Continue shopping</a>
           </p>
         </div>
@@ -42,22 +42,15 @@
                   {{ item.product.name }}
                 </a>
                 
-                <div class="amazon-item-info">
-                  <span style="color: var(--amazon-success); font-weight: 500;">In Stock</span>
-                </div>
-
-                <div class="amazon-item-info">
-                  <span style="font-size: 12px; color: #565959;">
-                    SKU: #{{ item.product.id|stringformat:"04d" }}
-                  </span>
-                </div>
+                <div class="amazon-item-info amazon-in-stock">In Stock</div>
+                <div class="amazon-item-info amazon-sku">SKU: #{{ item.product.id|stringformat:"04d" }}</div>
 
                 <div class="amazon-item-actions">
                   <!-- Quantity Selector -->
                   <div class="amazon-quantity-selector">
-                    <form method="post" action="{% url 'shop:update_quantity' item.product.id %}" style="display: inline;">
+                    <form method="post" action="{% url 'shop:update_quantity' item.product.id %}" class="amazon-inline-form">
                       {% csrf_token %}
-                      <select name="quantity" class="amazon-quantity-dropdown" onchange="this.form.submit()">
+                      <select name="quantity" class="amazon-quantity-dropdown" title="Select quantity" onchange="this.form.submit()">
                         {% for i in "123456789" %}
                           <option value="{{ forloop.counter }}" {% if item.quantity == forloop.counter %}selected{% endif %}>
                             Qty: {{ forloop.counter }}
@@ -69,7 +62,7 @@
                   </div>
 
                   <!-- Action Links -->
-                  <span style="color: #e7e7e7;">|</span>
+                  <span class="amazon-divider">|</span>
                   
                   <a href="{% url 'shop:remove_from_cart' item.product.id %}" 
                      class="amazon-action-link"
@@ -77,11 +70,11 @@
                     Delete
                   </a>
 
-                  <span style="color: #e7e7e7;">|</span>
+                  <span class="amazon-divider">|</span>
                   
                   <a href="#" class="amazon-action-link">Save for later</a>
 
-                  <span style="color: #e7e7e7;">|</span>
+                  <span class="amazon-divider">|</span>
                   
                   <a href="#" class="amazon-action-link">Compare with similar items</a>
                 </div>
@@ -92,9 +85,7 @@
                 <div class="amazon-price">
                   <span class="amazon-price-symbol">₹</span>{{ item.total|floatformat:2 }}
                 </div>
-                <div style="font-size: 12px; color: #565959; margin-top: 4px;">
-                  (₹{{ item.product.price }} each)
-                </div>
+                <div class="amazon-item-each">(₹{{ item.product.price }} each)</div>
               </div>
             </div>
           {% endfor %}
@@ -109,7 +100,7 @@
         </div>
 
         <div class="amazon-shipping-info">
-          <i class="bi bi-check-circle-fill" style="color: var(--amazon-success);"></i>
+          <i class="bi bi-check-circle-fill amazon-shipping-icon"></i>
           FREE delivery on orders over ₹499
         </div>
 
@@ -117,31 +108,25 @@
           Proceed to Buy
         </a>
 
-        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e7e7e7;">
-          <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
-            <input type="checkbox" style="margin-right: 8px;">
+        <div class="amazon-gift-option">
+          <label class="amazon-gift-label">
+            <input type="checkbox" class="amazon-gift-checkbox">
             This order contains a gift
           </label>
         </div>
 
         <!-- Recommended Items -->
-        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e7e7e7;">
-          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">
-            Frequently bought together
-          </h3>
-          <div style="font-size: 14px; color: #565959;">
-            Customers who bought items in your cart also bought these products.
-          </div>
+        <div class="amazon-frequently-bought">
+          <h3 class="amazon-frequently-title">Frequently bought together</h3>
+          <div class="amazon-frequently-desc">Customers who bought items in your cart also bought these products.</div>
         </div>
       </div>
     </div>
 
     <!-- Recently Viewed -->
-    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e7e7e7;">
-      <h2 style="font-size: 21px; font-weight: 400; margin-bottom: 16px;">
-        Your recently viewed items
-      </h2>
-      <div style="font-size: 14px; color: #565959;">
+    <div class="amazon-recently-viewed">
+      <h2 class="amazon-recently-title">Your recently viewed items</h2>
+      <div class="amazon-recently-desc">
         <a href="{% url 'products:product_list' %}" class="amazon-action-link">
           View or edit your browsing history
         </a>
@@ -155,19 +140,17 @@
       <h2>Your Amazon Cart is empty</h2>
       <p>Check your saved for later items below or <a href="{% url 'products:product_list' %}" class="amazon-action-link">continue shopping</a>.</p>
       
-      <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px;">
+      <div class="amazon-empty-cart-actions">
         <a href="{% url 'users:login' %}" class="amazon-btn amazon-btn-primary">Sign in to your account</a>
         <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary">Sign up now</a>
       </div>
 
       <!-- Recommended Products for Empty Cart -->
-      <div style="margin-top: 40px; text-align: left;">
-        <h3 style="font-size: 18px; font-weight: 400; margin-bottom: 16px;">
-          Shop today's deals
-        </h3>
-        <div class="amazon-product-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: 800px; margin: 0 auto;">
+      <div class="amazon-empty-cart-deals">
+        <h3 class="amazon-empty-cart-deals-title">Shop today's deals</h3>
+        <div class="amazon-product-grid amazon-empty-cart-grid">
           <!-- This would be populated with featured products -->
-          <div style="text-align: center; color: #565959; grid-column: 1 / -1;">
+          <div class="amazon-empty-cart-browse">
             <a href="{% url 'products:product_list' %}" class="amazon-action-link">
               Browse our product catalog →
             </a>

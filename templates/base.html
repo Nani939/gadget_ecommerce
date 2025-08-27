@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}"> -->
     <link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
     
     {% block extra_css %}{% endblock %}
@@ -49,9 +49,9 @@
             <!-- Navigation Tools -->
             <div class="amazon-nav-tools">
                 <!-- Location -->
-                <div class="amazon-nav-item" style="cursor: pointer;" onclick="getLocationForHeader()">
+                <div class="amazon-nav-item amazon-nav-location" onclick="getLocationForHeader()">
                     <small>Deliver to</small>
-                    <div style="font-weight: 700;">
+                        <div class="amazon-nav-bold">
                         <i class="bi bi-geo-alt"></i>
                         <span id="header-location">Your Location</span>
                     </div>
@@ -77,9 +77,9 @@
                 </a>
 
                 <!-- Cart -->
-                <a href="{% url 'shop:view_cart' %}" class="amazon-nav-item" style="position: relative;">
-                    <div style="display: flex; align-items: end; gap: 4px;">
-                        <i class="bi bi-cart3" style="font-size: 24px;"></i>
+                <a href="{% url 'shop:view_cart' %}" class="amazon-nav-item amazon-nav-cart">
+                    <div class="amazon-nav-cart-row">
+                        <i class="bi bi-cart3 amazon-nav-cart-icon"></i>
                         <div>
                             <small>Cart</small>
                             <span class="amazon-cart-count" id="cart-count">0</span>
@@ -90,8 +90,8 @@
                 <!-- Wishlist -->
                 {% if user.is_authenticated %}
                 <a href="{% url 'shop:wishlist' %}" class="amazon-nav-item">
-                    <div style="display: flex; align-items: end; gap: 4px;">
-                        <i class="bi bi-heart" style="font-size: 20px;"></i>
+                    <div class="amazon-nav-wishlist-row">
+                        <i class="bi bi-heart amazon-nav-wishlist-icon"></i>
                         <div>
                             <small>Wishlist</small>
                         </div>
@@ -123,10 +123,10 @@
     </header>
 
     <!-- Main Content -->
-    <main style="min-height: calc(100vh - 200px);">
+    <main class="amazon-main">
         <!-- Flash Messages -->
         {% if messages %}
-            <div class="amazon-container" style="padding-top: 20px;">
+            <div class="amazon-container amazon-messages">
                 {% for message in messages %}
                     <div class="amazon-alert amazon-alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
                         <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}-fill"></i>
@@ -138,17 +138,17 @@
 
         {% block content %}
         <!-- Default Amazon-style homepage content -->
-        <div class="amazon-container" style="padding-top: 40px;">
+    <div class="amazon-container amazon-home-container">
             <div class="amazon-empty-cart">
-                <div style="font-size: 60px; margin-bottom: 20px;">🛍️</div>
-                <h1 style="font-size: 32px; font-weight: 400; margin-bottom: 16px;">Welcome to Gadget Shop</h1>
-                <p style="font-size: 18px; color: #565959; margin-bottom: 32px;">Discover the latest technology and gadgets at unbeatable prices</p>
-                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                    <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary" style="padding: 12px 24px; font-size: 16px;">
+                <div class="amazon-home-icon">🛍️</div>
+                <h1 class="amazon-home-title">Welcome to Gadget Shop</h1>
+                <p class="amazon-home-desc">Discover the latest technology and gadgets at unbeatable prices</p>
+                <div class="amazon-home-btn-row">
+                    <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary amazon-home-btn">
                         Browse Products
                     </a>
                     {% if not user.is_authenticated %}
-                        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary" style="padding: 12px 24px; font-size: 16px;">
+                        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary amazon-home-btn">
                             Sign Up Today
                         </a>
                     {% endif %}
@@ -159,22 +159,22 @@
     </main>
 
     <!-- Amazon-style Footer -->
-    <footer style="background: var(--amazon-blue); color: white; margin-top: 60px;">
+    <footer class="amazon-footer">
         <!-- Back to top -->
-        <div style="background: var(--amazon-light-blue); text-align: center; padding: 15px; cursor: pointer;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-            <span style="font-size: 14px;">Back to top</span>
+        <div class="amazon-footer-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <span class="amazon-footer-top-text">Back to top</span>
         </div>
         
         <!-- Footer content -->
-        <div class="amazon-container" style="padding: 40px 14px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
+        <div class="amazon-container amazon-footer-container">
+            <div class="amazon-footer-grid">
                 <div>
-                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Get to Know Us</h3>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
-                        <li style="margin-bottom: 8px;"><a href="{% url 'shop:about' %}" style="color: #ddd; text-decoration: none; font-size: 14px;">About Us</a></li>
-                        <li style="margin-bottom: 8px;"><a href="#" style="color: #ddd; text-decoration: none; font-size: 14px;">Careers</a></li>
-                        <li style="margin-bottom: 8px;"><a href="#" style="color: #ddd; text-decoration: none; font-size: 14px;">Press Releases</a></li>
-                        <li style="margin-bottom: 8px;"><a href="#" style="color: #ddd; text-decoration: none; font-size: 14px;">Gadget Shop Science</a></li>
+                    <h3 class="amazon-footer-title">Get to Know Us</h3>
+                    <ul class="amazon-footer-list">
+                        <li class="amazon-footer-list-item"><a href="{% url 'shop:about' %}" class="amazon-footer-link">About Us</a></li>
+                        <li class="amazon-footer-list-item"><a href="#" class="amazon-footer-link">Careers</a></li>
+                        <li class="amazon-footer-list-item"><a href="#" class="amazon-footer-link">Press Releases</a></li>
+                        <li class="amazon-footer-list-item"><a href="#" class="amazon-footer-link">Gadget Shop Science</a></li>
                     </ul>
                 </div>
                 <div>

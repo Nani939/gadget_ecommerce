@@ -9,61 +9,56 @@
 
 {% block content %}
 <div class="amazon-container">
-  <!-- Success Header -->
-  <div style="text-align: center; margin: 40px 0;">
-    <div style="font-size: 80px; color: var(--amazon-success); margin-bottom: 20px;">✅</div>
-    <h1 style="font-size: 32px; font-weight: 400; color: var(--amazon-text); margin-bottom: 16px;">
-      Order Placed Successfully!
-    </h1>
-    <p style="font-size: 18px; color: #565959; margin-bottom: 32px;">
+  <!-- Success Header (Order Success Page) -->
+  <div class="order-success-header">
+    <div class="order-success-emoji">✅</div>
+    <h1 class="order-success-title">Order Placed Successfully!</h1>
+    <p class="order-success-desc">
       Thank you for your order. We'll send you shipping confirmation when your item(s) are on the way!
     </p>
   </div>
 
-  <!-- Order Details -->
-  <div style="max-width: 800px; margin: 0 auto;">
-    <div style="background: white; border: 1px solid var(--amazon-border); border-radius: 8px; padding: 24px; margin-bottom: 24px;">
-      <h2 style="font-size: 21px; font-weight: 400; margin-bottom: 16px; color: var(--amazon-text);">
-        Order Details
-      </h2>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+  <!-- Order Details (Order Success Page) -->
+  <div class="order-success-details-container">
+    <div class="order-success-details-box">
+      <h2 class="order-success-details-title">Order Details</h2>
+      <div class="order-success-details-grid">
         <div>
-          <div style="margin-bottom: 12px;">
+          <div class="order-success-detail-row">
             <strong>Order Number:</strong> #{{ order.id }}
           </div>
-          <div style="margin-bottom: 12px;">
+          <div class="order-success-detail-row">
+            <strong>Status:</strong> <span class="order-success-status">{{ order.get_status_display }}</span>
+          </div>
+          <div class="order-success-detail-row">
             <strong>Order Date:</strong> {{ order.created_at|date:"F j, Y" }}
           </div>
-          <div style="margin-bottom: 12px;">
+          <div class="order-success-detail-row">
             <strong>Total Amount:</strong> ₹{{ order.total_amount|floatformat:2 }}
           </div>
-          <div style="margin-bottom: 12px;">
+          <div class="order-success-detail-row">
             <strong>Payment Method:</strong> {{ order.payment_method }}
           </div>
         </div>
-        
         <div>
-          <div style="margin-bottom: 12px;">
-            <strong>Status:</strong> 
-            <span style="background: var(--amazon-success); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-              {{ order.get_status_display }}
-            </span>
+          <div class="order-success-detail-row">
+            <strong>Status:</strong>
+            <span class="order-success-status-badge">{{ order.get_status_display }}</span>
           </div>
-          <div style="margin-bottom: 12px;">
+          <div class="order-success-detail-row">
             <strong>Estimated Delivery:</strong> {{ estimated_delivery|date:"F j, Y" }}
           </div>
           {% if order.tracking_number %}
-          <div style="margin-bottom: 12px;">
+          <div class="order-success-detail-row">
             <strong>Tracking Number:</strong> {{ order.tracking_number }}
           </div>
           {% endif %}
         </div>
       </div>
 
-      <!-- Delivery Address -->
-      <div style="background: var(--amazon-gray); padding: 16px; border-radius: 4px; margin-bottom: 24px;">
-        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Delivery Address</h3>
+      <!-- Delivery Address (Order Success Page) -->
+      <div class="order-success-address-box">
+        <h3 class="order-success-address-title">Delivery Address</h3>
         <div>
           <strong>{{ order.customer_name }}</strong><br>
           {{ order.address }}<br>
@@ -75,63 +70,58 @@
         </div>
       </div>
 
-      <!-- Order Items -->
+      <!-- Order Items (Order Success Page) -->
       <div>
-        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Items Ordered</h3>
+        <h3 class="order-success-items-title">Items Ordered</h3>
         {% for item in order.items.all %}
-          <div style="display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e7e7e7;">
-            <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}https://via.placeholder.com/80x80?text=No+Image{% endif %}" 
+          <div class="order-success-item-row">
+            <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}https://via.placeholder.com/80x80?text=No+Image{% endif %}"
                  alt="{{ item.product.name }}"
-                 style="width: 80px; height: 80px; object-fit: contain; border-radius: 4px;"
+                 class="order-success-item-img"
                  onerror="this.src='https://via.placeholder.com/80x80?text=No+Image'">
-            
-            <div style="flex: 1;">
-              <div style="font-weight: 500; margin-bottom: 4px;">{{ item.product.name }}</div>
-              <div style="font-size: 14px; color: #565959; margin-bottom: 4px;">
+            <div class="order-success-item-info">
+              <div class="order-success-item-name">{{ item.product.name }}</div>
+              <div class="order-success-item-meta">
                 Quantity: {{ item.quantity }}
               </div>
-              <div style="font-size: 14px; color: #565959;">
+              <div class="order-success-item-meta">
                 Price: ₹{{ item.price|floatformat:2 }} each
               </div>
             </div>
-            
-            <div style="text-align: right;">
-              <div style="font-weight: 700;">₹{{ item.get_cost|floatformat:2 }}</div>
+            <div class="order-success-item-cost">
+              ₹{{ item.get_cost|floatformat:2 }}
             </div>
           </div>
         {% endfor %}
-        
-        <div style="text-align: right; margin-top: 16px; font-size: 18px; font-weight: 700;">
+        <div class="order-success-total">
           Total: ₹{{ order.get_total_cost|floatformat:2 }}
         </div>
       </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div style="text-align: center; margin: 32px 0;">
-      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <a href="{% url 'shop:track_order' order.id %}" class="amazon-btn amazon-btn-primary" style="padding: 12px 24px;">
+    <!-- Action Buttons (Order Success Page) -->
+    <div class="order-success-actions">
+      <div class="order-success-actions-row">
+        <a href="{% url 'shop:track_order' order.id %}" class="amazon-btn amazon-btn-primary order-success-action-btn">
           Track Your Order
         </a>
-        <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-secondary" style="padding: 12px 24px;">
+        <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-secondary order-success-action-btn">
           Continue Shopping
         </a>
-        <a href="{% url 'shop:home' %}" class="amazon-btn amazon-btn-secondary" style="padding: 12px 24px;">
+        <a href="{% url 'shop:home' %}" class="amazon-btn amazon-btn-secondary order-success-action-btn">
           Back to Home
         </a>
       </div>
     </div>
 
-    <!-- What's Next -->
-    <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 20px; margin: 24px 0;">
-      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #004085;">
-        What happens next?
-      </h3>
-      <ul style="margin: 0; padding-left: 20px; color: #004085;">
-        <li style="margin-bottom: 8px;">We'll send you an email confirmation shortly</li>
-        <li style="margin-bottom: 8px;">Your order will be processed and packed within 1-2 business days</li>
-        <li style="margin-bottom: 8px;">You'll receive tracking information once your order ships</li>
-        <li style="margin-bottom: 8px;">Estimated delivery: 3-5 business days</li>
+    <!-- What's Next (Order Success Page) -->
+    <div class="order-success-next-box">
+      <h3 class="order-success-next-title">What happens next?</h3>
+      <ul class="order-success-next-list">
+        <li>We'll send you an email confirmation shortly</li>
+        <li>Your order will be processed and packed within 1-2 business days</li>
+        <li>You'll receive tracking information once your order ships</li>
+        <li>Estimated delivery: 3-5 business days</li>
       </ul>
     </div>
   </div>

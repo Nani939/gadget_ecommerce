@@ -16,35 +16,31 @@
   </div>
 
   <!-- Page Header -->
-  <div style="margin-bottom: 20px;">
-    <h1 style="font-size: 28px; font-weight: 400; color: var(--amazon-text); margin-bottom: 8px;">
-      All Products
-    </h1>
-    <div style="font-size: 14px; color: #565959;">
-      {{ products|length }} result{{ products|length|pluralize }} for "all products"
-    </div>
+  <div class="product-list-header">
+    <h1 class="product-list-title">All Products</h1>
+    <div class="product-list-count">{{ products|length }} result{{ products|length|pluralize }} for "all products"</div>
   </div>
 
   <!-- Filters and Sort -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px; background: white; border: 1px solid var(--amazon-border); border-radius: 8px;">
-    <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-      <span style="font-weight: 700; color: var(--amazon-text);">Filter by:</span>
-      <select class="amazon-form-input" style="width: auto; min-width: 120px;">
+  <div class="product-list-filters">
+    <div class="product-list-filter-group">
+      <span class="product-list-filter-label">Filter by:</span>
+  <select class="amazon-form-input product-list-select" title="Filter by Category">
         <option>All Categories</option>
         <option>Electronics</option>
         <option>Accessories</option>
         <option>Mobile Phones</option>
       </select>
-      <select class="amazon-form-input" style="width: auto; min-width: 120px;">
+  <select class="amazon-form-input product-list-select" title="Filter by Brand">
         <option>All Brands</option>
         <option>Apple</option>
         <option>Samsung</option>
         <option>OnePlus</option>
       </select>
     </div>
-    <div style="display: flex; gap: 8px; align-items: center;">
-      <span style="font-size: 14px; color: #565959;">Sort by:</span>
-      <select class="amazon-form-input" style="width: auto; min-width: 140px;">
+    <div class="product-list-sort-group">
+      <span class="product-list-sort-label">Sort by:</span>
+  <select class="amazon-form-input product-list-sort-select" title="Sort Products">
         <option>Featured</option>
         <option>Price: Low to High</option>
         <option>Price: High to Low</option>
@@ -86,7 +82,7 @@
                 <span class="amazon-price-symbol">₹</span>{{ product.price|floatformat:2 }}
               </div>
               {% if product.id|divisibleby:3 %}
-                <div style="font-size: 12px; color: #565959; text-decoration: line-through;">
+                <div class="product-list-old-price">
                   ₹{{ product.price|add:500|floatformat:2 }}
                 </div>
               {% endif %}
@@ -94,18 +90,14 @@
 
             <!-- Prime Badge (Mock) -->
             {% if product.id|divisibleby:2 %}
-              <div style="margin-bottom: 8px;">
-                <span style="background: var(--amazon-link); color: white; font-size: 11px; padding: 2px 6px; border-radius: 2px; font-weight: 700;">
-                  prime
-                </span>
-                <span style="font-size: 12px; color: #565959; margin-left: 4px;">
-                  FREE delivery
-                </span>
+              <div class="product-list-prime-row">
+                <span class="product-list-prime-badge">prime</span>
+                <span class="product-list-prime-delivery">FREE delivery</span>
               </div>
             {% endif %}
 
             <!-- Stock Status -->
-            <div style="font-size: 14px; color: var(--amazon-success); margin-bottom: 12px;">
+            <div class="product-list-stock-status">
               {% if product.available %}
                 In Stock
               {% else %}
@@ -116,37 +108,35 @@
             <!-- Action Buttons -->
             <div class="amazon-product-actions">
               {% if product.available and product.stock > 0 %}
-              <form method="post" action="{% url 'shop:add_to_cart' product.id %}" style="margin: 0;">
+              <form method="post" action="{% url 'shop:add_to_cart' product.id %}" class="product-list-action-form">
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="amazon-btn amazon-btn-primary" style="width: 100%;">
+                <button type="submit" class="amazon-btn amazon-btn-primary product-list-btn-fullwidth">
                 Add to Cart
                 </button>
               </form>
               
-              <form method="post" action="{% url 'shop:buy_now' product.id %}" style="margin: 0;">
+              <form method="post" action="{% url 'shop:buy_now' product.id %}" class="product-list-action-form">
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
-                <button type="submit" class="amazon-btn amazon-btn-secondary" style="width: 100%;">
+                <button type="submit" class="amazon-btn amazon-btn-secondary product-list-btn-fullwidth">
                 Buy Now
                 </button>
               </form>
               {% else %}
-              <button class="amazon-btn" style="width: 100%; background-color: #ccc; color: #666; cursor: not-allowed;" disabled>
+              <button class="amazon-btn product-list-btn-disabled" type="button" disabled>
                 {% if product.stock <= 0 %}Out of Stock{% else %}Unavailable{% endif %}
               </button>
               {% endif %}
               <!-- Wishlist Button -->
-              <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" style="margin-top: 8px; text-align: center;">
+              <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" class="product-list-wishlist-form">
               {% csrf_token %}
-              <button type="submit" title="Add to Wishlist" style="background: none; border: none; cursor: pointer; font-size: 22px; color: #e74c3c;">
-                ❤️
-              </button>
+              <button type="submit" title="Add to Wishlist" class="product-list-wishlist-btn">❤️</button>
               </form>
             </div>
 
             <!-- Additional Info -->
-            <div style="margin-top: 8px; font-size: 12px; color: #565959;">
+            <div class="product-list-additional-info">
               <div>Ships from Gadget Shop</div>
               {% if product.id|divisibleby:4 %}
                 <div>Climate Pledge Friendly</div>
@@ -158,16 +148,16 @@
     </div>
 
     <!-- Pagination (if needed) -->
-    <div style="margin-top: 40px; text-align: center; padding: 20px;">
-      <div style="display: inline-flex; gap: 8px; align-items: center;">
-        <button class="amazon-btn amazon-btn-secondary" disabled>Previous</button>
-        <span style="padding: 8px 16px; background: var(--amazon-orange); color: var(--amazon-blue); border-radius: 4px; font-weight: 700;">1</span>
-        <button class="amazon-btn amazon-btn-secondary">2</button>
-        <button class="amazon-btn amazon-btn-secondary">3</button>
-        <span style="padding: 8px;">...</span>
-        <button class="amazon-btn amazon-btn-secondary">Next</button>
+    <div class="product-list-pagination">
+        <div class="product-list-pagination-group">
+          <button class="amazon-btn amazon-btn-secondary" disabled>Previous</button>
+          <span class="product-list-pagination-current">1</span>
+          <button class="amazon-btn amazon-btn-secondary">2</button>
+          <button class="amazon-btn amazon-btn-secondary">3</button>
+          <span class="product-list-pagination-ellipsis">...</span>
+          <button class="amazon-btn amazon-btn-secondary">Next</button>
+        </div>
       </div>
-    </div>
 
   {% else %}
     <!-- No Products -->
@@ -182,12 +172,10 @@
   {% endif %}
 
   <!-- Recently Viewed -->
-  <div style="margin-top: 60px; padding-top: 24px; border-top: 1px solid #e7e7e7;">
-    <h2 style="font-size: 21px; font-weight: 400; margin-bottom: 16px;">
-      Your recently viewed items
-    </h2>
-    <div style="font-size: 14px; color: #565959;">
-      <a href="#" class="amazon-action-link">View or edit your browsing history</a>
+  <div class="product-list-recently-viewed">
+    <h2 class="product-list-recently-title">Your recently viewed items</h2>
+    <div class="product-list-recently-link-row">
+      <a href="#" class="amazon-action-link product-list-recently-link">View or edit your browsing history</a>
     </div>
   </div>
 </div>
