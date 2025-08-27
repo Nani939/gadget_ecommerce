@@ -187,22 +187,23 @@
   font-size: 1rem;
   border-radius: 6px;
   border: none;
-  background: #ff9900;
+  background: var(--amazon-orange);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: var(--amazon-transition);
 }
-.product-card-btn:hover {
-  background: #e48f00;
+.product-card-btn:hover,
+.product-card-btn:focus-visible {
+  background: var(--amazon-orange-dark);
 }
 .product-card-btn.secondary {
-  background: #232f3e;
+  background: var(--amazon-blue);
   color: #fff;
 }
 .product-card-btn.secondary:hover {
-  background: #31425c;
-  color: #ff9900;
+  background: var(--amazon-gray);
+  color: var(--amazon-text);
 }
 
 @media (max-width: 600px) {
@@ -230,6 +231,11 @@
   --amazon-radius: 8px;
   --amazon-shadow: 0 4px 12px rgba(0,0,0,0.08);
   --amazon-transition: all 0.2s cubic-bezier(.4,0,.2,1);
+  --amazon-light-blue: #37475a;
+  --amazon-orange-dark: #e48f00;
+  --amazon-gray: #f0f2f2;
+  --amazon-link: #007185;
+  --amazon-warning: #b12704;
 }
 
 body {
@@ -238,6 +244,22 @@ body {
   color: var(--amazon-text);
   margin: 0;
   padding: 0;
+}
+
+/* Global focus visibility and interaction improvements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--amazon-orange);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #ffe0b2;
+}
+
+a,
+button {
+  transition: var(--amazon-transition);
 }
 
 .amazon-container {
@@ -271,20 +293,20 @@ body {
   color: #fff;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: background 0.2s, color 0.2s;
+  transition: var(--amazon-transition);
   outline: none;
 }
-.amazon-btn:hover, .amazon-btn:focus {
-  background: #e48f00;
+.amazon-btn:hover, .amazon-btn:focus-visible {
+  background: var(--amazon-orange-dark);
   color: #fff;
 }
 .amazon-btn-secondary {
-  background: #232f3e;
+  background: var(--amazon-blue);
   color: #fff;
 }
-.amazon-btn-secondary:hover, .amazon-btn-secondary:focus {
-  background: #31425c;
-  color: #ff9900;
+.amazon-btn-secondary:hover, .amazon-btn-secondary:focus-visible {
+  background: var(--amazon-gray);
+  color: var(--amazon-text);
 }
 .wishlist-btn-removeall {
   background: #dc3545;
