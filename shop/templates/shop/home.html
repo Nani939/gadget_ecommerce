@@ -11,17 +11,42 @@
 <div class="amazon-container">
   <!-- Hero Section -->
   <div class="amazon-hero-section">
-    <h1 class="amazon-hero-title">Welcome to Gadget Shop</h1>
-    <p class="amazon-hero-desc">Discover the latest technology and gadgets at unbeatable prices</p>
+    <div class="hero-content fade-in">
+      <h1 class="amazon-hero-title">Welcome to Gadget Shop</h1>
+      <p class="amazon-hero-desc">Discover the latest technology and gadgets at unbeatable prices</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-number">10,000+</div>
+          <div class="hero-stat-label">Happy Customers</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-number">500+</div>
+          <div class="hero-stat-label">Products</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-number">24/7</div>
+          <div class="hero-stat-label">Support</div>
+        </div>
+      </div>
+    </div>
     
     {% if not user.is_authenticated %}
       <div class="amazon-hero-actions">
-        <a href="{% url 'users:login' %}" class="amazon-btn amazon-btn-primary amazon-hero-btn">Sign In</a>
-        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary amazon-hero-btn">Create Account</a>
+        <a href="{% url 'users:login' %}" class="amazon-btn amazon-btn-primary amazon-hero-btn">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </a>
+        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary amazon-hero-btn">
+          <i class="fas fa-user-plus"></i> Create Account
+        </a>
       </div>
     {% else %}
-      <div>
-        <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary amazon-hero-btn">Start Shopping</a>
+      <div class="amazon-hero-actions">
+        <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary amazon-hero-btn">
+          <i class="fas fa-shopping-bag"></i> Start Shopping
+        </a>
+        <a href="{% url 'shop:quick_order' %}" class="amazon-btn amazon-btn-secondary amazon-hero-btn">
+          <i class="fas fa-bolt"></i> Quick Order
+        </a>
       </div>
     {% endif %}
   </div>
@@ -32,34 +57,50 @@
     <div class="amazon-category-grid">
       <!-- Electronics Category -->
       <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">📱</div>
+        <div class="amazon-category-emoji">
+          <i class="fas fa-mobile-alt" style="font-size: 48px; color: var(--amazon-info);"></i>
+        </div>
         <h3 class="amazon-category-name">Electronics</h3>
         <p class="amazon-category-desc">Latest smartphones, tablets, and gadgets</p>
-        <div class="amazon-action-link">Shop now</div>
+        <div class="amazon-action-link">
+          <i class="fas fa-arrow-right"></i> Shop now
+        </div>
       </div>
 
       <!-- Accessories Category -->
       <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">🎧</div>
+        <div class="amazon-category-emoji">
+          <i class="fas fa-headphones" style="font-size: 48px; color: var(--amazon-success);"></i>
+        </div>
         <h3 class="amazon-category-name">Accessories</h3>
         <p class="amazon-category-desc">Headphones, cases, and more</p>
-        <div class="amazon-action-link">Shop now</div>
+        <div class="amazon-action-link">
+          <i class="fas fa-arrow-right"></i> Shop now
+        </div>
       </div>
 
       <!-- Smart Home Category -->
       <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">🏠</div>
+        <div class="amazon-category-emoji">
+          <i class="fas fa-home" style="font-size: 48px; color: var(--amazon-warning);"></i>
+        </div>
         <h3 class="amazon-category-name">Smart Home</h3>
         <p class="amazon-category-desc">Connected devices for your home</p>
-        <div class="amazon-action-link">Shop now</div>
+        <div class="amazon-action-link">
+          <i class="fas fa-arrow-right"></i> Shop now
+        </div>
       </div>
 
       <!-- Gaming Category -->
       <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">🎮</div>
+        <div class="amazon-category-emoji">
+          <i class="fas fa-gamepad" style="font-size: 48px; color: var(--amazon-error);"></i>
+        </div>
         <h3 class="amazon-category-name">Gaming</h3>
         <p class="amazon-category-desc">Gaming accessories and peripherals</p>
-        <div class="amazon-action-link">Shop now</div>
+        <div class="amazon-action-link">
+          <i class="fas fa-arrow-right"></i> Shop now
+        </div>
       </div>
     </div>
   </div>
@@ -68,14 +109,18 @@
   <div class="amazon-deals-section">
     <div class="amazon-deals-header">
       <h2 class="amazon-deals-title">Today's Deals</h2>
-      <a href="{% url 'products:product_list' %}" class="amazon-action-link">See all deals</a>
+      <a href="{% url 'products:product_list' %}" class="amazon-action-link">
+        <i class="fas fa-external-link-alt"></i> See all deals
+      </a>
     </div>
     <div class="amazon-deals-box">
       <div class="amazon-deals-grid">
         <!-- Deal Item 1 -->
         <div class="amazon-deal-card">
           <div class="amazon-deal-badge amazon-deal-badge-warning">Deal of the Day</div>
-          <div class="amazon-deal-emoji">📱</div>
+          <div class="amazon-deal-emoji">
+            <i class="fas fa-mobile-alt" style="color: var(--amazon-info);"></i>
+          </div>
           <div class="amazon-deal-name">Smartphones</div>
           <div class="amazon-deal-offer">Up to 40% off</div>
           <div class="amazon-deal-meta">Limited time offer</div>
@@ -84,7 +129,9 @@
         <!-- Deal Item 2 -->
         <div class="amazon-deal-card">
           <div class="amazon-deal-badge amazon-deal-badge-warning">Lightning Deal</div>
-          <div class="amazon-deal-emoji">🎧</div>
+          <div class="amazon-deal-emoji">
+            <i class="fas fa-headphones" style="color: var(--amazon-success);"></i>
+          </div>
           <div class="amazon-deal-name">Headphones</div>
           <div class="amazon-deal-offer">Up to 60% off</div>
           <div class="amazon-deal-meta">Ends in 2 hours</div>
@@ -93,7 +140,9 @@
         <!-- Deal Item 3 -->
         <div class="amazon-deal-card">
           <div class="amazon-deal-badge amazon-deal-badge-success">Best Seller</div>
-          <div class="amazon-deal-emoji">⌚</div>
+          <div class="amazon-deal-emoji">
+            <i class="fas fa-clock" style="color: var(--amazon-warning);"></i>
+          </div>
           <div class="amazon-deal-name">Smart Watches</div>
           <div class="amazon-deal-offer">Up to 35% off</div>
           <div class="amazon-deal-meta">#1 Best Seller</div>
@@ -102,7 +151,9 @@
         <!-- Deal Item 4 -->
         <div class="amazon-deal-card">
           <div class="amazon-deal-badge amazon-deal-badge-link">New Arrival</div>
-          <div class="amazon-deal-emoji">💻</div>
+          <div class="amazon-deal-emoji">
+            <i class="fas fa-laptop" style="color: var(--amazon-error);"></i>
+          </div>
           <div class="amazon-deal-name">Laptops</div>
           <div class="amazon-deal-offer">Up to 25% off</div>
           <div class="amazon-deal-meta">Just launched</div>
@@ -117,7 +168,9 @@
     <div class="amazon-features-grid">
       <!-- Feature 1 -->
       <div class="amazon-feature-card">
-        <div class="amazon-feature-icon amazon-feature-orange">🚚</div>
+        <div class="amazon-feature-icon amazon-feature-orange">
+          <i class="fas fa-shipping-fast"></i>
+        </div>
         <div>
           <h3 class="amazon-feature-name">Fast Delivery</h3>
           <p class="amazon-feature-desc">Get your orders delivered quickly with our express shipping options.</p>
@@ -126,7 +179,9 @@
 
       <!-- Feature 2 -->
       <div class="amazon-feature-card">
-        <div class="amazon-feature-icon amazon-feature-success">🛡️</div>
+        <div class="amazon-feature-icon amazon-feature-success">
+          <i class="fas fa-shield-alt"></i>
+        </div>
         <div>
           <h3 class="amazon-feature-name">Secure Shopping</h3>
           <p class="amazon-feature-desc">Your personal information and payments are always protected.</p>
@@ -135,7 +190,9 @@
 
       <!-- Feature 3 -->
       <div class="amazon-feature-card">
-        <div class="amazon-feature-icon amazon-feature-link">💰</div>
+        <div class="amazon-feature-icon amazon-feature-link">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
         <div>
           <h3 class="amazon-feature-name">Best Prices</h3>
           <p class="amazon-feature-desc">We offer competitive prices and regular deals on all products.</p>
@@ -144,7 +201,9 @@
 
       <!-- Feature 4 -->
       <div class="amazon-feature-card">
-        <div class="amazon-feature-icon amazon-feature-warning">🎧</div>
+        <div class="amazon-feature-icon amazon-feature-warning">
+          <i class="fas fa-headset"></i>
+        </div>
         <div>
           <h3 class="amazon-feature-name">24/7 Support</h3>
           <p class="amazon-feature-desc">Our customer service team is always ready to help you.</p>
@@ -155,32 +214,83 @@
 
   <!-- Newsletter Signup -->
   <div class="amazon-newsletter-section">
-    <h2 class="amazon-newsletter-title">Stay Updated</h2>
+    <h2 class="amazon-newsletter-title">
+      <i class="fas fa-envelope"></i> Stay Updated
+    </h2>
     <p class="amazon-newsletter-desc">Get the latest deals and product updates delivered to your inbox.</p>
     <div class="amazon-newsletter-form">
-      <input type="email" class="amazon-form-input amazon-newsletter-input" placeholder="Enter your email address">
-      <button class="amazon-btn amazon-btn-primary amazon-newsletter-btn">Subscribe</button>
+      <input type="email" 
+             class="amazon-form-input amazon-newsletter-input" 
+             placeholder="Enter your email address">
+      <button class="amazon-btn amazon-btn-primary amazon-newsletter-btn">
+        <i class="fas fa-paper-plane"></i> Subscribe
+      </button>
     </div>
     <div class="amazon-newsletter-meta">By subscribing, you agree to our privacy policy and terms of service.</div>
   </div>
 </div>
 
 <script>
-// Add hover effects to category cards
+// Enhanced interactions and animations
 document.addEventListener('DOMContentLoaded', function() {
-  const categoryCards = document.querySelectorAll('[onclick*="location.href"]');
+  // Animated counters for hero stats
+  const animateCounter = (element, target) => {
+    let current = 0;
+    const increment = target / 100;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        current = target;
+        clearInterval(timer);
+      }
+      element.textContent = Math.floor(current).toLocaleString() + (target >= 1000 ? '+' : '');
+    }, 20);
+  };
   
-  categoryCards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-4px)';
-      this.style.boxShadow = 'var(--amazon-shadow-hover)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0)';
-      this.style.boxShadow = 'var(--amazon-shadow)';
+  // Start counter animation when hero section is visible
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const counters = entry.target.querySelectorAll('.hero-stat-number');
+        counters.forEach((counter, index) => {
+          const targets = [10000, 500, 24];
+          setTimeout(() => animateCounter(counter, targets[index]), index * 200);
+        });
+        observer.unobserve(entry.target);
+      }
     });
   });
+  
+  const heroSection = document.querySelector('.amazon-hero-section');
+  if (heroSection) {
+    observer.observe(heroSection);
+  }
+  
+  // Newsletter form enhancement
+  const newsletterForm = document.querySelector('.amazon-newsletter-form');
+  if (newsletterForm) {
+    const input = newsletterForm.querySelector('input');
+    const button = newsletterForm.querySelector('button');
+    
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (input.value && input.value.includes('@')) {
+        this.innerHTML = '<i class="fas fa-check"></i> Subscribed!';
+        this.style.backgroundColor = 'var(--amazon-green)';
+        input.value = '';
+        setTimeout(() => {
+          this.innerHTML = '<i class="fas fa-paper-plane"></i> Subscribe';
+          this.style.backgroundColor = 'var(--amazon-orange)';
+        }, 2000);
+      } else {
+        input.focus();
+        input.style.borderColor = 'var(--amazon-error)';
+        setTimeout(() => {
+          input.style.borderColor = 'var(--amazon-gray)';
+        }, 1000);
+      }
+    });
+  }
 });
 </script>
 {% endblock %}

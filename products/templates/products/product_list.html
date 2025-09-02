@@ -25,13 +25,13 @@
   <div class="product-list-filters">
     <div class="product-list-filter-group">
       <span class="product-list-filter-label">Filter by:</span>
-  <select class="amazon-form-input product-list-select" title="Filter by Category">
+      <select class="amazon-form-input product-list-select" title="Filter by Category">
         <option>All Categories</option>
         <option>Electronics</option>
         <option>Accessories</option>
         <option>Mobile Phones</option>
       </select>
-  <select class="amazon-form-input product-list-select" title="Filter by Brand">
+      <select class="amazon-form-input product-list-select" title="Filter by Brand">
         <option>All Brands</option>
         <option>Apple</option>
         <option>Samsung</option>
@@ -40,7 +40,7 @@
     </div>
     <div class="product-list-sort-group">
       <span class="product-list-sort-label">Sort by:</span>
-  <select class="amazon-form-input product-list-sort-select" title="Sort Products">
+      <select class="amazon-form-input product-list-sort-select" title="Sort Products">
         <option>Featured</option>
         <option>Price: Low to High</option>
         <option>Price: High to Low</option>
@@ -112,7 +112,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="amazon-btn amazon-btn-primary product-list-btn-fullwidth">
-                Add to Cart
+                  <i class="fas fa-cart-plus"></i> Add to Cart
                 </button>
               </form>
               
@@ -120,18 +120,20 @@
                 {% csrf_token %}
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="amazon-btn amazon-btn-secondary product-list-btn-fullwidth">
-                Buy Now
+                  <i class="fas fa-bolt"></i> Buy Now
                 </button>
               </form>
               {% else %}
               <button class="amazon-btn product-list-btn-disabled" type="button" disabled>
-                {% if product.stock <= 0 %}Out of Stock{% else %}Unavailable{% endif %}
+                <i class="fas fa-times"></i> {% if product.stock <= 0 %}Out of Stock{% else %}Unavailable{% endif %}
               </button>
               {% endif %}
               <!-- Wishlist Button -->
               <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" class="product-list-wishlist-form">
-              {% csrf_token %}
-              <button type="submit" title="Add to Wishlist" class="product-list-wishlist-btn">❤️</button>
+                {% csrf_token %}
+                <button type="submit" title="Add to Wishlist" class="product-list-wishlist-btn">
+                  <i class="fas fa-heart"></i>
+                </button>
               </form>
             </div>
 
@@ -162,11 +164,13 @@
   {% else %}
     <!-- No Products -->
     <div class="amazon-empty-cart">
-      <div class="amazon-empty-cart-icon">📦</div>
+      <div class="amazon-empty-cart-icon">
+        <i class="fas fa-box-open" style="font-size: 80px; opacity: 0.5;"></i>
+      </div>
       <h2>No products found</h2>
       <p>We couldn't find any products matching your criteria.</p>
       <a href="{% url 'shop:home' %}" class="amazon-btn amazon-btn-primary">
-        Go to Homepage
+        <i class="fas fa-home"></i> Go to Homepage
       </a>
     </div>
   {% endif %}
@@ -175,7 +179,9 @@
   <div class="product-list-recently-viewed">
     <h2 class="product-list-recently-title">Your recently viewed items</h2>
     <div class="product-list-recently-link-row">
-      <a href="#" class="amazon-action-link product-list-recently-link">View or edit your browsing history</a>
+      <a href="#" class="amazon-action-link product-list-recently-link">
+        <i class="fas fa-history"></i> View or edit your browsing history
+      </a>
     </div>
   </div>
 </div>
