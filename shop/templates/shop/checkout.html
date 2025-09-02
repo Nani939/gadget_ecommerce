@@ -12,9 +12,18 @@
 
 <!-- Stepper Section -->
 <div class="amazon-stepper">
-    <div class="amazon-step active"><i class="fa fa-map-marker-alt"></i> Address</div>
-    <div class="amazon-step active"><i class="fa fa-list"></i> Order Summary</div>
-    <div class="amazon-step active"><i class="fa fa-credit-card"></i> Payment</div>
+    <div class="amazon-step active">
+        <i class="fas fa-map-marker-alt"></i> 
+        <span>Address</span>
+    </div>
+    <div class="amazon-step active">
+        <i class="fas fa-list"></i> 
+        <span>Order Summary</span>
+    </div>
+    <div class="amazon-step active">
+        <i class="fas fa-credit-card"></i> 
+        <span>Payment</span>
+    </div>
 </div>
 
 <!-- Checkout Main Section -->
@@ -22,9 +31,13 @@
     <div class="amazon-checkout-main">
         <!-- Address Section -->
         <div class="amazon-checkout-section">
-            <div class="amazon-section-title"><i class="fa fa-map-marker-alt"></i> Delivery Address</div>
+            <div class="amazon-section-title">
+                <i class="fas fa-map-marker-alt"></i> Delivery Address
+            </div>
             <form id="checkout-form">
-                <button type="button" id="get-location-btn" class="amazon-btn amazon-btn-primary amazon-location-btn"><i class="fa fa-location-arrow"></i> Use My Location</button>
+                <button type="button" id="get-location-btn" class="amazon-btn amazon-btn-primary amazon-location-btn">
+                    <i class="fas fa-location-arrow"></i> Use My Location
+                </button>
                 <div class="amazon-form-group">
                     <label for="name" class="amazon-form-label">Full Name</label>
                     <input type="text" id="name" name="name" class="amazon-form-input" required>
@@ -41,16 +54,23 @@
         </div>
         <!-- Payment Section -->
         <div class="amazon-checkout-section">
-            <div class="amazon-section-title"><i class="fa fa-credit-card"></i> Payment Method</div>
-            <div class="amazon-payment-methods">
-                <div class="amazon-payment-option selected" id="razorpay-option"><i class="fa fa-credit-card"></i> Razorpay / UPI / Netbanking</div>
+            <div class="amazon-section-title">
+                <i class="fas fa-credit-card"></i> Payment Method
             </div>
-            <button id="rzp-button" class="amazon-btn amazon-btn-primary amazon-place-order-btn">Pay & Place Order</button>
+            <div class="amazon-payment-methods">
+                <div class="amazon-payment-option selected" id="razorpay-option">
+                    <i class="fas fa-credit-card"></i> 
+                    <span>Razorpay / UPI / Netbanking</span>
+                </div>
+            </div>
+            <button id="rzp-button" class="amazon-btn amazon-btn-primary amazon-place-order-btn">
+                <i class="fas fa-lock"></i> Pay & Place Order
+            </button>
         </div>
     </div>
     <!-- Order Summary Section -->
     <div class="amazon-order-summary">
-        <h3>Order Summary</h3>
+        <h3><i class="fas fa-receipt"></i> Order Summary</h3>
         <ul class="amazon-summary-list">
             {# Ensure only <li> as direct children #}
             {% for item in cart_items %}
@@ -75,7 +95,7 @@
             alert('Geolocation is not supported by your browser.');
             return;
         }
-        document.getElementById('get-location-btn').textContent = 'Getting location...';
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
         navigator.geolocation.getCurrentPosition(function(position) {
             var lat = position.coords.latitude;
             var lon = position.coords.longitude;
@@ -88,15 +108,18 @@
                 var addr = data.address;
                 var addressStr = [addr.road, addr.suburb, addr.city || addr.town || addr.village, addr.state, addr.postcode, addr.country].filter(Boolean).join(', ');
                 document.getElementById('address').value = addressStr;
-                document.getElementById('get-location-btn').textContent = 'Use My Location';
+                document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-check"></i> Location Found';
+                setTimeout(() => {
+                    document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
+                }, 2000);
             })
             .catch(() => {
                 alert('Could not fetch address from location.');
-                document.getElementById('get-location-btn').textContent = 'Use My Location';
+                document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
             });
         }, function() {
             alert('Unable to retrieve your location.');
-            document.getElementById('get-location-btn').textContent = 'Use My Location';
+            document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
         });
     };
     // Payment method selection
@@ -120,6 +143,11 @@
     document.getElementById('rzp-button').onclick = function(e){
         e.preventDefault();
         if (!validateCheckoutForm()) return;
+        
+        // Add loading state to button
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        this.disabled = true;
+        
         // Only online payment allowed
         fetch("{% url 'shop:checkout' %}", {
             method: "POST",
@@ -165,6 +193,8 @@
                                   window.location.href = "{% url 'shop:orders' %}";
                               } else {
                                   alert("Payment failed! Please try again.");
+                                  document.getElementById('rzp-button').innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
+                                  document.getElementById('rzp-button').disabled = false;
                               }
                           });
                     },
@@ -174,6 +204,8 @@
                 rzp1.open();
             } else {
                 alert('Could not initiate payment. Please try again.');
+                document.getElementById('rzp-button').innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
+                document.getElementById('rzp-button').disabled = false;
             }
         });
     }
