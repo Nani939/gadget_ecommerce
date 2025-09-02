@@ -5,69 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
-<style>
-.wishlist-header {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-    padding: 40px 20px;
-    text-align: center;
-    border-radius: 8px;
-    margin-bottom: 30px;
-}
 
-.wishlist-item {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    display: flex;
-    gap: 20px;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.wishlist-item:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
-}
-
-.wishlist-image {
-    width: 150px;
-    height: 150px;
-    object-fit: contain;
-    border-radius: 6px;
-}
-
-.wishlist-details {
-    flex: 1;
-}
-
-.wishlist-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 150px;
-}
-
-.heart-icon {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    color: #e74c3c;
-    font-size: 20px;
-}
-
-.price-alert {
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    color: #155724;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-top: 10px;
-}
-</style>
 {% endblock %}
 
 {% block content %}
