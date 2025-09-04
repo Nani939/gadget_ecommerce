@@ -67,16 +67,20 @@
                   <a href="{% url 'shop:remove_from_cart' item.product.id %}" 
                      class="amazon-action-link"
                      onclick="return confirm('Are you sure you want to remove this item from your cart?')">
-                    Delete
+                    <i class="fas fa-trash"></i> Delete
                   </a>
 
                   <span class="amazon-divider">|</span>
                   
-                  <a href="#" class="amazon-action-link">Save for later</a>
+                  <a href="#" class="amazon-action-link">
+                    <i class="fas fa-bookmark"></i> Save for later
+                  </a>
 
                   <span class="amazon-divider">|</span>
                   
-                  <a href="#" class="amazon-action-link">Compare with similar items</a>
+                  <a href="#" class="amazon-action-link">
+                    <i class="fas fa-balance-scale"></i> Compare with similar items
+                  </a>
                 </div>
               </div>
 
@@ -105,7 +109,7 @@
         </div>
 
         <a href="{% url 'shop:checkout' %}" class="amazon-checkout-btn">
-          Proceed to Buy
+          <i class="fas fa-credit-card"></i> Proceed to Buy
         </a>
 
         <div class="amazon-gift-option">
@@ -136,13 +140,19 @@
   {% else %}
     <!-- Empty Cart -->
     <div class="amazon-empty-cart">
-      <div class="amazon-empty-cart-icon">🛒</div>
-      <h2>Your Amazon Cart is empty</h2>
+      <div class="amazon-empty-cart-icon">
+        <i class="fas fa-shopping-cart" style="font-size: 80px; opacity: 0.5;"></i>
+      </div>
+      <h2>Your Gadget Shop Cart is empty</h2>
       <p>Check your saved for later items below or <a href="{% url 'products:product_list' %}" class="amazon-action-link">continue shopping</a>.</p>
       
       <div class="amazon-empty-cart-actions">
-        <a href="{% url 'users:login' %}" class="amazon-btn amazon-btn-primary">Sign in to your account</a>
-        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary">Sign up now</a>
+        <a href="{% url 'users:login' %}" class="amazon-btn amazon-btn-primary">
+          <i class="fas fa-sign-in-alt"></i> Sign in to your account
+        </a>
+        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary">
+          <i class="fas fa-user-plus"></i> Sign up now
+        </a>
       </div>
 
       <!-- Recommended Products for Empty Cart -->
@@ -152,7 +162,7 @@
           <!-- This would be populated with featured products -->
           <div class="amazon-empty-cart-browse">
             <a href="{% url 'products:product_list' %}" class="amazon-action-link">
-              Browse our product catalog →
+              <i class="fas fa-arrow-right"></i> Browse our product catalog
             </a>
           </div>
         </div>
@@ -162,7 +172,7 @@
 </div>
 
 <script>
-// Auto-submit quantity changes with loading state
+// Enhanced cart interactions
 document.addEventListener('DOMContentLoaded', function() {
   const quantitySelects = document.querySelectorAll('.amazon-quantity-dropdown');
   
@@ -170,11 +180,37 @@ document.addEventListener('DOMContentLoaded', function() {
     select.addEventListener('change', function() {
       // Add loading state
       const originalHTML = this.innerHTML;
-      this.innerHTML = '<option>Updating...</option>';
+      this.innerHTML = '<option><i class="fas fa-spinner fa-spin"></i> Updating...</option>';
       this.disabled = true;
       
       // Submit form
       this.form.submit();
+    });
+  });
+  
+  // Add to cart animation
+  document.querySelectorAll('form[action*="add_to_cart"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const button = this.querySelector('button[type="submit"]');
+      if (button) {
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+        button.disabled = true;
+      }
+    });
+  });
+  
+  // Wishlist button animation
+  document.querySelectorAll('.product-list-wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      this.innerHTML = '<i class="fas fa-heart" style="color: #ff6b6b;"></i>';
+      this.style.backgroundColor = '#ff6b6b';
+      this.style.color = 'white';
+      this.style.borderColor = '#ff6b6b';
+      
+      setTimeout(() => {
+        this.closest('form').submit();
+      }, 300);
     });
   });
 });
