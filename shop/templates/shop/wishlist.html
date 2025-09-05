@@ -115,10 +115,22 @@
 <script>
 function removeFromWishlist(productId) {
     if (confirm('Remove this item from your wishlist?')) {
-        // Implementation for removing from wishlist (AJAX or redirect)
-        window.location.reload();
+        fetch(`/wishlist/remove/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to remove item.');
+            }
+        });
     }
 }
+
 
 function shareProduct(productId) {
     const url = window.location.origin + '/products/' + productId + '/';

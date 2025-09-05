@@ -174,7 +174,7 @@
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1" id="buy-quantity">
             <button type="submit" class="amazon-btn amazon-btn-secondary product-detail-btn-fullwidth product-detail-btn-buynow">
-              Buy Now
+            Buy Now
             </button>
           </form>
           
@@ -183,15 +183,11 @@
             <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" class="product-detail-feature-form">
               {% csrf_token %}
               <button type="submit" class="amazon-btn amazon-btn-secondary product-detail-btn-feature">❤️ Wishlist</button>
-                ❤️ Wishlist
-              </button>
             </form>
             
             <form method="post" action="{% url 'shop:add_to_compare' product.id %}" class="product-detail-feature-form">
               {% csrf_token %}
               <button type="submit" class="amazon-btn amazon-btn-secondary product-detail-btn-feature">📊 Compare</button>
-                📊 Compare
-              </button>
             </form>
           </div>
           
@@ -222,7 +218,6 @@
             <input type="checkbox" class="product-detail-options-checkbox">
             Add gift options
           </label>
-          <a href="#" class="amazon-action-link product-detail-options-link">Add to Wish List</a>
         </div>
 
         <!-- Security Features -->
@@ -282,7 +277,6 @@
           <a href="#" class="amazon-action-link product-detail-reviews-link">See all reviews</a>
         </div>
       </div>
-          <a href="#" class="amazon-action-link">See all reviews</a>
         </div>
       </div>
     </div>
@@ -290,29 +284,33 @@
 </div>
 
 <script>
-// Update quantity in hidden inputs when dropdown changes
 document.addEventListener('DOMContentLoaded', function() {
   const quantitySelect = document.getElementById('quantity-select');
   const cartQuantity = document.getElementById('cart-quantity');
   const buyQuantity = document.getElementById('buy-quantity');
-  
-  quantitySelect.addEventListener('change', function() {
-    const selectedQuantity = this.value;
-    cartQuantity.value = selectedQuantity;
-    buyQuantity.value = selectedQuantity;
-  });
 
-  // Add loading states to buttons
-  const buttons = document.querySelectorAll('.amazon-btn');
-  buttons.forEach(button => {
-    if (button.type === 'submit') {
-      button.addEventListener('click', function() {
-        const originalText = this.textContent;
-        this.innerHTML = '<span class="amazon-loading"></span> ' + originalText;
-        this.disabled = true;
-      });
-    }
+  // Update hidden input values
+  if (quantitySelect) {
+    quantitySelect.addEventListener('change', function() {
+      const selectedQuantity = this.value;
+      if (cartQuantity) cartQuantity.value = selectedQuantity;
+      if (buyQuantity) buyQuantity.value = selectedQuantity;
+    });
+  }
+
+  // Add loading state on form submit (faster UI feedback)
+  const forms = document.querySelectorAll('.product-detail-action-form, .product-detail-feature-form');
+  forms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) {
+        btn.classList.add('loading');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="amazon-loading"></span> Processing...';
+      }
+    });
   });
 });
 </script>
+
 {% endblock %}

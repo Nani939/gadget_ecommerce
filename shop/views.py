@@ -8,9 +8,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.mail import send_mail
-
+import json, hmac, hashlib
 from .models import Category, Product, Order, OrderItem
 from users.models import UserProfile
+from shop.models import Wishlist  # 👈 import your model here
 
 import razorpay
 
@@ -316,7 +317,43 @@ def checkout(request):
         "state": "",
     })
 
+@csrf_exempt
+@login_required
+def payment_success(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
 
+        razorpay_order_id = data.get("razorpay_order_id")
+        razorpay_payment_id = data.get("razorpay_payment_id")
+        razorpay_signature = data.get("razorpay_signature")
+
+        # ✅ Verify signature
+        generated_signature = hmac.new(
+            settings.RAZORPAY_SECRET.encode(),
+            f"{razorpay_order_id}|{razorpay_payment_id}".encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        if generated_signature != razorpay_signature:
+            return JsonResponse({"status": "failed", "message": "Signature mismatch"})
+
+        # ✅ Find order
+        try:
+            order = Order.objects.get(razorpay_order_id=razorpay_order_id, user=request.user)
+        except Order.DoesNotExist:
+            return JsonResponse({"status": "failed", "message": "Order not found"})
+
+        # ✅ Update order as paid
+        order.payment_status = "Paid"
+        order.payment_id = razorpay_payment_id
+        order.save()
+
+        return JsonResponse({
+            "status": "success",
+            "redirect_url": f"/orders/success/{order.id}/"
+        })
+
+    return JsonResponse({"status": "failed", "message": "Invalid request"}, status=400)
 # -------------------------------
 # Order Success
 # -------------------------------
@@ -509,3 +546,14 @@ def order_details_view(request, order_id):
         "estimated_delivery": estimated_delivery,
     }
     return render(request, "admin/shop/order_details.html", context)
+
+
+
+
+@login_required
+def remove_from_wishlist(request, product_id):
+    wishlist = request.session.get('wishlist', [])
+    if product_id in wishlist:
+        wishlist.remove(product_id)
+        request.session['wishlist'] = wishlist
+    return JsonResponse({"success": True, "wishlist_count": len(wishlist)})

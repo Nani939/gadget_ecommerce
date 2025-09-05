@@ -1,214 +1,234 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block title %}Checkout{% endblock %}
+
 {% block extra_css %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
+<style>
+  .amazon-btn[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+</style>
 {% endblock %}
+
 {% block content %}
-
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
 
 <!-- Stepper Section -->
 <div class="amazon-stepper">
-    <div class="amazon-step active">
-        <i class="fas fa-map-marker-alt"></i> 
-        <span>Address</span>
-    </div>
-    <div class="amazon-step active">
-        <i class="fas fa-list"></i> 
-        <span>Order Summary</span>
-    </div>
-    <div class="amazon-step active">
-        <i class="fas fa-credit-card"></i> 
-        <span>Payment</span>
-    </div>
+  <div class="amazon-step active">
+    <i class="fas fa-map-marker-alt"></i> 
+    <span>Address</span>
+  </div>
+  <div class="amazon-step active">
+    <i class="fas fa-list"></i> 
+    <span>Order Summary</span>
+  </div>
+  <div class="amazon-step active">
+    <i class="fas fa-credit-card"></i> 
+    <span>Payment</span>
+  </div>
 </div>
 
 <!-- Checkout Main Section -->
 <div class="amazon-checkout-container">
-    <div class="amazon-checkout-main">
-        <!-- Address Section -->
-        <div class="amazon-checkout-section">
-            <div class="amazon-section-title">
-                <i class="fas fa-map-marker-alt"></i> Delivery Address
-            </div>
-            <form id="checkout-form">
-                <button type="button" id="get-location-btn" class="amazon-btn amazon-btn-primary amazon-location-btn">
-                    <i class="fas fa-location-arrow"></i> Use My Location
-                </button>
-                <div class="amazon-form-group">
-                    <label for="name" class="amazon-form-label">Full Name</label>
-                    <input type="text" id="name" name="name" class="amazon-form-input" required>
-                </div>
-                <div class="amazon-form-group">
-                    <label for="address" class="amazon-form-label">Address</label>
-                    <textarea id="address" name="address" rows="3" class="amazon-form-input" required></textarea>
-                </div>
-                <div class="amazon-form-group">
-                    <label for="phone" class="amazon-form-label">Phone</label>
-                    <input type="text" id="phone" name="phone" class="amazon-form-input" required>
-                </div>
-            </form>
+  <div class="amazon-checkout-main">
+    <!-- Address Section -->
+    <div class="amazon-checkout-section">
+      <div class="amazon-section-title">
+        <i class="fas fa-map-marker-alt"></i> Delivery Address
+      </div>
+      <form id="checkout-form">
+        <button type="button" id="get-location-btn" class="amazon-btn amazon-btn-primary amazon-location-btn">
+          <i class="fas fa-location-arrow"></i> Use My Location
+        </button>
+        <div class="amazon-form-group">
+          <label for="name" class="amazon-form-label">Full Name</label>
+          <input type="text" id="name" name="name" class="amazon-form-input" required>
         </div>
-        <!-- Payment Section -->
-        <div class="amazon-checkout-section">
-            <div class="amazon-section-title">
-                <i class="fas fa-credit-card"></i> Payment Method
-            </div>
-            <div class="amazon-payment-methods">
-                <div class="amazon-payment-option selected" id="razorpay-option">
-                    <i class="fas fa-credit-card"></i> 
-                    <span>Razorpay / UPI / Netbanking</span>
-                </div>
-            </div>
-            <button id="rzp-button" class="amazon-btn amazon-btn-primary amazon-place-order-btn">
-                <i class="fas fa-lock"></i> Pay & Place Order
-            </button>
+        <div class="amazon-form-group">
+          <label for="address" class="amazon-form-label">Address</label>
+          <textarea id="address" name="address" rows="3" class="amazon-form-input" required></textarea>
         </div>
+        <div class="amazon-form-group">
+          <label for="phone" class="amazon-form-label">Phone</label>
+          <input type="text" id="phone" name="phone" class="amazon-form-input" required>
+        </div>
+      </form>
     </div>
-    <!-- Order Summary Section -->
-    <div class="amazon-order-summary">
-        <h3><i class="fas fa-receipt"></i> Order Summary</h3>
-        <ul class="amazon-summary-list">
-            {# Ensure only <li> as direct children #}
-            {% for item in cart_items %}
-                <li class="amazon-summary-row">
-                    <span>{{ item.product.name }} x {{ item.quantity }}</span>
-                    <span>₹{{ item.get_total_price }}</span>
-                </li>
-            {% endfor %}
-        </ul>
-        <div class="amazon-summary-total">
-            <span>Total:</span> <span>₹{{ total_price }}</span>
+
+    <!-- Payment Section -->
+    <div class="amazon-checkout-section">
+      <div class="amazon-section-title">
+        <i class="fas fa-credit-card"></i> Payment Method
+      </div>
+      <div class="amazon-payment-methods">
+        <div class="amazon-payment-option selected" id="razorpay-option">
+          <i class="fas fa-credit-card"></i> 
+          <span>Razorpay / UPI / Netbanking</span>
         </div>
+      </div>
+      <button id="rzp-button" class="amazon-btn amazon-btn-primary amazon-place-order-btn">
+        <i class="fas fa-lock"></i> Pay & Place Order
+      </button>
     </div>
+  </div>
+
+  <!-- Order Summary Section -->
+  <div class="amazon-order-summary">
+    <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+    <ul class="amazon-summary-list">
+      {% for item in cart_items %}
+        <li class="amazon-summary-row">
+          <span>{{ item.product.name }} x {{ item.quantity }}</span>
+          <span>₹{{ item.get_total_price }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="amazon-summary-total">
+      <span>Total:</span> <span>₹{{ total_price }}</span>
+    </div>
+  </div>
 </div>
 
 <script>
+  // Helper: set button loading state
+  function setLoading(btn, isLoading, loadingText = 'Processing...') {
+    if (isLoading) {
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+      btn.disabled = true;
+    } else {
+      btn.innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
+      btn.disabled = false;
+    }
+  }
 
-    // Live location autofill for address
-    document.getElementById('get-location-btn').onclick = function(e) {
-        e.preventDefault();
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser.');
-            return;
-        }
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var lat = position.coords.latitude;
-            var lon = position.coords.longitude;
-            // Use OpenStreetMap Nominatim for reverse geocoding
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
-                headers: { 'User-Agent': 'gadget-shop' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                var addr = data.address;
-                var addressStr = [addr.road, addr.suburb, addr.city || addr.town || addr.village, addr.state, addr.postcode, addr.country].filter(Boolean).join(', ');
-                document.getElementById('address').value = addressStr;
-                document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-check"></i> Location Found';
-                setTimeout(() => {
-                    document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
-                }, 2000);
-            })
-            .catch(() => {
-                alert('Could not fetch address from location.');
-                document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
-            });
-        }, function() {
-            alert('Unable to retrieve your location.');
-            document.getElementById('get-location-btn').innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
-        });
-    };
-    // Payment method selection
+  // Live location autofill for address
+  document.getElementById('get-location-btn').onclick = async function(e) {
+    e.preventDefault();
+    const btn = this;
+    setLoading(btn, true, 'Getting location...');
 
-
-    function validateCheckoutForm() {
-        var name = document.getElementById('name').value.trim();
-        var address = document.getElementById('address').value.trim();
-        var phone = document.getElementById('phone').value.trim();
-        if (!name || !address || !phone) {
-            alert('Please fill in all address fields.');
-            return false;
-        }
-        if (!/^\d{10}$/.test(phone)) {
-            alert('Please enter a valid 10-digit phone number.');
-            return false;
-        }
-        return true;
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      setLoading(btn, false);
+      return;
     }
 
-    document.getElementById('rzp-button').onclick = function(e){
-        e.preventDefault();
-        if (!validateCheckoutForm()) return;
-        
-        // Add loading state to button
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        this.disabled = true;
-        
-        // Only online payment allowed
-        fetch("{% url 'shop:checkout' %}", {
-            method: "POST",
-            headers: {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+          { headers: { 'User-Agent': 'gadget-shop' } }
+        );
+        const data = await res.json();
+        const addr = data.address;
+        const addressStr = [addr.road, addr.suburb, addr.city || addr.town || addr.village, addr.state, addr.postcode, addr.country]
+          .filter(Boolean).join(', ');
+        document.getElementById('address').value = addressStr;
+        btn.innerHTML = '<i class="fas fa-check"></i> Location Found';
+        setTimeout(() => setLoading(btn, false, 'Use My Location'), 2000);
+      } catch {
+        alert('Could not fetch address from location.');
+        setLoading(btn, false, 'Use My Location');
+      }
+    }, () => {
+      alert('Unable to retrieve your location.');
+      setLoading(btn, false, 'Use My Location');
+    });
+  };
+
+  // Validate checkout form
+  function validateCheckoutForm() {
+    const name = document.getElementById('name').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    if (!name || !address || !phone) {
+      alert('Please fill in all address fields.');
+      return false;
+    }
+    if (!/^\d{10}$/.test(phone)) {
+      alert('Please enter a valid 10-digit phone number.');
+      return false;
+    }
+    return true;
+  }
+
+  // Razorpay Payment
+  document.getElementById('rzp-button').onclick = async function(e) {
+    e.preventDefault();
+    const btn = this;
+
+    if (!validateCheckoutForm()) return;
+    setLoading(btn, true);
+
+    try {
+      const res = await fetch("{% url 'shop:checkout' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+          name: document.getElementById("name").value,
+          address: document.getElementById("address").value,
+          phone: document.getElementById("phone").value,
+          payment_method: "razorpay"
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.razorpay_order_id && data.razorpay_key && data.razorpay_amount) {
+        const options = {
+          key: data.razorpay_key,
+          amount: data.razorpay_amount,
+          currency: "INR",
+          name: "Gadget Ecommerce",
+          description: "Order Payment",
+          order_id: data.razorpay_order_id,
+          handler: async function (response) {
+            const confirmRes = await fetch("{% url 'shop:payment_success' %}", {
+              method: "POST",
+              headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": "{{ csrf_token }}"
-            },
-            body: JSON.stringify({
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
                 name: document.getElementById("name").value,
                 address: document.getElementById("address").value,
-                phone: document.getElementById("phone").value,
-                payment_method: "razorpay"
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.razorpay_order_id && data.razorpay_key && data.razorpay_amount) {
-                var options = {
-                    "key": data.razorpay_key,
-                    "amount": data.razorpay_amount,
-                    "currency": "INR",
-                    "name": "Gadget Ecommerce",
-                    "description": "Order Payment",
-                    "order_id": data.razorpay_order_id,
-                    "handler": function (response){
-                        fetch("{% url 'shop:payment_success' %}", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: JSON.stringify({
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_signature: response.razorpay_signature,
-                                name: document.getElementById("name").value,
-                                address: document.getElementById("address").value,
-                                phone: document.getElementById("phone").value
-                            })
-                        }).then(res => res.json())
-                          .then(data => {
-                              if(data.status === "success"){
-                                  window.location.href = "{% url 'shop:orders' %}";
-                              } else {
-                                  alert("Payment failed! Please try again.");
-                                  document.getElementById('rzp-button').innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
-                                  document.getElementById('rzp-button').disabled = false;
-                              }
-                          });
-                    },
-                    "theme": { "color": "#0d6efd" }
-                };
-                var rzp1 = new Razorpay(options);
-                rzp1.open();
+                phone: document.getElementById("phone").value
+              })
+            });
+            const confirmData = await confirmRes.json();
+            if (confirmData.status === "success") {
+              window.location.href = "{% url 'shop:orders' %}";
             } else {
-                alert('Could not initiate payment. Please try again.');
-                document.getElementById('rzp-button').innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
-                document.getElementById('rzp-button').disabled = false;
+              alert("Payment failed! Please try again.");
+              setLoading(btn, false);
             }
-        });
+          },
+          theme: { color: "#0d6efd" }
+        };
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+      } else {
+        alert("Could not initiate payment. Please try again.");
+        setLoading(btn, false);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Network error. Please try again.");
+      setLoading(btn, false);
     }
+  };
 </script>
-
 {% endblock %}

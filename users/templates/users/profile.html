@@ -54,21 +54,33 @@
             <button type="submit" class="btn btn-primary w-100">Save Changes</button>
           </form>
           
-          <hr class="orders-divider">
+          <hr style="margin:25px 0;border-top:2px solid #eaeaea;">
           <h5 class="mb-3">📦 Recent Orders</h5>
-          <div class="orders-list">
+          <div>
             {% for order in user.order_set.all|slice:":5" %}
-              <div class="order-card">
-                <div class="order-card-header">
+              <div style="
+                  background:#fff;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                  padding:15px 20px;
+                  margin-bottom:15px;
+                  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+                  transition:transform 0.2s ease,box-shadow 0.2s ease;
+              " 
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.12)';"
+              onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.08)';">
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;">
                   <div>
-                    <strong>Order #{{ order.id }}</strong>
-                    <div class="order-date">{{ order.created_at|date:"M j, Y" }}</div>
+                    <strong style="font-size:16px;color:#007185;">Order #{{ order.id }}</strong>
+                    <div style="font-size:13px;color:#555;margin-top:4px;">
+                      {{ order.created_at|date:"M j, Y" }}
+                    </div>
                   </div>
                 </div>
-               
               </div>
             {% empty %}
-              <p class="orders-empty">No orders yet</p>
+              <p style="color:#888;font-style:italic;">No orders yet</p>
             {% endfor %}
           </div>
         </div>

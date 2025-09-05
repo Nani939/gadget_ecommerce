@@ -35,6 +35,8 @@ urlpatterns = [
     
     # Unique features
     path("wishlist/", views.wishlist, name="wishlist"),
+    path('wishlist/remove/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
+
     path("wishlist/add/<int:product_id>/", views.add_to_wishlist, name="add_to_wishlist"),
     path("compare/", views.compare_products, name="compare_products"),
     path("compare/add/<int:product_id>/", views.add_to_compare, name="add_to_compare"),
@@ -42,7 +44,7 @@ urlpatterns = [
     path("bulk-order/", views.bulk_order, name="bulk_order"),
 
     # FIXED section
-    path("payment-success/", views.payment_success, name="payment_success"),  # ✅ Keep only this
+    path("payment/success/", views.payment_success, name="payment_success"),  # ✅ Keep only this
     # ❌ REMOVE: path("order-success/", views.order_success, name="order_success"),
     # ❌ REMOVE duplicate: path("product/<int:pk>/", views.product_detail, name="product_detail"),
 ]
