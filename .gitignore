@@ -1,2 +1,3 @@
 https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCT0hFd2dFPSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--58ecf74f731a780ce31f2c8c9c7ecbb3c79e1170//.gitignore
 .env
+db.sqlite3
