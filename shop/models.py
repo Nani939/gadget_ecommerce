@@ -140,6 +140,8 @@ class Order(models.Model):
         choices=[("Pending", "Pending"), ("Paid", "Paid"), ("Failed", "Failed")],
         default="Pending"
     )
+    payment_signature = models.CharField(max_length=255, blank=True, null=True)
+    payment_order_id = models.CharField(max_length=255, blank=True, null=True)
 
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -153,6 +155,19 @@ class Order(models.Model):
 
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.items.all())
+
+    def get_items_summary(self):
+        """Return a summary of items in the order"""
+        items = self.items.all()
+        return f"{items.count()} item{'s' if items.count() != 1 else ''}"
+
+    def get_payment_method_display_name(self):
+        """Return a user-friendly payment method name"""
+        method_names = {
+            'RZP': 'Razorpay',
+            'razorpay': 'Razorpay',
+        }
+        return method_names.get(self.payment_method, self.payment_method)
 
 # -------------------------
 # Order Item Model
