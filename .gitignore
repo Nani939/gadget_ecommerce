@@ -1,2 +1,28 @@
-https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCT0UyM0FFPSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--f659a1e3462dbc13c5ab6951e0190e25d2b5422e//.gitignore
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Environment variables
 .env
+
+# SQLite database
+db.sqlite3
+
+# Django migrations cache
+*/migrations/__pycache__/
+
+# Media files (uploads)
+media/
+
+# Static files collected
+staticfiles/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
