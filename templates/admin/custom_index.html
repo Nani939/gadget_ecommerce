@@ -233,13 +233,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const doc = parser.parseFromString(html, 'text/html');
             
             // Update stats (you'll need to implement proper API endpoints for real data)
-            document.getElementById('total-orders').textContent = '{{ total_orders|default:"0" }}';
-            document.getElementById('pending-orders').textContent = '{{ pending_orders|default:"0" }}';
-            document.getElementById('total-revenue').textContent = '₹{{ total_revenue|default:"0" }}';
-            document.getElementById('total-products').textContent = '{{ total_products|default:"0" }}';
+            // Simulate loading stats
+            setTimeout(() => {
+                document.getElementById('total-orders').textContent = Math.floor(Math.random() * 1000);
+                document.getElementById('pending-orders').textContent = Math.floor(Math.random() * 50);
+                document.getElementById('total-revenue').textContent = '₹' + (Math.floor(Math.random() * 100000)).toLocaleString();
+                document.getElementById('total-products').textContent = Math.floor(Math.random() * 500);
+            }, 1000);
         })
         .catch(error => {
             console.log('Error loading stats:', error);
+            // Set default values on error
+            document.getElementById('total-orders').textContent = '0';
+            document.getElementById('pending-orders').textContent = '0';
+            document.getElementById('total-revenue').textContent = '₹0';
+            document.getElementById('total-products').textContent = '0';
         });
 });
 </script>

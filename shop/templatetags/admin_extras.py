@@ -1,6 +1,7 @@
 from django import template
 from django.utils.safestring import mark_safe
 from datetime import timedelta
+from django.db import models
 
 register = template.Library()
 
@@ -16,13 +17,13 @@ def add_days(date, days):
 def get_order_stats():
     """Get order statistics for admin dashboard"""
     from shop.models import Order
-    from django.db.models import Sum, Count
+    from django.db.models import Sum, Count, Q
     
     stats = Order.objects.aggregate(
         total_orders=Count('id'),
         total_revenue=Sum('total_amount'),
-        pending_orders=Count('id', filter=models.Q(status='PLACED')),
-        shipped_orders=Count('id', filter=models.Q(status='SHIPPED')),
+        pending_orders=Count('id', filter=Q(status='PLACED')),
+        shipped_orders=Count('id', filter=Q(status='SHIPPED')),
     )
     
     return stats

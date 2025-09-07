@@ -604,6 +604,50 @@ class OrderAdmin(admin.ModelAdmin):
         return response
     export_selected_orders.short_description = "Export selected orders to CSV"
 
+    def download_addresses_view(self, request):
+        """Download all customer addresses as CSV"""
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="customer_addresses.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "Order ID", "Customer Name", "Email", "Phone", "Address", 
+            "City", "State", "Postal Code", "Country", "Order Date"
+        ])
+
+        orders = Order.objects.all().order_by("-created_at")
+        for order in orders:
+            writer.writerow([
+                order.id, order.customer_name, order.customer_email,
+                order.phone_number or "N/A", order.address or "N/A",
+                order.city or "N/A", order.state or "N/A", 
+                order.postal_code or "N/A", order.country,
+                order.created_at.strftime("%Y-%m-%d")
+            ])
+
+        return response
+
+    def download_single_address_view(self, request, order_id):
+        """Download single order address as CSV"""
+        order = get_object_or_404(Order, id=order_id)
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="order_{order.id}_address.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "Order ID", "Customer Name", "Email", "Phone", "Address", 
+            "City", "State", "Postal Code", "Country", "Order Date"
+        ])
+        writer.writerow([
+            order.id, order.customer_name, order.customer_email,
+            order.phone_number or "N/A", order.address or "N/A",
+            order.city or "N/A", order.state or "N/A", 
+            order.postal_code or "N/A", order.country,
+            order.created_at.strftime("%Y-%m-%d")
+        ])
+
+        return response
+
 
 # -----------------------------
 # Admin Site Customization

@@ -368,7 +368,7 @@ def order_success(request, order_id):
 
 @login_required
 def track_order(request, pk):
-    order = get_object_or_404(Order, id=pk)
+    order = get_object_or_404(Order, id=pk, user=request.user)
     status_list = ["PLACED", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED"]
     try:
         current_status_index = status_list.index(order.status)

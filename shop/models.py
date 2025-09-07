@@ -76,6 +76,19 @@ class Product(models.Model):
         return 0
     get_savings.short_description = "You Save"
 
+    def calculate_discount_percentage(self):
+        """Calculate discount percentage based on discount amount"""
+        if self.discount_amount > 0 and self.price > 0:
+            percentage = (self.discount_amount / self.price) * 100
+            self.discount_percentage = round(percentage, 2)
+            return self.discount_percentage
+        return 0
+    
+    def save(self, *args, **kwargs):
+        # Auto-calculate discount percentage when discount amount is set
+        if self.discount_amount > 0:
+            self.calculate_discount_percentage()
+        super().save(*args, **kwargs)
 
 def has_discount(self):
     """Check if product has any discount."""
