@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
-
+from rangefilter.filters import NumericRangeFilter
 from .models import Category, Product, Order, OrderItem
 
 
@@ -37,26 +37,30 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
-        "product_image_preview",
-        "name",
-        "brand",
-        "category",
-        "price",
-        "discounted_price_display",
-        "stock_status",
-        "availability_badge",
-        "created",
-    ]
+    "product_image_preview",
+    "name",
+    "brand",
+    "category",
+    "price",
+    "discounted_price_display",
+    "stock",              # added ✅
+    "available",          # added ✅
+    "stock_status",
+    "availability_badge",
+    "created",
+]
+
+    list_editable = ("stock", "available")
+ 
     list_filter = [
         "available", 
         "created", 
         "updated", 
         "category", 
         "brand",
-        ("price", admin.RangeFilter),
-        ("stock", admin.RangeFilter),
+        ("price", NumericRangeFilter),
+        ("stock", NumericRangeFilter),
     ]
-    list_editable = ["price", "stock", "available"]
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ["name", "description", "model", "brand", "model_number"]
     readonly_fields = ["created", "updated", "product_image_preview"]
@@ -196,7 +200,7 @@ class OrderAdmin(admin.ModelAdmin):
         "payment_method",
         "paid",
         ("created_at", admin.DateFieldListFilter),
-        ("total_amount", admin.RangeFilter),
+        ("total_amount",  NumericRangeFilter),
         "country",
         "state"
     ]
