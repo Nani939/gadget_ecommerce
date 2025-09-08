@@ -33,6 +33,10 @@ urlpatterns = [
     path("order/print/<int:order_id>/", views.print_order_details, name="print_order_details"),
     path("order/delivery-slip/<int:order_id>/", views.delivery_slip, name="delivery_slip"),
     
+    # Admin download URLs (for admin interface)
+    path("admin/download-addresses/", views.download_addresses_admin, name="download_addresses_admin"),
+    path("admin/download-single-address/<int:order_id>/", views.download_single_address_admin, name="download_single_address_admin"),
+    
     # Unique features
     path("wishlist/", views.wishlist, name="wishlist"),
     path('wishlist/remove/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),

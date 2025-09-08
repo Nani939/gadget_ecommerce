@@ -505,6 +505,16 @@ class OrderAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.export_orders_view),
                 name="shop_export_orders",
             ),
+            path(
+                "download-addresses/",
+                self.admin_site.admin_view(self.download_addresses_view),
+                name="shop_download_addresses",
+            ),
+            path(
+                "download-single-address/<int:order_id>/",
+                self.admin_site.admin_view(self.download_single_address_view),
+                name="shop_download_single_address",
+            ),
         ]
         return custom_urls + urls
 
