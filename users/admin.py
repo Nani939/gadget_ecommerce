@@ -17,7 +17,7 @@ class CustomUserAdmin(UserAdmin):
 # Register Address with correct field names
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
-    list_display = ('user', 'full_name', 'phone_number', 'address_line1', 'city', 'zip_code', 'is_default')
+    list_display = ('user', 'full_name', 'phone_number', 'address_line1', 'city', 'postal_code', 'is_default')
     list_filter = ('is_default', 'country', 'state')
     search_fields = ('user__username', 'full_name', 'phone_number', 'city')
     list_editable = ('is_default',)
@@ -27,7 +27,7 @@ class AddressAdmin(admin.ModelAdmin):
             'fields': ('user', 'full_name', 'phone_number')
         }),
         ('Address Details', {
-            'fields': ('address_line1', 'address_line2', 'city', 'state', 'zip_code', 'country')
+            'fields': ('address_line1', 'address_line2', 'city', 'state', 'postal_code', 'country')
         }),
         ('Settings', {
             'fields': ('is_default',)

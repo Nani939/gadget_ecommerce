@@ -251,6 +251,7 @@ def buy_now(request, product_id):
 # -------------------------------
 # Checkout & Order Success with Razorpay Integration
 # -------------------------------
+
 @login_required
 def checkout(request):
     cart = request.session.get("cart", {})
@@ -268,12 +269,8 @@ def checkout(request):
         cart_items.append({"product": product, "quantity": qty, "total": line_total})
         total_price += line_total
 
-    # Try to load user's saved profile if available
-    try:
-        profile = request.user.userprofile
-    except UserProfile.DoesNotExist:
-        profile = None
-
+    # Load or create user's profile using the correct related_name
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
         import json
@@ -283,39 +280,48 @@ def checkout(request):
             address = data.get("address", "").strip()
             phone_number = data.get("phone", "").strip()
             name = data.get("name", "").strip()
-            # For demo, city/state/postal_code are left blank, you can parse from address if needed
-            city = ""
-            state = ""
-            postal_code = ""
+            city = data.get("city", "").strip()
+            state = data.get("state", "").strip()
+            postal_code = data.get("postal_code", "").strip()
             latitude = data.get("latitude")
             longitude = data.get("longitude")
-            error = None
+
             if not address or not phone_number or not name:
                 return JsonResponse({"status": "error", "error": "All address fields required."}, status=400)
-            # Only allow Razorpay/online payments
+
+            # Save/update user's profile info
+            profile.address = address
+            profile.city = city
+            profile.postal_code = postal_code
+            profile.save()
+
+            # Razorpay integration
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
             razorpay_order = client.order.create({
                 "amount": int(total_price * 100),  # in paise
                 "currency": "INR",
                 "payment_capture": "1"
             })
+
             return JsonResponse({
                 "razorpay_order_id": razorpay_order["id"],
                 "razorpay_key": settings.RAZORPAY_KEY_ID,
                 "razorpay_amount": int(total_price * 100)
             })
+
         # fallback for non-JSON POST (form submit)
-        # ...existing code for form POST...
+        # ... your existing form handling code ...
 
     return render(request, "shop/checkout.html", {
         "cart_items": cart_items,
         "total_price": total_price,
-        "address": profile.address if profile else "",
-        "city": profile.city if profile else "",
-        "postal_code": profile.postal_code if profile else "",
+        "address": profile.address,
+        "city": profile.city,
+        "postal_code": profile.postal_code,
         "phone_number": "",
         "state": "",
     })
+
 
 @csrf_exempt
 @login_required

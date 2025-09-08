@@ -59,7 +59,7 @@ class AddressForm(forms.ModelForm):
     class Meta:
         model = Address
         fields = ['full_name', 'phone_number', 'address_line1', 'address_line2',
-                  'city', 'state', 'zip_code', 'country', 'is_default']
+                  'city', 'state', 'postal_code', 'country', 'is_default']
 # users/forms.py
 from django import forms
 from django.contrib.auth.models import User

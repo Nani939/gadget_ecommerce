@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'shop',
     'users',
     'widget_tweaks',
+    'rangefilter',
 ]
 
 MIDDLEWARE = [

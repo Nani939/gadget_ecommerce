@@ -107,13 +107,15 @@ class ProductAdmin(admin.ModelAdmin):
         discounted = obj.get_discounted_price()
         if discounted < obj.price:
             savings = obj.price - discounted
-            return format_html(
-                '<div style="font-weight: 600; color: #d32f2f;">₹{:.2f}</div><div style="font-size: 11px; color: #4caf50;">Save ₹{:.2f}</div>',
-                discounted, savings
-            )
-        return format_html('<span style="color: #666;">₹{:.2f}</span>', obj.price)
-    discounted_price_display.short_description = "Final Price"
+        return format_html(
+            '<div style="font-weight: 600; color: #d32f2f;">₹{}</div>'
+            '<div style="font-size: 11px; color: #4caf50;">Save ₹{}</div>',
+            "{:.2f}".format(discounted),
+            "{:.2f}".format(savings)
+        )
+        return format_html('<span style="color: #666;">₹{}</span>', "{:.2f}".format(obj.price))
 
+    discounted_price_display.short_description = "Final Price"
     def stock_status(self, obj):
         if obj.stock == 0:
             return format_html('<span style="background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">OUT OF STOCK</span>')
