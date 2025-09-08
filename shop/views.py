@@ -557,3 +557,60 @@ def remove_from_wishlist(request, product_id):
         wishlist.remove(product_id)
         request.session['wishlist'] = wishlist
     return JsonResponse({"success": True, "wishlist_count": len(wishlist)})
+
+# Admin helper views for CSV downloads
+def download_addresses_admin(request):
+    """Admin view to download all addresses"""
+    if not request.user.is_staff:
+        return redirect('shop:home')
+    
+    import csv
+    from django.http import HttpResponse
+    
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="all_customer_addresses.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        "Order ID", "Customer Name", "Email", "Phone", "Address", 
+        "City", "State", "Postal Code", "Country", "Order Date"
+    ])
+    
+    orders = Order.objects.all().order_by("-created_at")
+    for order in orders:
+        writer.writerow([
+            order.id, order.customer_name, order.customer_email,
+            order.phone_number or "N/A", order.address or "N/A",
+            order.city or "N/A", order.state or "N/A", 
+            order.postal_code or "N/A", order.country,
+            order.created_at.strftime("%Y-%m-%d")
+        ])
+    
+    return response
+
+def download_single_address_admin(request, order_id):
+    """Admin view to download single order address"""
+    if not request.user.is_staff:
+        return redirect('shop:home')
+    
+    import csv
+    from django.http import HttpResponse
+    
+    order = get_object_or_404(Order, id=order_id)
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="order_{order.id}_address.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        "Order ID", "Customer Name", "Email", "Phone", "Address", 
+        "City", "State", "Postal Code", "Country", "Order Date"
+    ])
+    writer.writerow([
+        order.id, order.customer_name, order.customer_email,
+        order.phone_number or "N/A", order.address or "N/A",
+        order.city or "N/A", order.state or "N/A", 
+        order.postal_code or "N/A", order.country,
+        order.created_at.strftime("%Y-%m-%d")
+    ])
+    
+    return response
