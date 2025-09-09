@@ -65,16 +65,20 @@ class Product(models.Model):
         return reverse("products:product_detail", args=[self.id])
     
     def get_discounted_price(self):
-        if self.discount:
+        """Calculate discounted price based on discount percentage"""
+        if self.discount > 0:
             return self.price - (self.price * (self.discount / 100))
         return self.price
-    get_discounted_price.short_description = "Discounted Price"
-
-    def get_savings(self):
-        if self.discount:
+    
+    def get_savings_amount(self):
+        """Calculate savings amount"""
+        if self.discount > 0:
             return self.price * (self.discount / 100)
         return 0
-    get_savings.short_description = "You Save"
+    
+    def get_discount_percentage(self):
+        """Return discount percentage"""
+        return self.discount
 
     def calculate_discount_percentage(self):
         """Calculate discount percentage based on discount amount"""

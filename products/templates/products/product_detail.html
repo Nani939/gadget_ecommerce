@@ -63,13 +63,13 @@
         <div class="product-detail-price-row">
           <span class="product-detail-price-label">Price:</span>
           <div class="amazon-price product-detail-price-main">
-            <span class="amazon-price-symbol product-detail-price-symbol">₹</span>{{ product.price|floatformat:2 }}
+            <span class="amazon-price-symbol product-detail-price-symbol">₹</span>{{ product.get_discounted_price|floatformat:2 }}
           </div>
         </div>
-        {% if product.id|divisibleby:3 %}
+        {% if product.discount > 0 %}
           <div class="product-detail-old-price-row">
-            List Price: <span class="product-detail-old-price">₹{{ product.price|add:500|floatformat:2 }}</span>
-            <span class="product-detail-discount">Save ₹{{ discount }} ( {{ discount_percent }}% )</span>
+            List Price: <span class="product-detail-old-price">₹{{ product.price|floatformat:2 }}</span>
+            <span class="product-detail-discount">Save ₹{{ product.get_savings_amount|floatformat:2 }} ({{ product.discount }}%)</span>
           </div>
         {% endif %}
       </div>
@@ -115,7 +115,7 @@
   <div class="product-detail-purchase-box">
         <!-- Price -->
         <div class="amazon-price product-detail-purchase-price">
-          <span class="amazon-price-symbol product-detail-purchase-price-symbol">₹</span>{{ product.price|floatformat:2 }}
+          <span class="amazon-price-symbol product-detail-purchase-price-symbol">₹</span>{{ product.get_discounted_price|floatformat:2 }}
         </div>
 
         <!-- Delivery Info -->
@@ -270,8 +270,8 @@
             <div class="amazon-stars">★★★★★</div>
             <strong>Excellent product!</strong>
           </div>
-          <div class="product-detail-review-meta">By <strong>John D.</strong> on {{ product.created|date:"F j, Y" }}</div>
-          <div class="product-detail-review-body">Great quality and fast delivery. Exactly as described. Would definitely recommend to others.</div>
+          <div class="product-detail-review-meta">By <strong>Customer</strong> on {{ product.created|date:"F j, Y" }}</div>
+          <div class="product-detail-review-body">{{ product.description|default:"Quality product as described." }}</div>
         </div>
         <div class="product-detail-reviews-footer">
           <a href="#" class="amazon-action-link product-detail-reviews-link">See all reviews</a>

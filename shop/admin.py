@@ -107,12 +107,12 @@ class ProductAdmin(admin.ModelAdmin):
         discounted = obj.get_discounted_price()
         if discounted < obj.price:
             savings = obj.price - discounted
-        return format_html(
-            '<div style="font-weight: 600; color: #d32f2f;">₹{}</div>'
-            '<div style="font-size: 11px; color: #4caf50;">Save ₹{}</div>',
-            "{:.2f}".format(discounted),
-            "{:.2f}".format(savings)
-        )
+            return format_html(
+                '<div style="font-weight: 600; color: #d32f2f;">₹{}</div>'
+                '<div style="font-size: 11px; color: #4caf50;">Save ₹{}</div>',
+                "{:.2f}".format(discounted),
+                "{:.2f}".format(savings)
+            )
         return format_html('<span style="color: #666;">₹{}</span>', "{:.2f}".format(obj.price))
 
     discounted_price_display.short_description = "Final Price"
@@ -365,7 +365,7 @@ class OrderAdmin(admin.ModelAdmin):
                 <div>
                     <div style="font-size: 24px; margin-bottom: 5px;">💰</div>
                     <div style="font-size: 14px; opacity: 0.9;">Total Amount</div>
-                    <div style="font-size: 18px; font-weight: 700;">₹{obj.total_amount:.2f}</div>
+                    <div style="font-size: 18px; font-weight: 700;">₹{obj.get_total_cost():.2f}</div>
                 </div>
                 <div>
                     <div style="font-size: 24px; margin-bottom: 5px;">📦</div>

@@ -273,6 +273,7 @@
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
                 }
             })
             .then(response => response.json())
@@ -280,24 +281,31 @@
                 const cartCount = document.getElementById('cart-count');
                 if (cartCount) {
                     cartCount.textContent = data.count || 0;
+                    // Show/hide cart count badge
+                    if (data.count > 0) {
+                        cartCount.style.display = 'block';
+                    } else {
+                        cartCount.style.display = 'none';
+                    }
                 }
             })
             .catch(error => {
                 console.log('Cart count update failed:', error);
+                // Set to 0 on error
                 const cartCount = document.getElementById('cart-count');
                 if (cartCount) {
-                    // Fallback to session-based count
-                    const cart = JSON.parse(sessionStorage.getItem('cart') || '{}');
-                    const count = Object.values(cart).reduce((sum, item) => sum + (item.quantity || 0), 0);
-                    cartCount.textContent = count;
+                    cartCount.textContent = '0';
+                    cartCount.style.display = 'none';
                 }
             });
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            getLocationForHeader();
             updateCartCount();
+            
+            // Update cart count every 30 seconds
+            setInterval(updateCartCount, 30000);
             
             // Add smooth scrolling
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -318,6 +326,11 @@
                         submitBtn.disabled = true;
                         const originalText = submitBtn.textContent;
                         submitBtn.innerHTML = '<span class="amazon-loading"></span> ' + originalText;
+                        // Re-enable after 3 seconds to prevent permanent disable
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = originalText;
+                        }, 3000);
                     }
                 });
             });
@@ -345,7 +358,17 @@
                     element.style.transform = 'translateY(0)';
                 }, index * 100);
             });
+            
+            // Update cart count when items are added
+            document.addEventListener('cartUpdated', function() {
+                updateCartCount();
+            });
         });
+        
+        // Function to trigger cart update event
+        function triggerCartUpdate() {
+            document.dispatchEvent(new CustomEvent('cartUpdated'));
+        }
     </script>
 
     <!-- Bootstrap JS -->

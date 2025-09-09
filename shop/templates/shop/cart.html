@@ -50,7 +50,7 @@
                   <div class="amazon-quantity-selector">
                     <form method="post" action="{% url 'shop:update_quantity' item.product.id %}" class="amazon-inline-form">
                       {% csrf_token %}
-                      <select name="quantity" class="amazon-quantity-dropdown" title="Select quantity" onchange="this.form.submit()">
+                      <select name="quantity" class="amazon-quantity-dropdown" title="Select quantity" onchange="updateCartQuantity(this)">
                         {% for i in "123456789" %}
                           <option value="{{ forloop.counter }}" {% if item.quantity == forloop.counter %}selected{% endif %}>
                             Qty: {{ forloop.counter }}
@@ -174,28 +174,52 @@
 <script>
 // Enhanced cart interactions
 document.addEventListener('DOMContentLoaded', function() {
-  const quantitySelects = document.querySelectorAll('.amazon-quantity-dropdown');
-  
-  quantitySelects.forEach(select => {
-    select.addEventListener('change', function() {
-      // Add loading state
-      const originalHTML = this.innerHTML;
-      this.innerHTML = '<option><i class="fas fa-spinner fa-spin"></i> Updating...</option>';
-      this.disabled = true;
-      
-      // Submit form
-      this.form.submit();
-    });
-  });
-  
   // Add to cart animation
   document.querySelectorAll('form[action*="add_to_cart"]').forEach(form => {
     form.addEventListener('submit', function(e) {
+      e.preventDefault();
       const button = this.querySelector('button[type="submit"]');
       if (button) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
         button.disabled = true;
       }
+      
+      // Submit via AJAX
+      const formData = new FormData(this);
+      fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update cart count
+          const cartCount = document.getElementById('cart-count');
+          if (cartCount) {
+            cartCount.textContent = data.cart_count;
+            if (data.cart_count > 0) {
+              cartCount.style.display = 'block';
+            }
+          }
+          // Show success message
+          showMessage(data.message, 'success');
+        }
+        // Reset button
+        if (button) {
+          button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+          button.disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        if (button) {
+          button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
+          button.disabled = false;
+        }
+      });
     });
   });
   
@@ -214,5 +238,53 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+// Function to update cart quantity
+function updateCartQuantity(selectElement) {
+  const form = selectElement.closest('form');
+  const formData = new FormData(form);
+  
+  selectElement.disabled = true;
+  
+  fetch(form.action, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Update cart count in header
+      const cartCount = document.getElementById('cart-count');
+      if (cartCount) {
+        cartCount.textContent = data.cart_count;
+      }
+      // Reload page to show updated totals
+      window.location.reload();
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    selectElement.disabled = false;
+  });
+}
+
+// Function to show messages
+function showMessage(message, type) {
+  const messagesContainer = document.querySelector('.amazon-messages') || document.querySelector('.amazon-container');
+  if (messagesContainer) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `amazon-alert amazon-alert-${type}`;
+    alertDiv.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${message}`;
+    messagesContainer.insertBefore(alertDiv, messagesContainer.firstChild);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 3000);
+  }
+}
 </script>
 {% endblock %}

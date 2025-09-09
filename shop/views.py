@@ -30,7 +30,7 @@ def about(request):
 def cart_count(request):
     """Return cart item count as JSON"""
     cart = request.session.get("cart", {})
-    total_qty = sum(int(item.get("quantity", 0)) for item in cart.values())
+    total_qty = sum(int(item.get("quantity", 0)) for item in cart.values() if isinstance(item, dict))
     return JsonResponse({"count": total_qty})
 
 # -------------------------------
@@ -96,7 +96,12 @@ def payment_success(request):
             except Product.DoesNotExist:
                 continue
             qty = int(item.get("quantity", 1))
-            line_total = product.get_discounted_price() * qty
+            # Use actual product price with discount calculation
+            if product.discount > 0:
+                discounted_price = product.price - (product.price * (product.discount / 100))
+            else:
+                discounted_price = product.price
+            line_total = discounted_price * qty
             cart_items.append({"product": product, "quantity": qty, "total": line_total})
             total_price += line_total
         order = Order.objects.create(
@@ -132,7 +137,7 @@ def payment_success(request):
             OrderItem.objects.create(
                 order=order,
                 product=ci["product"],
-                price=ci["product"].get_discounted_price(),
+                price=ci["product"].price - (ci["product"].price * (ci["product"].discount / 100)) if ci["product"].discount > 0 else ci["product"].price,
                 quantity=ci["quantity"],
             )
             ci["product"].stock -= ci["quantity"]
@@ -165,7 +170,12 @@ def view_cart(request):
             continue
 
         qty = int(item.get("quantity", 1))
-        line_total = product.get_discounted_price() * qty
+        # Use actual product price with discount calculation
+        if product.discount > 0:
+            discounted_price = product.price - (product.price * (product.discount / 100))
+        else:
+            discounted_price = product.price
+        line_total = discounted_price * qty
         cart_items.append({"product": product, "quantity": qty, "total": line_total})
         total_price += line_total
         total_qty += qty
@@ -203,6 +213,14 @@ def add_to_cart(request, product_id):
     request.session["cart"] = cart
     messages.success(request, f"Added {qty} {product.name}(s) to your cart.")
     
+    # Return JSON response for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': f"Added {qty} {product.name}(s) to your cart.",
+            'cart_count': sum(int(item.get("quantity", 0)) for item in request.session.get("cart", {}).values())
+        })
+    
     if request.GET.get("next") == "checkout":
         return redirect("shop:checkout")
     return redirect("shop:view_cart")
@@ -213,6 +231,15 @@ def remove_from_cart(request, product_id):
         del cart[str(product_id)]
         request.session["cart"] = cart
         messages.success(request, "Item removed from cart.")
+        
+    # Return JSON response for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': 'Item removed from cart.',
+            'cart_count': sum(int(item.get("quantity", 0)) for item in request.session.get("cart", {}).values())
+        })
+        
     return redirect("shop:view_cart")
 
 def update_quantity(request, product_id):
@@ -232,6 +259,15 @@ def update_quantity(request, product_id):
         cart[str(product_id)]["quantity"] = new_qty
         request.session["cart"] = cart
         messages.success(request, "Cart updated successfully.")
+        
+    # Return JSON response for AJAX requests  
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': 'Cart updated successfully.',
+            'cart_count': sum(int(item.get("quantity", 0)) for item in request.session.get("cart", {}).values())
+        })
+        
     return redirect("shop:view_cart")
 
 def buy_now(request, product_id):

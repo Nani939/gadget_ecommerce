@@ -73,23 +73,26 @@
             <!-- Rating (Mock data for demo) -->
             <div class="amazon-product-rating">
               <div class="amazon-stars">★★★★☆</div>
-              <a href="#" class="amazon-rating-count">({{ product.id|add:47 }})</a>
+              <a href="#" class="amazon-rating-count">({{ product.id|add:10 }})</a>
             </div>
 
             <!-- Price -->
             <div class="amazon-product-price">
               <div class="amazon-price">
-                <span class="amazon-price-symbol">₹</span>{{ product.price|floatformat:2 }}
+                <span class="amazon-price-symbol">₹</span>{{ product.get_discounted_price|floatformat:2 }}
               </div>
-              {% if product.id|divisibleby:3 %}
+              {% if product.discount > 0 %}
                 <div class="product-list-old-price">
-                  ₹{{ product.price|add:500|floatformat:2 }}
+                  ₹{{ product.price|floatformat:2 }}
+                </div>
+                <div class="product-list-discount">
+                  {{ product.discount }}% off
                 </div>
               {% endif %}
             </div>
 
             <!-- Prime Badge (Mock) -->
-            {% if product.id|divisibleby:2 %}
+            {% if product.available %}
               <div class="product-list-prime-row">
                 <span class="product-list-prime-badge">prime</span>
                 <span class="product-list-prime-delivery">FREE delivery</span>
