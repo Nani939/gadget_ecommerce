@@ -3,115 +3,190 @@
 
 {% block title %}Quick Order - Gadget Shop{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="amazon-container">
+<div class="container">
+  <div class="quick-order-container">
     <!-- Quick Order Header -->
     <div class="quick-order-header">
-    <h1 class="quick-order-title">⚡ Quick Order</h1>
-    <p class="quick-order-desc">Order multiple products instantly using product codes</p>
+      <h1 class="quick-order-title">⚡ Quick Order</h1>
+      <p class="text-lg opacity-90">Order multiple products instantly using product codes</p>
     </div>
 
     <!-- Quick Order Form -->
-    <div class="quick-order-form">
-    <h2 class="quick-order-form-title">📝 Enter Product Codes</h2>
-        
-        <form method="post">
-            {% csrf_token %}
-            <div class="quick-order-form-group">
-                <label for="product_codes" class="quick-order-label">
-                    Product Codes (Format: ProductID:Quantity)
-                </label>
-                <textarea name="product_codes" id="product_codes" class="code-input" 
-                          placeholder="Example:&#10;1:2&#10;5:1&#10;8:3&#10;&#10;Enter one product per line in format ProductID:Quantity"></textarea>
-            </div>
-            
-            <div class="quick-order-btn-row">
-                <button type="submit" class="amazon-btn amazon-btn-primary quick-order-btn-large" title="Quick Add to Cart">
-                    ⚡ Quick Add to Cart
-                </button>
-            </div>
+    <div class="card mb-8">
+      <div class="card-header">
+        <h2 class="text-xl font-semibold flex items-center gap-2">
+          📝 Enter Product Codes
+        </h2>
+      </div>
+      <div class="card-body">
+        <form method="post" id="quick-order-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="product_codes" class="form-label">
+              Product Codes (Format: ProductID:Quantity)
+            </label>
+            <textarea name="product_codes" id="product_codes" class="code-input" 
+                      placeholder="Example:&#10;1:2&#10;5:1&#10;8:3&#10;&#10;Enter one product per line in format ProductID:Quantity"></textarea>
+          </div>
+          
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg" title="Quick Add to Cart">
+              ⚡ Quick Add to Cart
+            </button>
+          </div>
         </form>
-        
-        <!-- Help Section -->
-        <div class="help-section">
-            <h3 class="help-section-title">💡 How to use Quick Order</h3>
-            <ul class="help-section-list">
-                <li>Find product IDs from product pages or previous orders</li>
-                <li>Enter one product per line in format: <code>ProductID:Quantity</code></li>
-                <li>Example: <code>1:2</code> means Product ID 1 with quantity 2</li>
-                <li>You can add multiple products at once</li>
-                <li>Invalid codes will be skipped with a warning</li>
-            </ul>
-        </div>
+      </div>
+    </div>
+    
+    <!-- Help Section -->
+    <div class="card mb-8">
+      <div class="card-header">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          💡 How to use Quick Order
+        </h3>
+      </div>
+      <div class="card-body">
+        <ul class="space-y-2 text-sm">
+          <li class="flex items-start gap-2">
+            <span class="text-primary">•</span>
+            Find product IDs from product pages or previous orders
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary">•</span>
+            Enter one product per line in format: <code class="bg-tertiary px-2 py-1 rounded">ProductID:Quantity</code>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary">•</span>
+            Example: <code class="bg-tertiary px-2 py-1 rounded">1:2</code> means Product ID 1 with quantity 2
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary">•</span>
+            You can add multiple products at once
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-primary">•</span>
+            Invalid codes will be skipped with a warning
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- Unique Features -->
     <div class="feature-grid">
-        <div class="feature-card">
-            <div class="feature-icon">📱</div>
-            <h3>QR Code Scanner</h3>
-            <p>Scan product QR codes to add items instantly</p>
-            <button type="button" class="amazon-btn amazon-btn-secondary quick-order-btn-feature" onclick="openQRScanner()" title="Open QR Scanner">
-                📱 Open Scanner
-            </button>
-        </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">🎯</div>
-            <h3>Smart Suggestions</h3>
-            <p>AI-powered product recommendations based on your history</p>
-            <button type="button" class="amazon-btn amazon-btn-secondary quick-order-btn-feature" onclick="showSuggestions()" title="Get Suggestions">
-                🤖 Get Suggestions
-            </button>
-        </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Bulk Upload</h3>
-            <p>Upload CSV file for large quantity orders</p>
-            <a href="{% url 'shop:bulk_order' %}" class="amazon-btn amazon-btn-secondary quick-order-btn-feature" title="Bulk Order">
-                📄 Bulk Order
-            </a>
-        </div>
-        
-        <div class="feature-card">
-            <div class="feature-icon">🔄</div>
-            <h3>Reorder Previous</h3>
-            <p>Quickly reorder from your purchase history</p>
-            <button type="button" class="amazon-btn amazon-btn-secondary quick-order-btn-feature" onclick="showPreviousOrders()" title="Reorder Previous">
-                🔄 Reorder
-            </button>
-        </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3 class="text-lg font-semibold mb-2">QR Code Scanner</h3>
+        <p class="text-secondary mb-4">Scan product QR codes to add items instantly</p>
+        <button type="button" class="btn btn-secondary btn-full" onclick="openQRScanner()" title="Open QR Scanner">
+          📱 Open Scanner
+        </button>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 class="text-lg font-semibold mb-2">Smart Suggestions</h3>
+        <p class="text-secondary mb-4">AI-powered product recommendations based on your history</p>
+        <button type="button" class="btn btn-secondary btn-full" onclick="showSuggestions()" title="Get Suggestions">
+          🤖 Get Suggestions
+        </button>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="text-lg font-semibold mb-2">Bulk Upload</h3>
+        <p class="text-secondary mb-4">Upload CSV file for large quantity orders</p>
+        <a href="{% url 'shop:bulk_order' %}" class="btn btn-secondary btn-full" title="Bulk Order">
+          📄 Bulk Order
+        </a>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3 class="text-lg font-semibold mb-2">Reorder Previous</h3>
+        <p class="text-secondary mb-4">Quickly reorder from your purchase history</p>
+        <button type="button" class="btn btn-secondary btn-full" onclick="showPreviousOrders()" title="Reorder Previous">
+          🔄 Reorder
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
-function openQRScanner() {
-    alert('QR Scanner feature coming soon! 📱');
-}
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate feature cards
+  document.querySelectorAll('.feature-card').forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'all 0.3s ease-out';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 100);
+  });
 
-function showSuggestions() {
-    alert('AI Suggestions feature coming soon! 🤖');
-}
+  // Form submission with loading state
+  document.getElementById('quick-order-form').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.classList.add('btn-loading');
+  });
 
-function showPreviousOrders() {
-    alert('Previous orders feature coming soon! 🔄');
-}
-
-// Auto-format input
-document.getElementById('product_codes').addEventListener('input', function(e) {
+  // Auto-format input with syntax highlighting
+  const textarea = document.getElementById('product_codes');
+  textarea.addEventListener('input', function(e) {
     // Add formatting hints
     const lines = e.target.value.split('\n');
     const lastLine = lines[lines.length - 1];
     
     if (lastLine && !lastLine.includes(':') && lastLine.match(/^\d+$/)) {
-        // If user typed just a number, suggest adding :1
-        e.target.placeholder = `Current: ${lastLine}\nSuggestion: ${lastLine}:1\n\nContinue typing...`;
+      // If user typed just a number, suggest adding :1
+      e.target.placeholder = `Current: ${lastLine}\nSuggestion: ${lastLine}:1\n\nContinue typing...`;
     }
+  });
+
+  // Add line numbers to textarea
+  textarea.addEventListener('scroll', function() {
+    // Sync scroll with line numbers if implemented
+  });
 });
+
+function openQRScanner() {
+  // Show modal or notification
+  showFeatureModal('QR Scanner', 'QR Scanner feature coming soon! 📱', '📱');
+}
+
+function showSuggestions() {
+  showFeatureModal('Smart Suggestions', 'AI Suggestions feature coming soon! 🤖', '🤖');
+}
+
+function showPreviousOrders() {
+  showFeatureModal('Reorder Previous', 'Previous orders feature coming soon! 🔄', '🔄');
+}
+
+function showFeatureModal(title, message, icon) {
+  // Create modal overlay
+  const modal = document.createElement('div');
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-modal';
+  modal.innerHTML = `
+    <div class="bg-primary rounded-xl p-8 max-w-md mx-4 text-center animate-fade-in">
+      <div class="text-4xl mb-4">${icon}</div>
+      <h3 class="text-xl font-semibold mb-2">${title}</h3>
+      <p class="text-secondary mb-6">${message}</p>
+      <button class="btn btn-primary" onclick="this.closest('.fixed').remove()">
+        Got it!
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    if (modal.parentNode) {
+      modal.remove();
+    }
+  }, 3000);
+}
 </script>
 {% endblock %}

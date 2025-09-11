@@ -80,8 +80,7 @@ class ProductAdmin(admin.ModelAdmin):
         }),
         ("Pricing & Discounts", {
             "fields": (
-                "price", "discount_amount", "discount_percentage", 
-                "discount", "available", "stock"
+                "price", "discount", "available", "stock"
             )
         }),
         ("Specifications", {

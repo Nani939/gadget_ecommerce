@@ -3,106 +3,113 @@
 
 {% block title %}Checkout{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
-<style>
-  .amazon-btn[disabled] {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-</style>
-{% endblock %}
-
 {% block content %}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+<div class="container">
 <!-- Stepper Section -->
-<div class="amazon-stepper">
-  <div class="amazon-step active">
+<div class="stepper">
+  <div class="stepper-step active">
+    <div class="stepper-icon">
     <i class="fas fa-map-marker-alt"></i> 
-    <span>Address</span>
+    </div>
+    <div class="stepper-label">Address</div>
   </div>
-  <div class="amazon-step active">
+  <div class="stepper-step active">
+    <div class="stepper-icon">
     <i class="fas fa-list"></i> 
-    <span>Order Summary</span>
+    </div>
+    <div class="stepper-label">Order Summary</div>
   </div>
-  <div class="amazon-step active">
+  <div class="stepper-step active">
+    <div class="stepper-icon">
     <i class="fas fa-credit-card"></i> 
-    <span>Payment</span>
+    </div>
+    <div class="stepper-label">Payment</div>
   </div>
 </div>
 
 <!-- Checkout Main Section -->
-<div class="amazon-checkout-container">
-  <div class="amazon-checkout-main">
+<div class="checkout-container">
+  <div>
     <!-- Address Section -->
-    <div class="amazon-checkout-section">
-      <div class="amazon-section-title">
+    <div class="checkout-section">
+      <div class="checkout-section-title">
         <i class="fas fa-map-marker-alt"></i> Delivery Address
       </div>
       <form id="checkout-form">
-        <button type="button" id="get-location-btn" class="amazon-btn amazon-btn-primary amazon-location-btn">
+        <button type="button" id="get-location-btn" class="btn btn-primary mb-4">
           <i class="fas fa-location-arrow"></i> Use My Location
         </button>
-        <div class="amazon-form-group">
-          <label for="name" class="amazon-form-label">Full Name</label>
-          <input type="text" id="name" name="name" class="amazon-form-input" required>
+        <div class="form-group">
+          <label for="name" class="form-label">Full Name</label>
+          <input type="text" id="name" name="name" class="form-input" required>
         </div>
-        <div class="amazon-form-group">
-          <label for="address" class="amazon-form-label">Address</label>
-          <textarea id="address" name="address" rows="3" class="amazon-form-input" required></textarea>
+        <div class="form-group">
+          <label for="address" class="form-label">Address</label>
+          <textarea id="address" name="address" rows="3" class="form-input form-textarea" required></textarea>
         </div>
-        <div class="amazon-form-group">
-          <label for="phone" class="amazon-form-label">Phone</label>
-          <input type="text" id="phone" name="phone" class="amazon-form-input" required>
+        <div class="form-group">
+          <label for="phone" class="form-label">Phone</label>
+          <input type="text" id="phone" name="phone" class="form-input" required>
         </div>
       </form>
     </div>
 
     <!-- Payment Section -->
-    <div class="amazon-checkout-section">
-      <div class="amazon-section-title">
+    <div class="checkout-section">
+      <div class="checkout-section-title">
         <i class="fas fa-credit-card"></i> Payment Method
       </div>
-      <div class="amazon-payment-methods">
-        <div class="amazon-payment-option selected" id="razorpay-option">
+      <div class="mb-6">
+        <div class="p-4 border-2 border-primary rounded-lg bg-primary/5" id="razorpay-option">
           <i class="fas fa-credit-card"></i> 
           <span>Razorpay / UPI / Netbanking</span>
         </div>
       </div>
-      <button id="rzp-button" class="amazon-btn amazon-btn-primary amazon-place-order-btn">
+      <button id="rzp-button" class="btn btn-primary btn-full">
         <i class="fas fa-lock"></i> Pay & Place Order
       </button>
     </div>
   </div>
 
   <!-- Order Summary Section -->
-  <div class="amazon-order-summary">
-    <h3><i class="fas fa-receipt"></i> Order Summary</h3>
-    <ul class="amazon-summary-list">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="flex items-center gap-2 font-semibold">
+        <i class="fas fa-receipt"></i> Order Summary
+      </h3>
+    </div>
+    <div class="card-body">
+    <ul class="space-y-3">
       {% for item in cart_items %}
-        <li class="amazon-summary-row">
-          <span>{{ item.product.name }} x {{ item.quantity }}</span>
-          <span>₹{{ item.get_total_price }}</span>
+        <li class="flex justify-between items-center py-2 border-b border-light">
+          <div class="flex-1">
+            <div class="font-medium">{{ item.product.name }}</div>
+            <div class="text-sm text-muted">Qty: {{ item.quantity }}</div>
+          </div>
+          <div class="font-semibold">₹{{ item.get_total_price }}</div>
         </li>
       {% endfor %}
     </ul>
-    <div class="amazon-summary-total">
-      <span>Total:</span> <span>₹{{ total_price }}</span>
+    </div>
+    <div class="card-footer">
+      <div class="flex justify-between items-center text-xl font-bold">
+        <span>Total:</span> 
+        <span class="text-error">₹{{ total_price }}</span>
+      </div>
     </div>
   </div>
+</div>
 </div>
 
 <script>
   // Helper: set button loading state
   function setLoading(btn, isLoading, loadingText = 'Processing...') {
     if (isLoading) {
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
-      btn.disabled = true;
+      btn.classList.add('btn-loading');
     } else {
-      btn.innerHTML = '<i class="fas fa-lock"></i> Pay & Place Order';
-      btn.disabled = false;
+      btn.classList.remove('btn-loading');
     }
   }
 
@@ -132,14 +139,19 @@
           .filter(Boolean).join(', ');
         document.getElementById('address').value = addressStr;
         btn.innerHTML = '<i class="fas fa-check"></i> Location Found';
-        setTimeout(() => setLoading(btn, false, 'Use My Location'), 2000);
+        btn.classList.add('btn-success');
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
+          btn.classList.remove('btn-success');
+          setLoading(btn, false);
+        }, 2000);
       } catch {
         alert('Could not fetch address from location.');
-        setLoading(btn, false, 'Use My Location');
+        setLoading(btn, false);
       }
     }, () => {
       alert('Unable to retrieve your location.');
-      setLoading(btn, false, 'Use My Location');
+      setLoading(btn, false);
     });
   };
 
@@ -148,6 +160,7 @@
     const name = document.getElementById('name').value.trim();
     const address = document.getElementById('address').value.trim();
     const phone = document.getElementById('phone').value.trim();
+    
     if (!name || !address || !phone) {
       alert('Please fill in all address fields.');
       return false;
@@ -230,5 +243,30 @@
       setLoading(btn, false);
     }
   };
+
+  // Add form animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Animate checkout sections
+    document.querySelectorAll('.checkout-section').forEach((section, index) => {
+      section.style.opacity = '0';
+      section.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        section.style.transition = 'all 0.3s ease-out';
+        section.style.opacity = '1';
+        section.style.transform = 'translateY(0)';
+      }, index * 200);
+    });
+
+    // Form input focus effects
+    document.querySelectorAll('.form-input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+  });
 </script>
 {% endblock %}

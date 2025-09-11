@@ -3,130 +3,157 @@
 
 {% block title %}Bulk Order - Gadget Shop{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="amazon-container">
+<div class="container">
+  <div class="bulk-order-container">
     <!-- Bulk Order Header -->
     <div class="bulk-header">
-    <h1 class="bulk-header-title">📊 Bulk Order</h1>
-    <p class="bulk-header-desc">Perfect for businesses and large quantity purchases</p>
+      <h1 class="bulk-order-title">📊 Bulk Order</h1>
+      <p class="text-lg opacity-90">Perfect for businesses and large quantity purchases</p>
     </div>
 
     <!-- Upload Form -->
-    <div class="bulk-upload-box">
-        <h2 class="bulk-upload-title">📄 Upload Your Order File</h2>
-        
+    <div class="card mb-8">
+      <div class="card-header">
+        <h2 class="text-xl font-semibold flex items-center gap-2">
+          📄 Upload Your Order File
+        </h2>
+      </div>
+      <div class="card-body">
         <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="upload-zone" onclick="document.getElementById('bulk_file').click()">
-                <div class="upload-zone-icon">📁</div>
-                <h3>Click to upload or drag & drop</h3>
-                <p>Upload CSV file with your bulk order</p>
-                <p class="upload-zone-desc">Supported format: CSV (ProductID, Quantity)</p>
-            </div>
-            
-            <input type="file" id="bulk_file" name="bulk_file" accept=".csv" class="file-input">
-            
-            <div class="bulk-upload-submit-row">
-                <button type="submit" class="amazon-btn amazon-btn-primary bulk-upload-submit-btn" title="Process Bulk Order">
-                    📊 Process Bulk Order
-                </button>
-            </div>
+          {% csrf_token %}
+          
+          <div class="upload-zone" onclick="document.getElementById('bulk_file').click()">
+            <div class="upload-zone-icon">📁</div>
+            <h3 class="text-xl font-semibold mb-2">Click to upload or drag & drop</h3>
+            <p class="text-secondary mb-2">Upload CSV file with your bulk order</p>
+            <p class="text-sm text-muted">Supported format: CSV (ProductID, Quantity)</p>
+          </div>
+          
+          <input type="file" id="bulk_file" name="bulk_file" accept=".csv" class="hidden">
+          
+          <div class="text-center mt-6">
+            <button type="submit" class="btn btn-primary btn-lg" title="Process Bulk Order">
+              📊 Process Bulk Order
+            </button>
+          </div>
         </form>
+      </div>
     </div>
 
     <!-- Sample Format -->
-    <div class="bulk-sample-box">
-        <h2 class="bulk-sample-title">📋 CSV Format Example</h2>
-        
-        <div class="sample-table">
-            <table class="sample-table-main">
-                <thead>
-                    <tr class="sample-table-header-row">
-                        <th class="sample-table-th">Product ID</th>
-                        <th class="sample-table-th">Quantity</th>
-                        <th class="sample-table-th">Notes (Optional)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="sample-table-row-alt">
-                        <td class="sample-table-td">1</td>
-                        <td class="sample-table-td">5</td>
-                        <td class="sample-table-td">iPhone 15 Pro</td>
-                    </tr>
-                    <tr>
-                        <td class="sample-table-td">3</td>
-                        <td class="sample-table-td">10</td>
-                        <td class="sample-table-td">AirPods Pro</td>
-                    </tr>
-                    <tr class="sample-table-row-alt">
-                        <td class="sample-table-td">7</td>
-                        <td class="sample-table-td">2</td>
-                        <td class="sample-table-td">MacBook Pro</td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="card mb-8">
+      <div class="card-header">
+        <h2 class="text-xl font-semibold flex items-center gap-2">
+          📋 CSV Format Example
+        </h2>
+      </div>
+      <div class="card-body">
+        <div class="overflow-x-auto mb-6">
+          <table class="w-full border-collapse border border-light rounded-lg overflow-hidden">
+            <thead>
+              <tr class="bg-secondary">
+                <th class="border border-light p-3 text-left font-semibold">Product ID</th>
+                <th class="border border-light p-3 text-left font-semibold">Quantity</th>
+                <th class="border border-light p-3 text-left font-semibold">Notes (Optional)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="hover:bg-secondary transition-fast">
+                <td class="border border-light p-3">1</td>
+                <td class="border border-light p-3">5</td>
+                <td class="border border-light p-3">iPhone 15 Pro</td>
+              </tr>
+              <tr class="hover:bg-secondary transition-fast">
+                <td class="border border-light p-3">3</td>
+                <td class="border border-light p-3">10</td>
+                <td class="border border-light p-3">AirPods Pro</td>
+              </tr>
+              <tr class="hover:bg-secondary transition-fast">
+                <td class="border border-light p-3">7</td>
+                <td class="border border-light p-3">2</td>
+                <td class="border border-light p-3">MacBook Pro</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         
-        <div class="bulk-sample-download-row">
-            <a href="data:text/csv;charset=utf-8,Product ID,Quantity,Notes%0A1,5,iPhone 15 Pro%0A3,10,AirPods Pro%0A7,2,MacBook Pro" 
-               download="bulk_order_template.csv" 
-               class="amazon-btn amazon-btn-secondary bulk-sample-download-btn" title="Download CSV template">
-                📥 Download Template
-            </a>
+        <div class="text-center">
+          <a href="data:text/csv;charset=utf-8,Product ID,Quantity,Notes%0A1,5,iPhone 15 Pro%0A3,10,AirPods Pro%0A7,2,MacBook Pro" 
+             download="bulk_order_template.csv" 
+             class="btn btn-secondary" title="Download CSV template">
+            📥 Download Template
+          </a>
         </div>
+      </div>
     </div>
 
     <!-- Business Features -->
-    <div class="business-features">
-        <div class="business-card">
-            <div class="business-card-icon">💼</div>
-            <h3>Business Discounts</h3>
-            <p>Get special pricing for bulk orders over ₹50,000</p>
-        </div>
-        
-        <div class="business-card">
-            <div class="business-card-icon">🚚</div>
-            <h3>Priority Delivery</h3>
-            <p>Fast-track delivery for business orders</p>
-        </div>
-        
-        <div class="business-card">
-            <div class="business-card-icon">📊</div>
-            <h3>Order Analytics</h3>
-            <p>Detailed reports and purchase analytics</p>
-        </div>
-        
-        <div class="business-card">
-            <div class="business-card-icon">🎯</div>
-            <h3>Dedicated Support</h3>
-            <p>Priority customer support for business accounts</p>
-        </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💼</div>
+        <h3 class="text-lg font-semibold mb-2">Business Discounts</h3>
+        <p class="text-secondary">Get special pricing for bulk orders over ₹50,000</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🚚</div>
+        <h3 class="text-lg font-semibold mb-2">Priority Delivery</h3>
+        <p class="text-secondary">Fast-track delivery for business orders</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="text-lg font-semibold mb-2">Order Analytics</h3>
+        <p class="text-secondary">Detailed reports and purchase analytics</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 class="text-lg font-semibold mb-2">Dedicated Support</h3>
+        <p class="text-secondary">Priority customer support for business accounts</p>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate feature cards
+  document.querySelectorAll('.feature-card').forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'all 0.3s ease-out';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 100);
+  });
+});
+
 // Drag and drop functionality
 const uploadZone = document.querySelector('.upload-zone');
 const fileInput = document.getElementById('bulk_file');
 
-uploadZone.addEventListener('dragover', function(e) {
+uploadZone?.addEventListener('dragover', function(e) {
     e.preventDefault();
-    this.classList.add('dragover');
+    this.style.borderColor = 'var(--primary-color)';
+    this.style.backgroundColor = 'rgba(255, 153, 0, 0.05)';
+    this.style.transform = 'scale(1.02)';
 });
 
-uploadZone.addEventListener('dragleave', function(e) {
+uploadZone?.addEventListener('dragleave', function(e) {
     e.preventDefault();
-    this.classList.remove('dragover');
+    this.style.borderColor = 'var(--border-medium)';
+    this.style.backgroundColor = 'var(--bg-secondary)';
+    this.style.transform = 'scale(1)';
 });
 
-uploadZone.addEventListener('drop', function(e) {
+uploadZone?.addEventListener('drop', function(e) {
     e.preventDefault();
-    this.classList.remove('dragover');
+    this.style.borderColor = 'var(--border-medium)';
+    this.style.backgroundColor = 'var(--bg-secondary)';
+    this.style.transform = 'scale(1)';
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
@@ -135,7 +162,7 @@ uploadZone.addEventListener('drop', function(e) {
     }
 });
 
-fileInput.addEventListener('change', function(e) {
+fileInput?.addEventListener('change', function(e) {
     if (e.target.files.length > 0) {
         updateFileName(e.target.files[0].name);
     }
@@ -143,11 +170,15 @@ fileInput.addEventListener('change', function(e) {
 
 function updateFileName(fileName) {
     const uploadZone = document.querySelector('.upload-zone');
-    uploadZone.innerHTML = `
-        <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
-        <h3>File Selected: ${fileName}</h3>
-        <p>Click submit to process your bulk order</p>
+    if (uploadZone) {
+        uploadZone.innerHTML = `
+        <div class="text-4xl mb-4 text-success">✅</div>
+        <h3 class="text-xl font-semibold mb-2 text-success">File Selected: ${fileName}</h3>
+        <p class="text-secondary">Click submit to process your bulk order</p>
     `;
+        uploadZone.style.borderColor = 'var(--success-color)';
+        uploadZone.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+    }
 }
 </script>
 {% endblock %}

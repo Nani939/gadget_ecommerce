@@ -3,160 +3,229 @@
 
 {% block title %}My Wishlist - Gadget Shop{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="amazon-container">
+<div class="container">
+  <div class="wishlist-container">
     <!-- Wishlist Header -->
     <div class="wishlist-header">
-        <h1 class="wishlist-title">❤️ My Wishlist</h1>
-        <p class="wishlist-count">{{ wishlist_count }} item{{ wishlist_count|pluralize }} saved for later</p>
+      <h1 class="wishlist-title">❤️ My Wishlist</h1>
+      <p class="text-lg opacity-90">{{ wishlist_count }} item{{ wishlist_count|pluralize }} saved for later</p>
     </div>
 
     {% if products %}
-        <!-- Wishlist Items -->
+      <!-- Wishlist Items -->
+      <div class="wishlist-items">
         {% for product in products %}
-            <div class="wishlist-item">
-                <div class="heart-icon">❤️</div>
+          <div class="wishlist-item">
+            <div class="wishlist-heart">❤️</div>
 
-                <!-- Product Image -->
-                <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/150x150?text=No+Image{% endif %}" 
-                     alt="{{ product.name }}" class="wishlist-image"
-                     onerror="this.src='https://via.placeholder.com/150x150?text=No+Image'">
-
-                <!-- Product Details -->
-                <div class="wishlist-details">
-                    <h3 class="wishlist-product-title">
-                        <a href="{{ product.get_absolute_url }}" class="wishlist-product-link">
-                            {{ product.name }}
-                        </a>
-                    </h3>
-
-                    <div class="wishlist-rating-row">
-                        <div class="amazon-stars">★★★★☆</div>
-                        <span class="wishlist-review-count">({{ product.id|add:47 }} reviews)</span>
-                    </div>
-
-                    <div class="wishlist-product-price">
-                        ₹{{ product.price|floatformat:2 }}
-                    </div>
-
-                    <div class="wishlist-stock-status">
-                        {% if product.stock > 0 %}
-                            ✅ In Stock ({{ product.stock }} available)
-                        {% else %}
-                            ❌ Out of Stock
-                        {% endif %}
-                    </div>
-
-                    <div class="wishlist-added-date">
-                        Added to wishlist on {{ product.created|date:"M j, Y" }}
-                    </div>
-
-                    <!-- Wishlist Actions -->
-                    <div class="wishlist-actions">
-                        {% if product.stock > 0 %}
-                            <form method="post" action="{% url 'shop:add_to_cart' product.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="amazon-btn amazon-btn-primary wishlist-btn-fullwidth" title="Add to Cart">
-                                    🛒 Add to Cart
-                                </button>
-                            </form>
-                            <form method="post" action="{% url 'shop:buy_now' product.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="amazon-btn amazon-btn-secondary wishlist-btn-fullwidth wishlist-btn-buynow" title="Buy Now">
-                                    ⚡ Buy Now
-                                </button>
-                            </form>
-                        {% else %}
-                            <button class="amazon-btn wishlist-btn-fullwidth wishlist-btn-disabled" disabled>
-                                Out of Stock
-                            </button>
-                        {% endif %}
-
-                        <a href="{% url 'shop:add_to_compare' product.id %}" class="amazon-btn amazon-btn-secondary wishlist-btn-fullwidth" title="Compare Product">
-                            🔍 Compare
-                        </a>
-                        <button type="button" onclick="removeFromWishlist({{ product.id }})" class="amazon-btn wishlist-btn-fullwidth wishlist-btn-remove" title="Remove from Wishlist">
-                            ❌ Remove
-                        </button>
-                        <button type="button" onclick="shareProduct({{ product.id }})" class="amazon-btn amazon-btn-secondary wishlist-btn-fullwidth" title="Share Product">
-                            📤 Share
-                        </button>
-                    </div>
-                </div>
+            <!-- Product Image -->
+            <div class="product-image">
+              <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/150x150?text=No+Image{% endif %}" 
+                   alt="{{ product.name }}"
+                   onerror="this.src='https://via.placeholder.com/150x150?text=No+Image'">
             </div>
-        {% endfor %}
 
-        <!-- Wishlist Bulk Actions -->
-        <div class="wishlist-actions-row">
-            <button type="button" onclick="addAllToCart()" class="amazon-btn amazon-btn-primary wishlist-btn-large" title="Add All to Cart">
-                🛒 Add All to Cart
-            </button>
-            <button type="button" onclick="clearWishlist()" class="amazon-btn wishlist-btn-large wishlist-btn-removeall" title="Clear Wishlist">
-                🗑️ Clear Wishlist
-            </button>
-        </div>
+            <!-- Product Details -->
+            <div class="flex-1">
+              <h3 class="text-xl font-semibold mb-3">
+                <a href="{{ product.get_absolute_url }}" class="product-title">
+                  {{ product.name }}
+                </a>
+              </h3>
+
+              <div class="product-rating mb-3">
+                <div class="product-stars">★★★★☆</div>
+                <span class="text-sm text-muted">({{ product.id|add:47 }} reviews)</span>
+              </div>
+
+              <div class="product-price mb-3">
+                <div class="price-current">₹{{ product.get_discounted_price|floatformat:2 }}</div>
+                {% if product.discount > 0 %}
+                  <span class="price-original">₹{{ product.price|floatformat:2 }}</span>
+                  <span class="price-discount">{{ product.discount }}% off</span>
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                {% if product.stock > 0 %}
+                  <span class="text-success font-medium">✅ In Stock ({{ product.stock }} available)</span>
+                {% else %}
+                  <span class="text-error font-medium">❌ Out of Stock</span>
+                {% endif %}
+              </div>
+
+              <div class="text-sm text-muted mb-4">
+                Added to wishlist on {{ product.created|date:"M j, Y" }}
+              </div>
+            </div>
+
+            <!-- Wishlist Actions -->
+            <div class="flex flex-col gap-2 min-w-[150px]">
+              {% if product.stock > 0 %}
+                <form method="post" action="{% url 'shop:add_to_cart' product.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary btn-full" title="Add to Cart">
+                    🛒 Add to Cart
+                  </button>
+                </form>
+                <form method="post" action="{% url 'shop:buy_now' product.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-secondary btn-full" title="Buy Now">
+                    ⚡ Buy Now
+                  </button>
+                </form>
+              {% else %}
+                <button class="btn btn-full" disabled>
+                  Out of Stock
+                </button>
+              {% endif %}
+
+              <a href="{% url 'shop:add_to_compare' product.id %}" class="btn btn-secondary btn-full" title="Compare Product">
+                🔍 Compare
+              </a>
+              <button type="button" onclick="removeFromWishlist({{ product.id }})" class="btn btn-error btn-full" title="Remove from Wishlist">
+                ❌ Remove
+              </button>
+              <button type="button" onclick="shareProduct({{ product.id }})" class="btn btn-secondary btn-full" title="Share Product">
+                📤 Share
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Wishlist Bulk Actions -->
+      <div class="flex gap-4 justify-center mt-8">
+        <button type="button" onclick="addAllToCart()" class="btn btn-primary btn-lg" title="Add All to Cart">
+          🛒 Add All to Cart
+        </button>
+        <button type="button" onclick="clearWishlist()" class="btn btn-error btn-lg" title="Clear Wishlist">
+          🗑️ Clear Wishlist
+        </button>
+      </div>
     {% else %}
-        <!-- Empty Wishlist -->
-        <div class="amazon-empty-cart">
-            <div style="font-size: 80px; margin-bottom: 20px;">💔</div>
-            <h2>Your wishlist is empty</h2>
-            <p>Save items you love for later by clicking the heart icon ❤️</p>
-            <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary wishlist-btn-large" title="Start Shopping">
-                🛍️ Start Shopping
-            </a>
-        </div>
+      <!-- Empty Wishlist -->
+      <div class="empty-state">
+        <div class="empty-state-icon">💔</div>
+        <h2>Your wishlist is empty</h2>
+        <p>Save items you love for later by clicking the heart icon ❤️</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg" title="Start Shopping">
+          🛍️ Start Shopping
+        </a>
+      </div>
     {% endif %}
+  </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate wishlist items
+  document.querySelectorAll('.wishlist-item').forEach((item, index) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      item.style.transition = 'all 0.3s ease-out';
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    }, index * 100);
+  });
+
+  // Add hover effects to action buttons
+  document.querySelectorAll('.wishlist-item .btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+      this.style.transform = 'scale(1.05)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1)';
+    });
+  });
+});
+
 function removeFromWishlist(productId) {
-    if (confirm('Remove this item from your wishlist?')) {
-        fetch(`/wishlist/remove/${productId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-            }
-        }).then(response => {
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                alert('Failed to remove item.');
-            }
-        });
-    }
+  if (confirm('Remove this item from your wishlist?')) {
+    const wishlistItem = document.querySelector(`[onclick="removeFromWishlist(${productId})"]`).closest('.wishlist-item');
+    
+    // Animate removal
+    wishlistItem.style.transition = 'all 0.3s ease-out';
+    wishlistItem.style.opacity = '0';
+    wishlistItem.style.transform = 'translateX(-100%)';
+    
+    setTimeout(() => {
+      fetch(`/wishlist/remove/${productId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json',
+        }
+      }).then(response => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert('Failed to remove item.');
+          // Restore item if failed
+          wishlistItem.style.opacity = '1';
+          wishlistItem.style.transform = 'translateX(0)';
+        }
+      });
+    }, 300);
+  }
 }
 
-
 function shareProduct(productId) {
-    const url = window.location.origin + '/products/' + productId + '/';
-    if (navigator.share) {
-        navigator.share({
-            title: 'Check out this product!',
-            url: url
-        });
-    } else {
-        navigator.clipboard.writeText(url).then(() => {
-            alert('Product link copied to clipboard!');
-        });
-    }
+  const url = window.location.origin + '/products/' + productId + '/';
+  if (navigator.share) {
+    navigator.share({
+      title: 'Check out this product!',
+      url: url
+    });
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      // Show success message
+      const btn = document.querySelector(`[onclick="shareProduct(${productId})"]`);
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '✅ Copied!';
+      btn.classList.add('btn-success');
+      
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('btn-success');
+      }, 2000);
+    });
+  }
 }
 
 function addAllToCart() {
-    if (confirm('Add all wishlist items to cart?')) {
-        alert('All available items added to cart!');
-    }
+  if (confirm('Add all wishlist items to cart?')) {
+    // Show loading state
+    const btn = document.querySelector('[onclick="addAllToCart()"]');
+    btn.classList.add('btn-loading');
+    
+    // Simulate API call
+    setTimeout(() => {
+      btn.classList.remove('btn-loading');
+      alert('All available items added to cart!');
+    }, 1500);
+  }
 }
 
 function clearWishlist() {
-    if (confirm('Are you sure you want to clear your entire wishlist?')) {
-        alert('Wishlist cleared!');
-        window.location.reload();
-    }
+  if (confirm('Are you sure you want to clear your entire wishlist?')) {
+    // Animate all items out
+    document.querySelectorAll('.wishlist-item').forEach((item, index) => {
+      setTimeout(() => {
+        item.style.transition = 'all 0.3s ease-out';
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-100%)';
+      }, index * 100);
+    });
+    
+    setTimeout(() => {
+      alert('Wishlist cleared!');
+      window.location.reload();
+    }, 1000);
+  }
 }
 </script>
 {% endblock %}

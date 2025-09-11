@@ -2,23 +2,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="amazon-container">
+<div class="container">
+  <div class="compare-container">
     <!-- Compare Header -->
-    <div class="compare-header">
-    <h1 class="compare-header-title">📊 Product Comparison</h1>
-    <p class="compare-header-desc">Compare {{ compare_count }} product{{ compare_count|pluralize }} side by side</p>
+    <div class="text-center mb-8 p-8 bg-gradient-to-r from-info to-primary text-white rounded-xl">
+      <h1 class="text-4xl font-bold mb-2">📊 Product Comparison</h1>
+      <p class="text-lg opacity-90">Compare {{ compare_count }} product{{ compare_count|pluralize }} side by side</p>
     </div>
 
     {% if products %}
-        <!-- Comparison Table -->
+      <!-- Comparison Table -->
+      <div class="compare-table">
         <div class="compare-table">
             <table>
                 <thead>
                     <tr>
-                        <th class="compare-features-th">Features</th>
+                        <th class="p-4 bg-secondary font-semibold text-left sticky left-0 z-10">Features</th>
                         {% for product in products %}
-                            <th class="compare-product-th">
-                                <button onclick="removeFromCompare({{ product.id }})" class="remove-btn">✕</button>
+                            <th class="p-4 bg-secondary text-center relative">
+                                <button onclick="removeFromCompare({{ product.id }})" 
+                                        class="absolute top-2 right-2 w-6 h-6 bg-error text-white rounded-full text-xs hover:bg-red-600 transition-fast">
+                                    ✕
+                                </button>
                             </th>
                         {% endfor %}
                     </tr>
@@ -26,142 +31,198 @@
                 <tbody>
                     <!-- Product Images -->
                     <tr>
-                        <td class="compare-feature-label">Product</td>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Product</td>
                         {% for product in products %}
-                            <td>
+                            <td class="p-4 text-center">
                                 <img src="{% if product.image %}{{ product.image.url }}{% else %}https://via.placeholder.com/120x120?text=No+Image{% endif %}" 
-                                     alt="{{ product.name }}" class="product-image"
+                                     alt="{{ product.name }}" 
+                                     class="w-24 h-24 object-cover rounded-lg mx-auto mb-2"
                                      onerror="this.src='https://via.placeholder.com/120x120?text=No+Image'">
-                                <div class="compare-product-name">{{ product.name }}</div>
+                                <div class="font-semibold text-sm">{{ product.name }}</div>
                             </td>
                         {% endfor %}
                     </tr>
                     
                     <!-- Price Comparison -->
                     <tr>
-                        <td class="compare-feature-label">Price</td>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Price</td>
                         {% for product in products %}
-                            <td class="price-cell {% if forloop.first %}best-value{% endif %}">
-                                ₹{{ product.price|floatformat:2 }}
+                            <td class="p-4 text-center {% if forloop.first %}bg-success/10 border-2 border-success{% endif %}">
+                                <div class="text-lg font-bold text-error">₹{{ product.get_discounted_price|floatformat:2 }}</div>
+                                {% if product.discount > 0 %}
+                                    <div class="text-sm text-muted line-through">₹{{ product.price|floatformat:2 }}</div>
+                                    <div class="text-sm text-success font-semibold">{{ product.discount }}% off</div>
+                                {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
                     
                     <!-- Rating -->
                     <tr>
-                        <td class="compare-feature-label">Rating</td>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Rating</td>
                         {% for product in products %}
-                            <td>
-                                <div class="amazon-stars">★★★★☆</div>
-                                <div class="compare-rating-reviews">({{ product.id|add:47 }} reviews)</div>
+                            <td class="p-4 text-center">
+                                <div class="text-warning mb-1">★★★★☆</div>
+                                <div class="text-sm text-muted">({{ product.id|add:47 }} reviews)</div>
                             </td>
                         {% endfor %}
                     </tr>
                     
                     <!-- Stock Status -->
                     <tr>
-                        <td class="compare-feature-label">Availability</td>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Availability</td>
                         {% for product in products %}
-                            <td>
+                            <td class="p-4 text-center">
                                 {% if product.stock > 0 %}
-                                    <span class="compare-instock">✅ In Stock</span>
-                                    <div class="compare-stock-qty">({{ product.stock }} available)</div>
+                                    <span class="text-success font-semibold">✅ In Stock</span>
+                                    <div class="text-sm text-muted">({{ product.stock }} available)</div>
                                 {% else %}
-                                    <span class="compare-outstock">❌ Out of Stock</span>
+                                    <span class="text-error font-semibold">❌ Out of Stock</span>
                                 {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
                     
                     <!-- Features -->
-                    <tr class="feature-row">
-                        <td class="compare-feature-label">Brand</td>
+                    <tr>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Brand</td>
                         {% for product in products %}
-                            <td>Gadget Shop</td>
+                            <td class="p-4 text-center">{{ product.brand|default:"Gadget Shop" }}</td>
                         {% endfor %}
                     </tr>
                     
-                    <tr class="feature-row">
-                        <td class="compare-feature-label">Model</td>
+                    <tr>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Model</td>
                         {% for product in products %}
-                            <td>GS-{{ product.id|stringformat:"04d" }}</td>
+                            <td class="p-4 text-center">{{ product.model|default:"GS-"|add:product.id|stringformat:"04d" }}</td>
                         {% endfor %}
                     </tr>
                     
-                    <tr class="feature-row">
-                        <td class="compare-feature-label">Weight</td>
+                    <tr>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Weight</td>
                         {% for product in products %}
-                            <td>{{ product.id|add:100 }}g</td>
+                            <td class="p-4 text-center">{{ product.weight|default:product.id|add:100|add:"g" }}</td>
                         {% endfor %}
                     </tr>
                     
-                    <tr class="feature-row">
-                        <td class="compare-feature-label">Warranty</td>
+                    <tr>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Warranty</td>
                         {% for product in products %}
-                            <td>1 Year</td>
+                            <td class="p-4 text-center">{{ product.warranty|default:"1 Year" }}</td>
                         {% endfor %}
                     </tr>
                     
                     <!-- Actions -->
                     <tr>
-                        <td class="compare-feature-label">Actions</td>
+                        <td class="p-4 font-semibold bg-tertiary sticky left-0 z-10">Actions</td>
                         {% for product in products %}
-                            <td>
+                            <td class="p-4">
+                                <div class="flex flex-col gap-2">
                                 {% if product.stock > 0 %}
-                                    <form method="post" action="{% url 'shop:add_to_cart' product.id %}" class="compare-action-form">
+                                    <form method="post" action="{% url 'shop:add_to_cart' product.id %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="amazon-btn amazon-btn-primary compare-action-btn" title="Add {{ product.name }} to cart">
+                                        <button type="submit" class="btn btn-primary btn-sm btn-full" title="Add {{ product.name }} to cart">
                                             🛒 Add to Cart
                                         </button>
                                     </form>
-                                    <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}" class="compare-action-form">
+                                    <form method="post" action="{% url 'shop:add_to_wishlist' product.id %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="amazon-btn amazon-btn-secondary compare-action-btn" title="Add {{ product.name }} to wishlist">
+                                        <button type="submit" class="btn btn-secondary btn-sm btn-full" title="Add {{ product.name }} to wishlist">
                                             ❤️ Add to Wishlist
                                         </button>
                                     </form>
                                 {% else %}
-                                    <button class="amazon-btn compare-btn-disabled" disabled title="Out of Stock">
+                                    <button class="btn btn-sm btn-full" disabled title="Out of Stock">
                                         Out of Stock
                                     </button>
                                 {% endif %}
+                                </div>
                             </td>
                         {% endfor %}
                     </tr>
                 </tbody>
             </table>
         </div>
+      </div>
         
-        <!-- AI Recommendation -->
-        <div class="ai-recommendation">
-            <h3 class="ai-recommendation-title">🤖 AI Recommendation</h3>
-            <p class="ai-recommendation-desc">
+      <!-- AI Recommendation -->
+      <div class="card mt-8">
+        <div class="card-header">
+          <h3 class="text-xl font-semibold flex items-center gap-2">
+            🤖 AI Recommendation
+          </h3>
+        </div>
+        <div class="card-body text-center">
+          <p class="text-lg mb-4">
                 Based on your comparison, we recommend <strong>{{ products.0.name }}</strong> 
                 for the best value and features combination.
-            </p>
-            <a href="{{ products.0.get_absolute_url }}" class="amazon-btn amazon-btn-primary ai-recommendation-link" title="View recommended product">
+          </p>
+          <a href="{{ products.0.get_absolute_url }}" class="btn btn-primary btn-lg" title="View recommended product">
                 View Recommended Product
-            </a>
+          </a>
+        </div>
+      </div>
         </div>
         
     {% else %}
-        <!-- Empty Compare -->
-        <div class="amazon-empty-cart">
-            <div class="compare-empty-icon">📊</div>
+      <!-- Empty Compare -->
+      <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
             <h2>No products to compare</h2>
             <p>Add products to comparison by clicking the "Compare" button on product pages</p>
-            <a href="{% url 'products:product_list' %}" class="amazon-btn amazon-btn-primary compare-empty-link" title="Browse products">
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg" title="Browse products">
                 🛍️ Browse Products
-            </a>
-        </div>
+        </a>
+      </div>
     {% endif %}
+  </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate comparison table
+  const table = document.querySelector('.compare-table table');
+  if (table) {
+    table.style.opacity = '0';
+    table.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      table.style.transition = 'all 0.3s ease-out';
+      table.style.opacity = '1';
+      table.style.transform = 'translateY(0)';
+    }, 200);
+  }
+
+  // Add hover effects to table rows
+  document.querySelectorAll('.compare-table tr').forEach(row => {
+    row.addEventListener('mouseenter', function() {
+      this.style.backgroundColor = 'var(--bg-secondary)';
+    });
+    
+    row.addEventListener('mouseleave', function() {
+      this.style.backgroundColor = '';
+    });
+  });
+});
+
 function removeFromCompare(productId) {
     if (confirm('Remove this product from comparison?')) {
-        // Implementation for removing from comparison
-        window.location.reload();
+        // Animate removal
+        const productColumn = document.querySelector(`[onclick="removeFromCompare(${productId})"]`).closest('th');
+        const columnIndex = Array.from(productColumn.parentNode.children).indexOf(productColumn);
+        
+        // Find all cells in this column and animate them out
+        document.querySelectorAll('.compare-table tr').forEach(row => {
+            const cell = row.children[columnIndex];
+            if (cell) {
+                cell.style.transition = 'all 0.3s ease-out';
+                cell.style.opacity = '0';
+                cell.style.transform = 'translateX(100%)';
+            }
+        });
+        
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
     }
 }
 </script>

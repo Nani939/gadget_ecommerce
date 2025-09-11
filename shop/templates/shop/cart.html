@@ -3,54 +3,51 @@
 
 {% block title %}Shopping Cart - Gadget Shop{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="amazon-container">
+<div class="container">
   <!-- Breadcrumb -->
-  <div class="amazon-breadcrumb">
-    <a href="{% url 'shop:home' %}">Home</a> › 
+  <nav class="flex mb-6 text-sm text-secondary">
+    <a href="{% url 'shop:home' %}" class="text-info hover:text-error transition-fast">Home</a> 
+    <span class="mx-2">›</span>
     <span>Shopping Cart</span>
-  </div>
+  </nav>
 
   {% if cart_items %}
-    <div class="amazon-cart-container">
+    <div class="cart-container">
       <!-- Main Cart Content -->
-      <div class="amazon-cart-main">
-        <div class="amazon-cart-header">
-          <h1 class="amazon-cart-title">Shopping Cart</h1>
-          <p class="amazon-cart-continue">
-            <a href="{% url 'products:product_list' %}" class="amazon-action-link">Continue shopping</a>
+      <div class="cart-main">
+        <div class="cart-header">
+          <h1 class="cart-title">Shopping Cart</h1>
+          <p class="text-sm text-secondary">
+            <a href="{% url 'products:product_list' %}" class="text-info hover:text-error transition-fast">Continue shopping</a>
           </p>
         </div>
 
-        <div class="amazon-cart-items">
+        <div class="cart-items">
           {% for item in cart_items %}
-            <div class="amazon-cart-item">
+            <div class="cart-item">
               <!-- Product Image -->
-              <div class="amazon-item-image">
+              <div class="cart-item-image">
                 <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/no-image.jpg' %}{% endif %}" 
                      alt="{{ item.product.name }}"
                      onerror="this.src='https://via.placeholder.com/160x160?text=No+Image'">
               </div>
 
               <!-- Product Details -->
-              <div class="amazon-item-details">
-                <a href="{{ item.product.get_absolute_url }}" class="amazon-item-title">
+              <div class="cart-item-details">
+                <a href="{{ item.product.get_absolute_url }}" class="cart-item-title">
                   {{ item.product.name }}
                 </a>
                 
-                <div class="amazon-item-info amazon-in-stock">In Stock</div>
-                <div class="amazon-item-info amazon-sku">SKU: #{{ item.product.id|stringformat:"04d" }}</div>
+                <div class="text-sm text-success font-medium">In Stock</div>
+                <div class="text-sm text-muted">SKU: #{{ item.product.id|stringformat:"04d" }}</div>
 
-                <div class="amazon-item-actions">
+                <div class="cart-item-actions">
                   <!-- Quantity Selector -->
-                  <div class="amazon-quantity-selector">
-                    <form method="post" action="{% url 'shop:update_quantity' item.product.id %}" class="amazon-inline-form">
+                  <div class="flex items-center gap-2">
+                    <form method="post" action="{% url 'shop:update_quantity' item.product.id %}" class="inline">
                       {% csrf_token %}
-                      <select name="quantity" class="amazon-quantity-dropdown" title="Select quantity" onchange="updateCartQuantity(this)">
+                      <select name="quantity" class="form-input text-sm py-1 px-2" title="Select quantity" onchange="updateCartQuantity(this)">
                         {% for i in "123456789" %}
                           <option value="{{ forloop.counter }}" {% if item.quantity == forloop.counter %}selected{% endif %}>
                             Qty: {{ forloop.counter }}
@@ -62,34 +59,34 @@
                   </div>
 
                   <!-- Action Links -->
-                  <span class="amazon-divider">|</span>
+                  <span class="text-muted">|</span>
                   
                   <a href="{% url 'shop:remove_from_cart' item.product.id %}" 
-                     class="amazon-action-link"
+                     class="text-error hover:underline text-sm"
                      onclick="return confirm('Are you sure you want to remove this item from your cart?')">
                     <i class="fas fa-trash"></i> Delete
                   </a>
 
-                  <span class="amazon-divider">|</span>
+                  <span class="text-muted">|</span>
                   
-                  <a href="#" class="amazon-action-link">
+                  <a href="#" class="text-info hover:underline text-sm">
                     <i class="fas fa-bookmark"></i> Save for later
                   </a>
 
-                  <span class="amazon-divider">|</span>
+                  <span class="text-muted">|</span>
                   
-                  <a href="#" class="amazon-action-link">
+                  <a href="#" class="text-info hover:underline text-sm">
                     <i class="fas fa-balance-scale"></i> Compare with similar items
                   </a>
                 </div>
               </div>
 
               <!-- Price -->
-              <div class="amazon-item-price">
-                <div class="amazon-price">
-                  <span class="amazon-price-symbol">₹</span>{{ item.total|floatformat:2 }}
+              <div class="text-right">
+                <div class="text-xl font-bold text-error">
+                  <span class="text-sm">₹</span>{{ item.total|floatformat:2 }}
                 </div>
-                <div class="amazon-item-each">(₹{{ item.product.price }} each)</div>
+                <div class="text-sm text-muted">(₹{{ item.product.price }} each)</div>
               </div>
             </div>
           {% endfor %}
@@ -97,41 +94,41 @@
       </div>
 
       <!-- Cart Summary Sidebar -->
-      <div class="amazon-cart-sidebar">
-        <div class="amazon-subtotal">
+      <div class="cart-sidebar">
+        <div class="cart-subtotal">
           Subtotal ({{ total_qty }} item{{ total_qty|pluralize }}): 
-          <span class="amazon-subtotal-price">₹{{ total_price|floatformat:2 }}</span>
+          <div class="cart-subtotal-price">₹{{ total_price|floatformat:2 }}</div>
         </div>
 
-        <div class="amazon-shipping-info">
-          <i class="bi bi-check-circle-fill amazon-shipping-icon"></i>
+        <div class="flex items-center gap-2 text-sm text-success mb-4">
+          <i class="bi bi-check-circle-fill"></i>
           FREE delivery on orders over ₹499
         </div>
 
-        <a href="{% url 'shop:checkout' %}" class="amazon-checkout-btn">
+        <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-full mb-4">
           <i class="fas fa-credit-card"></i> Proceed to Buy
         </a>
 
-        <div class="amazon-gift-option">
-          <label class="amazon-gift-label">
-            <input type="checkbox" class="amazon-gift-checkbox">
+        <div class="mb-4">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" class="form-input">
             This order contains a gift
           </label>
         </div>
 
         <!-- Recommended Items -->
-        <div class="amazon-frequently-bought">
-          <h3 class="amazon-frequently-title">Frequently bought together</h3>
-          <div class="amazon-frequently-desc">Customers who bought items in your cart also bought these products.</div>
+        <div class="border-t pt-4">
+          <h3 class="font-semibold mb-2">Frequently bought together</h3>
+          <div class="text-sm text-secondary">Customers who bought items in your cart also bought these products.</div>
         </div>
       </div>
     </div>
 
     <!-- Recently Viewed -->
-    <div class="amazon-recently-viewed">
-      <h2 class="amazon-recently-title">Your recently viewed items</h2>
-      <div class="amazon-recently-desc">
-        <a href="{% url 'products:product_list' %}" class="amazon-action-link">
+    <div class="mt-12">
+      <h2 class="text-2xl font-semibold mb-4">Your recently viewed items</h2>
+      <div class="text-center">
+        <a href="{% url 'products:product_list' %}" class="text-info hover:underline">
           View or edit your browsing history
         </a>
       </div>
@@ -139,29 +136,29 @@
 
   {% else %}
     <!-- Empty Cart -->
-    <div class="amazon-empty-cart">
-      <div class="amazon-empty-cart-icon">
-        <i class="fas fa-shopping-cart" style="font-size: 80px; opacity: 0.5;"></i>
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i class="fas fa-shopping-cart"></i>
       </div>
       <h2>Your Gadget Shop Cart is empty</h2>
-      <p>Check your saved for later items below or <a href="{% url 'products:product_list' %}" class="amazon-action-link">continue shopping</a>.</p>
+      <p>Check your saved for later items below or <a href="{% url 'products:product_list' %}" class="text-info hover:underline">continue shopping</a>.</p>
       
-      <div class="amazon-empty-cart-actions">
-        <a href="{% url 'users:login' %}" class="amazon-btn amazon-btn-primary">
+      <div class="flex gap-4 justify-center">
+        <a href="{% url 'users:login' %}" class="btn btn-primary">
           <i class="fas fa-sign-in-alt"></i> Sign in to your account
         </a>
-        <a href="{% url 'users:signup' %}" class="amazon-btn amazon-btn-secondary">
+        <a href="{% url 'users:signup' %}" class="btn btn-secondary">
           <i class="fas fa-user-plus"></i> Sign up now
         </a>
       </div>
 
       <!-- Recommended Products for Empty Cart -->
-      <div class="amazon-empty-cart-deals">
-        <h3 class="amazon-empty-cart-deals-title">Shop today's deals</h3>
-        <div class="amazon-product-grid amazon-empty-cart-grid">
+      <div class="mt-8">
+        <h3 class="text-xl font-semibold mb-4">Shop today's deals</h3>
+        <div class="text-center">
           <!-- This would be populated with featured products -->
-          <div class="amazon-empty-cart-browse">
-            <a href="{% url 'products:product_list' %}" class="amazon-action-link">
+          <div>
+            <a href="{% url 'products:product_list' %}" class="text-info hover:underline">
               <i class="fas fa-arrow-right"></i> Browse our product catalog
             </a>
           </div>
@@ -174,14 +171,24 @@
 <script>
 // Enhanced cart interactions
 document.addEventListener('DOMContentLoaded', function() {
+  // Add loading animation to cart items
+  document.querySelectorAll('.cart-item').forEach((item, index) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      item.style.transition = 'all 0.3s ease-out';
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    }, index * 100);
+  });
+
   // Add to cart animation
   document.querySelectorAll('form[action*="add_to_cart"]').forEach(form => {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       const button = this.querySelector('button[type="submit"]');
       if (button) {
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-        button.disabled = true;
+        button.classList.add('btn-loading');
       }
       
       // Submit via AJAX
@@ -209,32 +216,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // Reset button
         if (button) {
-          button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
-          button.disabled = false;
+          button.classList.remove('btn-loading');
         }
       })
       .catch(error => {
         console.error('Error:', error);
         if (button) {
-          button.innerHTML = '<i class="fas fa-cart-plus"></i> Add to Cart';
-          button.disabled = false;
+          button.classList.remove('btn-loading');
         }
       });
     });
   });
   
-  // Wishlist button animation
-  document.querySelectorAll('.product-list-wishlist-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      this.innerHTML = '<i class="fas fa-heart" style="color: #ff6b6b;"></i>';
-      this.style.backgroundColor = '#ff6b6b';
-      this.style.color = 'white';
-      this.style.borderColor = '#ff6b6b';
-      
-      setTimeout(() => {
-        this.closest('form').submit();
-      }, 300);
+  // Smooth remove animation
+  document.querySelectorAll('a[href*="remove_from_cart"]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      if (confirm('Are you sure you want to remove this item from your cart?')) {
+        const cartItem = this.closest('.cart-item');
+        cartItem.style.transition = 'all 0.3s ease-out';
+        cartItem.style.opacity = '0';
+        cartItem.style.transform = 'translateX(-100%)';
+      }
     });
   });
 });
@@ -243,8 +245,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateCartQuantity(selectElement) {
   const form = selectElement.closest('form');
   const formData = new FormData(form);
+  const cartItem = selectElement.closest('.cart-item');
   
   selectElement.disabled = true;
+  cartItem.style.opacity = '0.7';
   
   fetch(form.action, {
     method: 'POST',
@@ -264,19 +268,22 @@ function updateCartQuantity(selectElement) {
       // Reload page to show updated totals
       window.location.reload();
     }
+    selectElement.disabled = false;
+    cartItem.style.opacity = '1';
   })
   .catch(error => {
     console.error('Error:', error);
     selectElement.disabled = false;
+    cartItem.style.opacity = '1';
   });
 }
 
 // Function to show messages
 function showMessage(message, type) {
-  const messagesContainer = document.querySelector('.amazon-messages') || document.querySelector('.amazon-container');
+  const messagesContainer = document.querySelector('.container');
   if (messagesContainer) {
     const alertDiv = document.createElement('div');
-    alertDiv.className = `amazon-alert amazon-alert-${type}`;
+    alertDiv.className = `alert alert-${type}`;
     alertDiv.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${message}`;
     messagesContainer.insertBefore(alertDiv, messagesContainer.firstChild);
     
