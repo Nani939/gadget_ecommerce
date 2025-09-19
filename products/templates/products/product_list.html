@@ -6,8 +6,353 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/amazon-style.css' %}">
 {% endblock %}
-
 {% block content %}
+<style>/* ===============================
+ Global Container
+================================= */
+.amazon-container {
+  font-family: 'Inter', sans-serif;
+  color: #111;
+  line-height: 1.6;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+/* ===============================
+   Breadcrumb
+================================= */
+.amazon-breadcrumb {
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.amazon-breadcrumb a {
+  color: #007185;
+  text-decoration: none;
+}
+
+.amazon-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   Page Header
+================================= */
+.product-list-header {
+  margin-bottom: 25px;
+}
+
+.product-list-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.product-list-count {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* ===============================
+   Filters & Sort
+================================= */
+.product-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 30px;
+  background: #fff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+.product-list-filter-group,
+.product-list-sort-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.product-list-filter-label,
+.product-list-sort-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.product-list-select,
+.product-list-sort-select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.95rem;
+}
+
+/* ===============================
+   Product Grid
+================================= */
+.amazon-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.amazon-product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.amazon-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.08);
+}
+
+.amazon-product-image {
+  text-align: center;
+}
+
+.amazon-product-image img {
+  max-height: 200px;
+  object-fit: contain;
+}
+
+/* Title */
+.amazon-product-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #007185;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.amazon-product-title:hover {
+  text-decoration: underline;
+}
+
+/* Rating */
+.amazon-product-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.amazon-stars {
+  color: #ffa41c;
+  font-size: 1rem;
+}
+
+.amazon-rating-count {
+  color: #007185;
+  font-size: 0.85rem;
+}
+
+/* Price */
+.amazon-product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.amazon-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #B12704;
+}
+
+.product-list-old-price {
+  font-size: 0.9rem;
+  text-decoration: line-through;
+  color: #888;
+}
+
+.product-list-discount {
+  font-size: 0.9rem;
+  color: #007600;
+  font-weight: 600;
+}
+
+/* Prime Badge */
+.product-list-prime-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.product-list-prime-badge {
+  background: #00a8e1;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.product-list-prime-delivery {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+/* Stock */
+.product-list-stock-status {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #007600;
+}
+
+.product-list-stock-status:contains("unavailable"),
+.product-list-stock-status:contains("Out") {
+  color: #B12704;
+}
+
+/* Actions */
+.amazon-product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.product-list-btn-fullwidth {
+  width: 100%;
+}
+
+.product-list-btn-disabled {
+  width: 100%;
+  background: #ddd !important;
+  color: #888 !important;
+  cursor: not-allowed;
+}
+
+/* Wishlist */
+.product-list-wishlist-form {
+  margin-top: 6px;
+  text-align: right;
+}
+
+.product-list-wishlist-btn {
+  background: none;
+  border: none;
+  color: #B12704;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.product-list-wishlist-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Additional Info */
+.product-list-additional-info {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 6px;
+}
+
+/* ===============================
+   Pagination
+================================= */
+.product-list-pagination {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.product-list-pagination-group {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.product-list-pagination-current {
+  font-weight: 700;
+  color: #111;
+}
+
+.product-list-pagination-ellipsis {
+  color: #555;
+}
+
+/* ===============================
+   Empty State
+================================= */
+.amazon-empty-cart {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.amazon-empty-cart h2 {
+  font-size: 1.5rem;
+  margin: 20px 0 10px;
+}
+
+.amazon-empty-cart p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+/* ===============================
+   Recently Viewed
+================================= */
+.product-list-recently-viewed {
+  margin-top: 50px;
+}
+
+.product-list-recently-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.product-list-recently-link {
+  color: #007185;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.product-list-recently-link:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   Responsive
+================================= */
+@media (max-width: 768px) {
+  .product-list-filters {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .amazon-product-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .amazon-product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
 <div class="amazon-container">
   <!-- Breadcrumb -->
   <div class="amazon-breadcrumb">

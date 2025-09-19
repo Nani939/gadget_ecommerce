@@ -8,6 +8,249 @@
 {% endblock %}
 
 {% block content %}
+<style>/* ===============================
+   Global Styles
+================================= */
+.amazon-container {
+  font-family: 'Inter', sans-serif;
+  color: #111;
+  line-height: 1.6;
+  padding: 0;
+  margin: 0;
+}
+
+/* Utility Classes */
+.fade-in {
+  animation: fadeIn 1.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
+   Hero Section
+================================= */
+.amazon-hero-section {
+  background: linear-gradient(135deg, #232f3e, #37475a);
+  color: #fff;
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+}
+
+.amazon-hero-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.amazon-hero-desc {
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  color: #e0e0e0;
+}
+
+/* Hero Stats */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffd814;
+}
+
+.hero-stat-label {
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+/* Hero Actions */
+.amazon-hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.amazon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.amazon-btn-primary {
+  background: #ffd814;
+  color: #111;
+  border: none;
+}
+
+.amazon-btn-primary:hover {
+  background: #f7ca00;
+}
+
+.amazon-btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.amazon-btn-secondary:hover {
+  background: #fff;
+  color: #111;
+}
+
+/* ===============================
+   Features Section
+================================= */
+.amazon-features-section {
+  padding: 60px 20px;
+  text-align: center;
+  background: #f9f9f9;
+}
+
+.amazon-features-title {
+  font-size: 2rem;
+  margin-bottom: 40px;
+  font-weight: 700;
+  color: #232f3e;
+}
+
+.amazon-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.amazon-feature-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.amazon-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.amazon-feature-icon {
+  font-size: 2rem;
+  padding: 15px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.amazon-feature-orange { background: #f90; }
+.amazon-feature-success { background: #28a745; }
+.amazon-feature-link { background: #007185; }
+.amazon-feature-warning { background: #ff9900; }
+
+.amazon-feature-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #232f3e;
+}
+
+.amazon-feature-desc {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* ===============================
+   Newsletter Section
+================================= */
+.amazon-newsletter-section {
+  padding: 60px 20px;
+  text-align: center;
+  background: #232f3e;
+  color: #fff;
+}
+
+.amazon-newsletter-title {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.amazon-newsletter-desc {
+  font-size: 1rem;
+  margin-bottom: 30px;
+  color: #e0e0e0;
+}
+
+.amazon-newsletter-form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 500px;
+  margin: 0 auto 20px;
+  flex-wrap: wrap;
+}
+
+.amazon-form-input {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+.amazon-newsletter-btn {
+  flex-shrink: 0;
+}
+
+.amazon-newsletter-meta {
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+/* ===============================
+   Responsive
+================================= */
+@media (max-width: 768px) {
+  .amazon-hero-title {
+    font-size: 2.2rem;
+  }
+  .hero-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .amazon-newsletter-form {
+    flex-direction: column;
+  }
+  .amazon-form-input {
+    width: 100%;
+  }
+  .amazon-newsletter-btn {
+    width: 100%;
+  }
+}
+</style>
 <div class="amazon-container">
   <!-- Hero Section -->
   <div class="amazon-hero-section">
@@ -51,117 +294,7 @@
     {% endif %}
   </div>
 
-  <!-- Featured Categories -->
-  <div class="amazon-category-section">
-    <h2 class="amazon-category-title">Shop by Category</h2>
-    <div class="amazon-category-grid">
-      <!-- Electronics Category -->
-      <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">
-          <i class="fas fa-mobile-alt" style="font-size: 48px; color: var(--amazon-info);"></i>
-        </div>
-        <h3 class="amazon-category-name">Electronics</h3>
-        <p class="amazon-category-desc">Latest smartphones, tablets, and gadgets</p>
-        <div class="amazon-action-link">
-          <i class="fas fa-arrow-right"></i> Shop now
-        </div>
-      </div>
-
-      <!-- Accessories Category -->
-      <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">
-          <i class="fas fa-headphones" style="font-size: 48px; color: var(--amazon-success);"></i>
-        </div>
-        <h3 class="amazon-category-name">Accessories</h3>
-        <p class="amazon-category-desc">Headphones, cases, and more</p>
-        <div class="amazon-action-link">
-          <i class="fas fa-arrow-right"></i> Shop now
-        </div>
-      </div>
-
-      <!-- Smart Home Category -->
-      <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">
-          <i class="fas fa-home" style="font-size: 48px; color: var(--amazon-warning);"></i>
-        </div>
-        <h3 class="amazon-category-name">Smart Home</h3>
-        <p class="amazon-category-desc">Connected devices for your home</p>
-        <div class="amazon-action-link">
-          <i class="fas fa-arrow-right"></i> Shop now
-        </div>
-      </div>
-
-      <!-- Gaming Category -->
-      <div class="amazon-category-card" onclick="location.href='{% url 'products:product_list' %}'">
-        <div class="amazon-category-emoji">
-          <i class="fas fa-gamepad" style="font-size: 48px; color: var(--amazon-error);"></i>
-        </div>
-        <h3 class="amazon-category-name">Gaming</h3>
-        <p class="amazon-category-desc">Gaming accessories and peripherals</p>
-        <div class="amazon-action-link">
-          <i class="fas fa-arrow-right"></i> Shop now
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Today's Deals -->
-  <div class="amazon-deals-section">
-    <div class="amazon-deals-header">
-      <h2 class="amazon-deals-title">Today's Deals</h2>
-      <a href="{% url 'products:product_list' %}" class="amazon-action-link">
-        <i class="fas fa-external-link-alt"></i> See all deals
-      </a>
-    </div>
-    <div class="amazon-deals-box">
-      <div class="amazon-deals-grid">
-        <!-- Deal Item 1 -->
-        <div class="amazon-deal-card">
-          <div class="amazon-deal-badge amazon-deal-badge-warning">Deal of the Day</div>
-          <div class="amazon-deal-emoji">
-            <i class="fas fa-mobile-alt" style="color: var(--amazon-info);"></i>
-          </div>
-          <div class="amazon-deal-name">Smartphones</div>
-          <div class="amazon-deal-offer">Up to 40% off</div>
-          <div class="amazon-deal-meta">Limited time offer</div>
-        </div>
-
-        <!-- Deal Item 2 -->
-        <div class="amazon-deal-card">
-          <div class="amazon-deal-badge amazon-deal-badge-warning">Lightning Deal</div>
-          <div class="amazon-deal-emoji">
-            <i class="fas fa-headphones" style="color: var(--amazon-success);"></i>
-          </div>
-          <div class="amazon-deal-name">Headphones</div>
-          <div class="amazon-deal-offer">Up to 60% off</div>
-          <div class="amazon-deal-meta">Ends in 2 hours</div>
-        </div>
-
-        <!-- Deal Item 3 -->
-        <div class="amazon-deal-card">
-          <div class="amazon-deal-badge amazon-deal-badge-success">Best Seller</div>
-          <div class="amazon-deal-emoji">
-            <i class="fas fa-clock" style="color: var(--amazon-warning);"></i>
-          </div>
-          <div class="amazon-deal-name">Smart Watches</div>
-          <div class="amazon-deal-offer">Up to 35% off</div>
-          <div class="amazon-deal-meta">#1 Best Seller</div>
-        </div>
-
-        <!-- Deal Item 4 -->
-        <div class="amazon-deal-card">
-          <div class="amazon-deal-badge amazon-deal-badge-link">New Arrival</div>
-          <div class="amazon-deal-emoji">
-            <i class="fas fa-laptop" style="color: var(--amazon-error);"></i>
-          </div>
-          <div class="amazon-deal-name">Laptops</div>
-          <div class="amazon-deal-offer">Up to 25% off</div>
-          <div class="amazon-deal-meta">Just launched</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+     
   <!-- Features Section -->
   <div class="amazon-features-section">
     <h2 class="amazon-features-title">Why Choose Gadget Shop?</h2>
