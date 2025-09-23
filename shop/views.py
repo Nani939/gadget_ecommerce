@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 import json, hmac, hashlib
 from .models import Category, Product, Order, OrderItem
 from users.models import UserProfile
-from shop.models import Wishlist  # 👈 import your model here
+from shop.models import Wishlist  #
 
 import razorpay
 
@@ -26,6 +26,7 @@ def about(request):
 
 # -------------------------------
 # Cart Count API
+
 # -------------------------------
 def cart_count(request):
     """Return cart item count as JSON"""
@@ -468,13 +469,9 @@ def delivery_slip(request, order_id):
 # Unique Features
 # -------------------------------
 @login_required
-def wishlist(request):
-    wishlist_items = request.session.get('wishlist', [])
-    products = Product.objects.filter(id__in=wishlist_items, available=True)
-    return render(request, 'shop/wishlist.html', {
-        'products': products,
-        'wishlist_count': len(wishlist_items)
-    })
+def wishlist_count(request):
+    count = Wishlist.objects.filter(user=request.user).count()
+    return JsonResponse({"count": count})
 
 @login_required
 def add_to_wishlist(request, product_id):
@@ -656,3 +653,63 @@ def download_single_address_admin(request, order_id):
     ])
     
     return response
+
+
+@login_required
+def wishlist(request):
+    """
+    Display user's wishlist items.
+    Wishlist is stored in session as a list of product IDs.
+    """
+    wishlist_ids = request.session.get('wishlist', [])
+    products = Product.objects.filter(id__in=wishlist_ids, available=True)
+
+    return render(request, "shop/wishlist.html", {
+        "products": products
+    })
+
+
+@login_required
+def add_to_wishlist(request, product_id):
+    """
+    Add a product to wishlist.
+    """
+    product = get_object_or_404(Product, id=product_id, available=True)
+    wishlist = request.session.get('wishlist', [])
+
+    if product_id not in wishlist:
+        wishlist.append(product_id)
+        request.session['wishlist'] = wishlist
+        messages.success(request, f"{product.name} added to your wishlist!")
+    else:
+        messages.info(request, f"{product.name} is already in your wishlist.")
+
+    return redirect('products:product_detail', pk=product.id)
+
+
+@login_required
+def remove_from_wishlist(request, product_id):
+    """
+    Remove a product from wishlist.
+    Supports AJAX requests.
+    """
+    wishlist = request.session.get('wishlist', [])
+
+    if product_id in wishlist:
+        wishlist.remove(product_id)
+        request.session['wishlist'] = wishlist
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({"success": True, "wishlist_count": len(wishlist)})
+
+    messages.success(request, "Item removed from wishlist.")
+    return redirect('shop:wishlist')
+
+
+@login_required
+def wishlist_count(request):
+    """
+    Return wishlist count for header or AJAX.
+    """
+    wishlist_ids = request.session.get('wishlist', [])
+    return JsonResponse({"count": len(wishlist_ids)})

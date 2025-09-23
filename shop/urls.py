@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from django.contrib import admin
+from django.contrib import admin 
 
 app_name = "shop"
 
@@ -38,6 +38,7 @@ urlpatterns = [
     path("admin/download-single-address/<int:order_id>/", views.download_single_address_admin, name="download_single_address_admin"),
     
     # Unique features
+    path('wishlist/count/', views.wishlist_count, name='wishlist_count'),
     path("wishlist/", views.wishlist, name="wishlist"),
     path('wishlist/remove/<int:product_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
 

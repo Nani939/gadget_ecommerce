@@ -6,10 +6,13 @@
 {% block content %}
 <div class="container">
   <div class="wishlist-container">
+
     <!-- Wishlist Header -->
     <div class="wishlist-header">
       <h1 class="wishlist-title">❤️ My Wishlist</h1>
-      <p class="text-lg opacity-90">{{ wishlist_count }} item{{ wishlist_count|pluralize }} saved for later</p>
+      <p class="text-lg opacity-90">
+        {{ products|length }} item{{ products|length|pluralize }} saved for later
+      </p>
     </div>
 
     {% if products %}
@@ -84,9 +87,11 @@
               <a href="{% url 'shop:add_to_compare' product.id %}" class="btn btn-secondary btn-full" title="Compare Product">
                 🔍 Compare
               </a>
+
               <button type="button" onclick="removeFromWishlist({{ product.id }})" class="btn btn-error btn-full" title="Remove from Wishlist">
                 ❌ Remove
               </button>
+
               <button type="button" onclick="shareProduct({{ product.id }})" class="btn btn-secondary btn-full" title="Share Product">
                 📤 Share
               </button>
@@ -95,7 +100,7 @@
         {% endfor %}
       </div>
 
-      <!-- Wishlist Bulk Actions -->
+      <!-- Bulk Actions -->
       <div class="flex gap-4 justify-center mt-8">
         <button type="button" onclick="addAllToCart()" class="btn btn-primary btn-lg" title="Add All to Cart">
           🛒 Add All to Cart
@@ -115,6 +120,7 @@
         </a>
       </div>
     {% endif %}
+
   </div>
 </div>
 
@@ -131,40 +137,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }, index * 100);
   });
 
-  // Add hover effects to action buttons
+  // Hover effect for buttons
   document.querySelectorAll('.wishlist-item .btn').forEach(btn => {
     btn.addEventListener('mouseenter', function() {
       this.style.transform = 'scale(1.05)';
     });
-    
     btn.addEventListener('mouseleave', function() {
       this.style.transform = 'scale(1)';
     });
   });
 });
 
+// Remove wishlist item via AJAX
 function removeFromWishlist(productId) {
   if (confirm('Remove this item from your wishlist?')) {
     const wishlistItem = document.querySelector(`[onclick="removeFromWishlist(${productId})"]`).closest('.wishlist-item');
-    
-    // Animate removal
     wishlistItem.style.transition = 'all 0.3s ease-out';
     wishlistItem.style.opacity = '0';
     wishlistItem.style.transform = 'translateX(-100%)';
-    
+
     setTimeout(() => {
       fetch(`/wishlist/remove/${productId}/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': '{{ csrf_token }}',
           'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
         }
-      }).then(response => {
-        if (response.ok) {
-          window.location.reload();
+      }).then(response => response.json()).then(data => {
+        if (data.success) {
+          // Update wishlist count in header
+          const countEl = document.querySelector('#wishlist-count');
+          if (countEl) countEl.textContent = data.wishlist_count;
+
+          wishlistItem.remove();
         } else {
           alert('Failed to remove item.');
-          // Restore item if failed
           wishlistItem.style.opacity = '1';
           wishlistItem.style.transform = 'translateX(0)';
         }
@@ -173,21 +181,17 @@ function removeFromWishlist(productId) {
   }
 }
 
+// Share product link
 function shareProduct(productId) {
   const url = window.location.origin + '/products/' + productId + '/';
   if (navigator.share) {
-    navigator.share({
-      title: 'Check out this product!',
-      url: url
-    });
+    navigator.share({ title: 'Check out this product!', url: url });
   } else {
     navigator.clipboard.writeText(url).then(() => {
-      // Show success message
       const btn = document.querySelector(`[onclick="shareProduct(${productId})"]`);
       const originalText = btn.innerHTML;
       btn.innerHTML = '✅ Copied!';
       btn.classList.add('btn-success');
-      
       setTimeout(() => {
         btn.innerHTML = originalText;
         btn.classList.remove('btn-success');
@@ -196,35 +200,17 @@ function shareProduct(productId) {
   }
 }
 
+// Bulk actions
 function addAllToCart() {
   if (confirm('Add all wishlist items to cart?')) {
-    // Show loading state
-    const btn = document.querySelector('[onclick="addAllToCart()"]');
-    btn.classList.add('btn-loading');
-    
-    // Simulate API call
-    setTimeout(() => {
-      btn.classList.remove('btn-loading');
-      alert('All available items added to cart!');
-    }, 1500);
+    alert('All available items added to cart!');
   }
 }
 
 function clearWishlist() {
-  if (confirm('Are you sure you want to clear your entire wishlist?')) {
-    // Animate all items out
-    document.querySelectorAll('.wishlist-item').forEach((item, index) => {
-      setTimeout(() => {
-        item.style.transition = 'all 0.3s ease-out';
-        item.style.opacity = '0';
-        item.style.transform = 'translateX(-100%)';
-      }, index * 100);
-    });
-    
-    setTimeout(() => {
-      alert('Wishlist cleared!');
-      window.location.reload();
-    }, 1000);
+  if (confirm('Clear entire wishlist?')) {
+    fetch('/wishlist/clear/', { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+      .then(() => window.location.reload());
   }
 }
 </script>
